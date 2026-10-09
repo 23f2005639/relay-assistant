@@ -1,0 +1,1086 @@
+                                        Kairos: Low-latency Multi-Agent Serving with Shared
+                                           LLMs and Excessive Loads in the Public Cloud
+                                                                              Jinyuan Chen∗ , Jiuchen Shi∗ , Quan Chen† , Minyi Guo
+                                                                                           Shanghai Jiao Tong University
+
+                                        Abstract                                                                                                            1 Lack of automated
+                                                                                                                                                              workflow awareness
+                                                                                                                     User               Workflow Orchestrator
+                                        Multi-agent applications utilize the advanced capabilities
+                                        of large language models (LLMs) for intricate task comple-                         Application #1                   Application #2
+                                        tion through agent collaboration in a workflow. Under this                                  Agent #2                  Tool Call
+                                                                                                                         Agent #1
+                                        situation, requests from different agents usually access the                                Agent #3            Agent #4     Agent #5
+                                        same shared LLM to perform different kinds of tasks, forcing
+
+
+
+
+arXiv:2508.06948v1 [cs.DC] 9 Aug 2025
+                                        the shared LLM to suffer excessive loads. However, existing                  https://api.openai.com/v1/chat/
+                                                                                                                                                       LLM Calls
+                                                                                                                       completions?model=gpt-4o
+                                        works have low serving performance for these multi-agent                                                         2 FCFS scheduling ignoring
+                                        applications, mainly due to the ignorance of inter-agent la-                 LLM Serving
+                                                                                                                                             Load Balancer inter-agent latency
+                                                                                                                     Round-Robin dispatching
+                                        tency and resource differences for request scheduling.                                                  3
+                                                                                                                     unaware of memory usage
+                                           We therefore propose Kairos, a multi-agent orchestration                     LLM Engine             LLM Engine          LLM Engine
+                                        system that optimizes end-to-end latency for multi-agent
+                                        applications. Kairos consists of a workflow orchestrator, a
+                                        workflow-aware priority scheduler, and a memory-aware dis-             Figure 1. Multi-Agent application serving architecture.
+                                        patcher. The orchestrator collects agent-specific informa-           the agents’ specific positions within the multi-agent work-
+                                        tion for online workflow analysis. The scheduler decides             flow lead to varying remaining execution latency.
+                                        the serving priority of the requests based on their latency             Figure 1 shows the Multi-Agent application serving ar-
+                                        characteristics to reduce the overall queuing. The dispatcher        chitecture. We can see agents within/across different ap-
+                                        dispatches the requests to different LLM instances based on          plications will utilize the same LLM deployed by the LLM
+                                        their memory demands to avoid GPU overloading. Experi-               provider. The LLM provider utilizes a workflow orchestrator
+                                        mental results show that Kairos reduces end-to-end latency           to manage task coordination among agents. Moreover, it
+                                        by 17.8% to 28.4% compared to state-of-the-art works.                utilizes a load balancer to manage the serving of requests
+                                                                                                             generated by different agents. With the highly shared LLM
+                                        1     Introduction                                                   paradigm, the workloads for an LLM will be excessive and
+                                                                                                             more dynamic [42, 54] in public cloud serving. When the
+                                        Multi-agent applications leverage the advanced capabilities
+                                                                                                             online serving loads dynamically change to be excessive, lots
+                                        of large language models (LLMs) in language understanding
+                                                                                                             of queries from different agents can be queued at the shared
+                                        and generation to achieve enhanced quality in complex task
+                                                                                                             LLM before elastic resource scaling is completed [5, 7, 42].
+                                        execution through role specialization and collaboration [29,
+                                                                                                                Under this situation, it is desirable to reduce the end-to-
+                                        61]. These applications decompose complex tasks into struc-
+                                                                                                             end latency for the Multi-Agent application. Therefore, at
+                                        tured, multi-stage sub-tasks in a workflow [3, 11, 43, 55],
+                                                                                                             the load balancer, efficient request priority scheduling based
+                                        which are collaboratively completed by LLM-driven agents
+                                                                                                             on remaining execution latency is required to reduce the
+                                        with different responsibility boundaries that are differen-
+                                                                                                             overall queuing time. Also, queries need to be appropriately
+                                        tiated through specialized system prompts [9, 29, 43]. For
+                                                                                                             dispatched to LLM instances based on their GPU memory
+                                        instance, a Question Answer (QA) application includes the
+                                                                                                             demands. Moreover, such scheduling and dispatching require
+                                        “Router”, “Humanities”, and “Math” agents to cooperatively
+                                                                                                             awareness of agent-specific execution characteristics and
+                                        answer various types of questions [26].
+                                                                                                             application workflow context at the workflow orchestrator.
+                                           Due to LLMs’ general-purpose and multi-task capabilities,
+                                                                                                                Existing works [18, 31, 35, 52, 60] fall short of achieving
+                                        multiple agents usually utilize the same LLM [29, 35, 52, 55].
+                                                                                                             the above goals for multi-agent application serving. Under
+                                        However, our observations reveal that different agents inher-
+                                                                                                             conditions of high load and significant request queuing, they
+                                        ently exhibit obvious differences in LLM execution character-
+                                                                                                             exhibit high end-to-end latency due to their neglect of dif-
+                                        istics, leading to varying execution latency and GPU memory
+                                                                                                             ferences among agents in execution latency and memory
+                                        demands. For example, in the QA, the “Math” agent gener-
+                                                                                                             demand. From our evaluations, the latency per token can
+                                        ates answers with significantly longer LLM outputs than the
+                                                                                                             be as high as 2.7s. The specific problems of existing works
+                                        “Router” agent, which only performs a quick routing decision,
+                                                                                                             primarily stem from the following three aspects.
+                                        with the latency variances reaching up to 25.1X. Moreover,
+                                                                                                                                                   ○), they lack automated
+                                                                                                                As for the first problem (Figure 1 1
+                                        ∗ Co-first authors.   † Corresponding author.                        workflow analysis mechanisms. For efficient multi-agent
+                                                                                                         1
+                                                                                                                           J. Chen et al.
+
+
+serving, it is crucial to obtain the workflow structure to de-              • The design of the workflow orchestrator. The or-
+termine each agent’s position and its remaining execution                     chestrator automatically collects critical agent-specific
+latency. However, existing workflow analysis approaches are                   information to enable efficient request scheduling.
+inherently static, requiring developers to either explicitly                • The design of the workflow-aware scheduler. The
+define the entire workflow structure or expose data depen-                    scheduler perceives the remaining latency of requests
+dencies via APIs. Although having consumed lots of manual                     across agents, thereby optimizing priority decisions
+efforts, this static reliance cannot capture the dynamic and                  and significantly reducing overall queuing latency.
+uncertain call relationships of autonomously planning multi-                • The design of the memory-aware dispatcher. The
+agent applications, thus failing to parse these workflows.                    dispatcher perceives the memory demands among
+   As for the second problem (Figure 1 2   ○), current works                  requests of different agents and dispatches them to
+ignore inter-agent remaining latency differences for request                  the LLM instance with the most suitable available
+scheduling. Without the awareness of requests’ end-to-end                     memory, thereby enabling efficient request batching.
+remaining execution latency, they cannot identify which re-              We implement Kairos on top of vLLM [31], and employ
+quests are closer to completion. Therefore, when requests             Kafka message queue [1] for inter-agent communication to
+from different agents wait in the queue under excessive               support distributed deployment and request scheduling. We
+loads, current works simply utilize the First-Come-First-             select three representative multi-agent benchmarks [26, 29,
+Serve (FCFS) for scheduling [31, 35]. This results in requests        55] to evaluate Kairos on 4 NVIDIA A40 GPUs. Experimental
+with short remaining latency being queued behind those                results show that Kairos reduces the end-to-end latency from
+with longer remaining latency, causing request-level head-            17.8% to 28.4% compared to state-of-the-art works.
+of-line blocking and significantly increasing overall queuing.
+   As for the third problem (Figure 1 3 ○), current works are         2     Motivation
+unaware of inter-agent GPU memory usage differences for re-
+quest dispatching. Popular LLM engines [31, 59] typically em-         In this section, we first characterize the inter-agent differ-
+ploy continuous batching and dynamic memory allocation                ences in LLM inference and then expose the limitations of
+to improve throughput. Under these strategies, when fail-             existing works. At last, we conclude the design requirements
+ing to recognize the differences in memory demands among              for efficient multi-agent deployment.
+agents, suboptimal request batching on LLM instances can be
+                                                                      2.1    Inter-Agent Differences in LLM Inference
+formed, which can cause some GPUs to be overloaded while
+others are idle. The requests scheduled to overloaded GPUs            2.1.1 Representative Multi-Agent Applications. To gain
+will be frequently preempted and thus need to be recom-               a comprehensive understanding of the characteristics of real-
+puted. Preempted requests waste already invested resources            world multi-agent applications, we investigated prominent
+and interfere with the normal execution of other requests.            open-source multi-agent projects available on GitHub using
+   To address the above issues, we develop a flexible Multi-          the keyword "LLM Multi-Agent", selecting 30 best-matched
+Agent orchestration system, Kairos. Kairos consists of a              projects with more than 1,000 stars. This investigation re-
+workflow orchestrator, a workflow-aware priority scheduler,           vealed three major types of multi-agent workflows: Dynamic
+and a memory-aware time-slot dispatcher. The orchestrator             branching, Sequential execution, and Dynamic feedback, as
+collects historical execution information of LLM requests             presented in Table 1.
+online, enabling automatic workflow analysis and modeling             Table 1. Statistics of representative multi-agent workflows.
+of execution characteristics for requests of different agents.
+The scheduler perceives the remaining execution latency                        Workflow Type           Count      Proportion
+among requests of different agents, allowing it to prioritize
+                                                                               Dynamic branching        19           63.3%
+requests that will complete sooner, to reduce overall queuing
+                                                                               Sequential execution     23           76.6%
+latency. The dispatcher leverages the differences in memory
+                                                                               Dynamic feedback         16           53.3%
+demands among requests of different agents, enabling it to
+dispatch requests to LLM instances with the most suitable
+available GPU memory, to avoid request preemption. The                   Dynamic branching [6, 13, 26] is characterized by adaptive
+main contributions of this paper are as follows:                      execution paths based on runtime conditions. Sequential
+                                                                      execution [14, 23, 55] involves a series of pre-defined, ordered
+                                                                      steps. Dynamic feedback [21, 29, 43] incorporates iterative
+    • Investigating the inefficiencies of the current                 refinement loops where agents re-evaluate and adjust their
+      Multi-Agent request scheduling. The analysis iden-              actions based on previous outputs.
+      tifies the significance of collecting diverse inter-agent          Based on the prevalence observed in our survey, we se-
+      execution latency and GPU memory demands and in-                lected representative applications for each of these work-
+      cluding them in the query scheduling and dispatching.           flow types: Question Answer (QA) [26], Report Generate
+                                                                  2
+Kairos: Low-latency Multi-Agent Serving with Shared LLMs and Excessive Loads in the Public Cloud
+
+                                                                                                                                                    5 R X W H U           + X P D Q L W L H V $ J H Q W           : U L W H U                     $ U F K L W H F W              ( Q J L Q H H U
+                                 Question                                                                                                           0 D W K $ J H Q W     5 H V H D U F K H U                     3 U R G X F W 0 D Q D J H U     3 U R M H F W 0 D Q D J H U    4 $ ( Q J L Q H H U
+                                                                                                                                                    * 6 0  .    0 0 / 8                 7 U X W K I X O 4 $                                      + X P D Q ( Y D O
+
+                                    Router
+
+
+
+                                                                                     6 H T X H Q F H  / H Q J W K   W R N H Q V 
+                                                                                                                                          
+
+                                                                                                                                          
+           Calculator                   Humanities       Web Search
+                          MathAgent
+             Tool                         Agent            Tool
+                                                                                                                                          
+
+                           Output            Output                                                                                            
+                                                                                                                                                                  4 $                                     5 *                                                  & *
+                                                                                                                                                                                                                   $ S S O L F D W L R Q
+                        (a) Question Answer (QA)
+       Topic                                                                      Figure 3. Output length distributions of different agents.
+                                               Task                                                                                                 5 R X W H U          + X P D Q L W L H V $ J H Q W           : U L W H U                     $ U F K L W H F W               ( Q J L Q H H U
+                  Web Search                                                                                                                        0 D W K $ J H Q W    5 H V H D U F K H U                     3 U R G X F W 0 D Q D J H U     3 U R M H F W 0 D Q D J H U     4 $ ( Q J L Q H H U
+    Researcher                               Product                                                                                               * 6 0  .    0 0 / 8                  7 U X W K I X O 4 $                                      + X P D Q ( Y D O
+                    Tool                     Manager
+                                                           Output
+                                                                                                                                         
+                                                            QA
+                                             Architect
+                                                                                     / D W H Q F \   V 
+                                                                                                                                         
+      Writer                                              Engineer
+                                                                      Fail                                                               
+                                             Project
+                                                          Engineer
+                                             Manager                                                                                      
+      Output
+                                                                                                                                          
+                                                                                                                                                                 4 $                                 5 *                                                       & *
+   (b) Report Generate (RG)                   (c) Code Generate (CG)                                                                                                                                              $ S S O L F D W L R Q
+
+
+Figure 2. The three benchmarks represent typical multi-                          Figure 4. Inference latency distributions of different agents.
+agent applications with different workflow structures.
+                                                                                 dynamic iterative feedback loop. The application is evalu-
+(RG) [55], and Code Generate (CG) [29]. Their workflow                           ated using three code generation benchmark datasets: Hu-
+structures are illustrated in Figure 2.                                          manEval (HE) [22], MBPP [20], and APPS [27].
+2.1.2 Benchmarks and Datasets Description. We fur-                               2.1.3 Analysis of Inter-Agent Differences. In multi-
+ther detail the three applications illustrated in Figure 2 along                 agent applications, agents serve different roles, leading to
+with the datasets used for their evaluation.                                     varied LLM inference performance. As shown in Figure 2a,
+   Question Answer (QA) represents a dynamic branching                           the QA app includes a Router, Humanities, and Math agent.
+workflow. After a user submits a question, a routing agent                       The Router gives short responses by directing queries to
+determines its category (mathematics or humanities) and as-                      the right agent. The Humanities agent answers open-ended
+signs the task to the corresponding expert agent for answer-                     questions with long, structured text, while the Math agent
+ing. To construct mixed datasets covering both mathemat-                         solves problems with brief, formula-based replies. These role
+ics and humanities questions, we select three mathematics                        differences cause a large variation in output lengths.
+datasets (GSM8K [24], MathQA [19], SVAMP [40]) and three                            To validate the above observation, we analyze the LLM
+humanities datasets (the history subset of MMLU [28], World-                     execution in three multi-agent applications: QA with G+M
+HistoryQA [4], SocialIQA [48]). These datasets are paired in                     dataset, RG with TQ dataset, and CG with HE dataset. We
+equal proportions to: GSM8K + MMLU (G+M), MathQA +                               evaluate them by using the Llama3-8B model on an NVIDIA
+WorldHistoryQA (M+W), SVAMP + SocialIQA (S+S).                                   A40 GPU. Figure 3 shows output length distributions across
+   Report Generate (RG) represents a sequential execution                        agents. We can observe notable differences in output lengths
+workflow. Given a research topic from the user, a research                       among the ten agents, both within one or across different
+agent generates materials, followed by a writer agent that                       applications. These results highlight the requirement for
+generates the final report. The application is evaluated using                   public LLM providers to manage diverse execution behaviors
+three datasets as the inputs of research questions or topics:                    from heterogeneous agent requests.
+TruthfulQA (TQ) [36], News Category Dataset (NCD) [39],                             We further analyze the LLM inference latency of these
+and Natural Questions (NQ) [30, 32].                                             requests. As shown in Figure 4, we can observe that the
+   Code Generate (CG) represents a dynamic feedback work-                        output length directly affects decoding latency, leading to
+flow. Upon receiving a code development task from the user,                      significant latency differences across agents. Since the prefill
+multiple roles, including product manager, architect, project                    stage is much faster than decoding, it contributes little to
+manager, engineer, and QA engineer, collaborate to com-                          total inference time, with over 96.6% coming from decoding.
+plete the development task. If code evaluation fails, the task                   These results show that agent functions cause corresponding
+is fed back to the engineer for redevelopment, forming a                         variations in inference latency.
+                                                                             3
+                                                                                                                                                                                                                                                                                                                                                                                                                                J. Chen et al.
+
+
+                                                                                                                                                                                                                                                                                                                                            Table 2. Experimental Setup
+
+
+                                                                                                                                                                                                          6 H T X H Q F H  / H Q J W K   W R N H Q V 
+                                    * U R X S                                                                                                                                                        
+
+
+       ' D W D V H W  * U R X S
+                                    * U R X S                                                                                                                                                                                                                                                                                                                           Specifications
+                                                                                                                                                                                                                                                                                                                      Hardware                            NVIDIA A40 GPU (48GB global memory) × 4
+                                    * U R X S                                                                                                                                                                                                                                                                           Software                                  Ubuntu 20.04 with CUDA 12.8
+                                                                                                                                                                                                                                                                                                                                                                        Question Answer
+                                                         W H U         H Q W                          W  U              U                            U  W                  U  U                U                                                                                                                        Benchmarks
+                                                   5 R X  D W K $ J                             J H Q  U F K H  U L W H                        D J H  L W H F        D J H  L Q H H   L Q H H                                                                                                                                                                            Report Generate
+                                                                0              Q  L W  L H V $ 5 H V H D  :                      X  F  W 0 D Q  $ U F K  H F W 0 D Q  ( Q J  $ ( Q J                                                                                                                                                                                      Code Generate
+                                                                      X  P  D                                           U  R  G                             U  R  M                4
+                                                                   +                                                 3                                  3
+                                                                                                                    $ J H Q W                                                                                                                                                                                              LLMs                                     Llama3-8B and Llama2-13B
+
+                                                                                                                                                                                                                                                                                Remaining          Latency per                                                                                          H             R1 M              R2
+                                                                                                                                                                                                                                                                                                                 Agent
+                                                                                                                                                                                                                                                                                   stages             stage
+Figure 5. Average output lengths of agents from QA, RG,                                                                                                                                                                                                         HumanitiesAgent        1               {5}                                                                                    0      2   4      6     8   10
+and CG applications across Group 1–3 datasets.                                                                                                                                                                                                                      Router             2              {1, 2}                                                                                   First-Come First-Served (FCFS)
+                                                                                                                                                                                                                                                                  MathAgent            1               {2}
+                                                                                                                                                                                                                                                                          Requests, arriving at t=0                                                                                                   H               M R1 R2
+                                    * U R X S 
+
+
+       ' D W D V H W  * U R X S
+                                                                                                                                                                                                                                                                                                                                                                                             0    2    4     6     8    10
+
+                                                                                                                                                                                                          / D W H Q F \   V 
+                                                                                                                                                                                                                                                                        Waiting Humanities
+                                                                                                                                                                                                                                                                                             Router MathAgent Total                                                                         Topology-Aware Scheduling (Topo)
+                                    * U R X S                                                                                                                                                                                                                             time    Agent
+                                                                                                                                                                                                                                                                          FCFS      0         7         6     13
+                                                                                                                                                                                                                                                                                                                                                                                                  M R1 R2                       H
+                                    * U R X S                                                                                                                                                                                                                             Topo      0         7         5     12
+                                                                                                                                                                                                                                                                          Oracle     5         2         0      7                                                                             0        2         4       6          8        10
+                                                         W H U        H Q W                   H Q W  K H U  L W H U                      J H U  H F W        J H U  H H U  J L Q H H U
+                                                   5 R X  D W K $ J                     V $ J  H D U F  : U                        D Q D  F K L W      D Q D  J L Q                                                                                                                 Requests waiting time                                                                                                            Oracle
+                                                                0          D  Q L W L H  5 H V                         G  X  F W 0  $ U  R M H F W 0  ( Q  4 $ ( Q
+                                                                   + X  P                                      3 U  R                            3 U
+                                                                                                               $ J H Q W
+                                                                                                                                                                                                                                                                Figure 7. Examples of queuing time under FCFS, Topology-
+                                                                                                                                                                                                                                                                Aware (Topo), and Oracle scheduling strategies.
+Figure 6. Average LLM inference latency of agents from QA,
+RG, and CG applications across Group 1–3 datasets.                                                                                                                                                                                                                                                                                                2 U D F O H                     ) & ) 6                      7 R S R
+                                                                                                                                                                                                                                                                                                                                            ) & ) 6                                                           7 R S R
+   We conduct evaluations on multiple datasets to further
+
+
+
+                                                                                                                                                                                                                                                                 / D W H Q F \  3 H U F H Q W L O H    
+                                                                                                                                                                                                                                                                                                                   
+support the above observation. For cross-application compar-
+ison, datasets are grouped as follows: Group 1 (G+M for QA,                                                                                                                                                                                                                                                        
+TQ for RG, HE for CG), Group 2 (M+W for QA, NCD for RG,                                                                                                                                                                                                                                                            
+MBPP for CG), and Group 3 (S+S for QA, NQ for RG, APPS
+                                                                                                                                                                                                                                                                                                                   
+for CG). Figure 5 shows average output lengths of agents
+across the three groups. Agents differ significantly within                                                                                                                                                                                                                                                                                                                                                                        
+each group, confirming that functional roles shape genera-                                                                                                                                                                                                                                                                 : D L W L Q J  7 L P H  3 H U F H Q W L O H                : D L W L Q J  7 L P H  3 H U F H Q W L O H    
+tion behavior. Despite task variations, each agent’s behavior
+remains consistent across groups. Figure 6 shows the corre-                                                                                                                                                                                                     Figure 8. Comparison of request ranking by queuing time
+sponding average inference latency, which also varies across                                                                                                                                                                                                    and inference latency under FCFS and Topo scheduling.
+agents but stays stable for the same agent across datasets.                                                                                                                                                                                                     2.2.2 Inappropriate Request Priority Scheduling. In
+   From the above analysis, we can conclude that both the                                                                                                                                                                                                       multi-agent applications, requests from different agents of-
+output length and inference latency of agents’ LLM requests                                                                                                                                                                                                     ten exhibit substantial variation in their remaining execu-
+are affected by their functional roles, while each agent main-                                                                                                                                                                                                  tion time within the overall workflow. Ideally, requests with
+tains stable behavior across different inputs.                                                                                                                                                                                                                  shorter remaining execution time should be prioritized to
+                                                                                                                                                                                                                                                                minimize overall queuing delay. However, existing sched-
+2.2                                  Inefficiency of Current Methods                                                                                                                                                                                            uling strategies fail to effectively capture such differences,
+2.2.1 Investigation Setup. We utilize the state-of-the-art                                                                                                                                                                                                      resulting in mismatches between the scheduling order and
+multi-agent orchestration systems Parrot [35] and Ayo [52]                                                                                                                                                                                                      the actual latency of requests.
+for investigations. At the scheduling layer, Parrot adopts the                                                                                                                                                                                                     Figure 7 presents an example of queuing time under three
+First-Come-First-Served (FCFS) policy, while Ayo prioritizes                                                                                                                                                                                                    scheduling strategies. The FCFS policy fails to distinguish
+requests with fewer remaining stages based on the stage                                                                                                                                                                                                         between requests with different latencies, causing longer re-
+depth in the workflow topology. At the dispatching layer,                                                                                                                                                                                                       quests to block shorter ones and resulting in a queuing delay
+both systems employ a Round-Robin strategy to dispatch                                                                                                                                                                                                          of up to 13 units. Topology-Aware (Topo) scheduling priori-
+requests across multiple LLM instances.                                                                                                                                                                                                                         tizes requests in later execution stages based on workflow
+   We use co-located workload (with datasets G+M for QA,                                                                                                                                                                                                        depth, partially alleviating head-of-line blocking and reduc-
+TQ for RG, and HE for CG) and the Llama3-8B model for                                                                                                                                                                                                           ing the queuing delay to 12 units. The ideal Oracle scheduler,
+evaluations. Table 2 shows our experimental configurations.                                                                                                                                                                                                     informed by accurate knowledge of each request’s remaining
+The request arrival times are derived from a popular real-                                                                                                                                                                                                      latency, achieves the lowest queuing delay of 7 units.
+world LLM inference trace [41], scaled proportionally to                                                                                                                                                                                                           Figure 8 shows the scatter distribution between the rel-
+simulate the real inter-arrival distribution.                                                                                                                                                                                                                   ative rankings of requests in queuing time and inference
+                                                                                                                                                                                                                                                            4
+Kairos: Low-latency Multi-Agent Serving with Shared LLMs and Excessive Loads in the Public Cloud
+
+
+latency under FCFS and Topo scheduling strategies at a re-                                                           Request Queue
+
+quest rate of 8 req/s. The x-axis represents the ranking of
+requests based on queuing time (with points further to the                                             Round-Robin                   Oracle
+left indicating earlier scheduling), while the y-axis repre-
+                                                                                          7
+sents the ranking of requests based on inference latency                                                                        7              8
+(with points lower down indicating shorter latency). Ideally,                         ×            5
+                                                                                                                 8
+requests with lower latency should be prioritized, resulting                                                                    6
+                                                                                                                                               5
+in scatter points distributed along the diagonal. However,                                                       6
+                                                                                                   3                            3
+this figure shows no obvious correlations between the wait-                                                      4                             4
+ing time and inference latency.
+   The above results indicate that effective priority scheduling is                                1             2              1              2
+
+needed to properly identify differences in the remaining latency
+                                                                                              Instance 1     Instance 2     Instance 1     Instance 2
+among agent requests in multi-agent applications.
+
+2.2.3 Recomputations under Inefficient Request Dis-                                                        Request batching on instances
+patching. Most of the current works employed a Round-
+Robin strategy to dispatch requests across multiple LLM in-                 Figure 9. Request dispatching and batching across two LLM
+stances. This overlooks the differences in memory demands                   instances under Round-Robin and Oracle strategies.
+among requests from different agents, leading to inefficient
+memory allocation and thus impacting overall performance.                      Request priority decision based on differentiated
+   As shown in Figure 9, requests from different agents are                 latency distributions among agents. Due to the auto-
+distributed to two LLM instances (Instances 1 and 2), and                   regressive nature of LLM inference, the execution latency of
+are batched within each instance, where the height of each                  a single request is difficult to predict precisely. Nevertheless,
+request block represents its memory demand. Under the                       we observe significant differences in the latency distributions
+Round-Robin strategy, requests are assigned to instances in                 of requests from different agents. Therefore, the latency dis-
+order of arrival. Because this approach does not consider                   tribution characteristics of agent requests need to be lever-
+the memory demand of requests and the resource status of                    aged to drive priority scheduling, mitigating head-of-line
+instances, it causes req-7 to be preempted due to insufficient              blocking and improving end-to-end performance.
+available memory, leading to resource waste. Under the re-                     Request Dispatching considering memory demand
+quest rate of 8 req/s, our results show that 18.4% of requests              differences. Although the memory usage of individual re-
+are preempted during execution, leading to 14.2% of memory                  quests is difficult to predict accurately, significant differences
+resources being wasted.                                                     are observed in the output length distributions of requests
+   In contrast, the Oracle strategy is aware of both the mem-               from different agents, and the input prompt length is avail-
+ory demand of requests and the current memory usage of                      able at dispatching. Thus, memory usage during inference
+instances. It dispatches requests to the instance with the                  needs to be dynamically perceived by combining prompt
+smallest expected peak memory usage by jointly considering                  length with the output length distribution of agent requests.
+the request’s memory demand and the instance’s current                      Requests can be dispatched accordingly to reduce preemp-
+memory usage, thereby constructing more compact request                     tion and improve resource utilization efficiency.
+batches. This effectively avoids preemption caused by mem-
+ory shortages and improves overall resource utilization.                    3     Methodology
+   The above results indicate that the Round-Robin strategy                 We propose Kairos, a scalable multi-agent orchestration sys-
+fails to recognize differences in memory demand, thereby lead-              tem that systematically optimizes the end-to-end perfor-
+ing to inefficient resource usage and degrading performance.                mance of multi-agent applications. Kairos supports efficient
+                                                                            workflow development, integrates pluggable communica-
+2.3   Design Requirements for Efficient Multi-Agent                         tion mechanisms, and employs a multi-threaded architecture
+      Application Deployment                                                to handle high-concurrency requests. This enables large-
+To effectively alleviate end-to-end performance bottlenecks,                scale distributed deployment of multi-agent applications
+three key design requirements must be addressed.                            with strong flexibility and scalability.
+   Automated application workflow analysis. To achieve                         Figure 10 illustrates the overview of Kairos. By introduc-
+end-to-end aware scheduling, global information about agent                 ing system identifiers (§4.1), Kairos supports online anal-
+requests throughout the entire application workflow needs                   ysis of various dynamic workflows (§4.2) without requir-
+to be obtained to perceive their remaining execution latency.               ing prior knowledge of application workflows, and contin-
+Thus, a lightweight and automated workflow analysis mech-                   uously collects latency distributions of requests from each
+anism needs to be designed to support efficient scheduling.                 agent (§4.3). Building on this foundation, Kairos designs a
+                                                                        5
+                                                                                                                                               J. Chen et al.
+
+
+                                                                                            LLM instances to minimize preemption and optimize GPU
+                                                                      Kairos
+ Applications                                                                               memory utilization under dynamic memory demands. Kairos
+                                                                     Front-end
+                                                                                            solves this by modeling the dynamic memory usage of each
+                 1    LLM Call                               Kairos APIs                    request and designing a time-slot packing strategy. This in-
+                             Load Balancer                          Workflow                volves discretizing the future timeline to evaluate expected
+                               Scheduler                           Orchestrator
+                   Reqs        Priority     Latency
+                                                                                            memory usage across instances and selecting the instance
+                                                                      System
+                 Reordering Determination Distributions
+                                                                     Identifiers
+                                                                                            with the lowest expected total peak memory usage.
+    Kairos                                             2                                       The overall workflow of Kairos is as follows. ➀ LLM re-
+                                                                     Workflow
+                                                                                            quests from various agents are submitted to Kairos’s Load
+                               Dispatcher                            Analyzer
+                            Time-Slot Packing                                               Balancer and enqueued into the request queue. ➁ Based
+                       Status              Memory                   Distribution            on real-time analysis from the Workflow Orchestrator, the
+                                                        3
+                       Monitor             Predictor                 Profiler
+                                                                                            Workflow-Aware Priority Scheduler evaluates the priority
+                                                                                            of requests from different agents and schedules the highest-
+                                                                    4       Execution
+                    LLM Instance #0                                                         priority request from the queue. ➂ For the dequeued request,
+LLM Engines      Mem: 97% | Preempted: 3
+                                               Engine Instance              Finished
+                                                                                            the Memory-Aware Time-Slot Dispatcher further selects the
+                                                                                            optimal LLM instance. Specifically, the dispatcher leverages
+                Figure 10. Kairos system overview.                                          the Status Monitor to track real-time memory usage and
+                                                                                            the number of preempted requests on each instance. To-
+workflow-aware priority scheduler that dynamically priori-                                  gether with the analysis from the Workflow Orchestrator,
+tizes requests in the queue by leveraging workflow structure                                the Memory Predictor uses this information to determine
+and historical latency distributions, thereby reducing overall                              the most suitable instance for execution. ➃ Once a request
+queuing delay (§5). For load balancing across multiple LLM                                  is completed, the Workflow Orchestrator collects its execu-
+instances, Kairos further proposes a memory-aware time-slot                                 tion information and incrementally updates the Workflow
+dispatcher, which intelligently dispatches requests based on                                Analyzer and the Distribution Profiler.
+the memory demands of requests and the memory status of                                        Kairos is implemented in about 6,000 lines of Python code.
+each LLM engine to optimize end-to-end performance (§6).                                    It seamlessly integrates with vLLM [31] as the underlying
+   The Workflow Orchestrator faces the significant challenge                                LLM inference engine via its standard APIs (for request exe-
+of analyzing dynamic, complex, and unpredictable multi-                                     cution and status monitoring) and leverages Kafka [1] for effi-
+agent application workflows whose structures are impossi-                                   cient inter-agent communication. Kairos adopts a distributed
+ble to know beforehand. Consequently, online tracking and                                   deployment architecture, deploying Workflow Orchestrator,
+parsing are essential. The difficulty lies in providing devel-                              Load Balancer, and agent processes via multi-processing, and
+opers with a lightweight solution that automatically submits                                using multi-threading to handle high-concurrency requests.
+the necessary contextual information for analysis at runtime,                               Kairos provides an HTTP interface compatible with the Ope-
+and in designing robust parsing algorithms capable of han-                                  nAI API format [16] to serve multi-agent applications.
+dling diverse workflow structures. Kairos overcomes this by
+designing system identifiers as the contextual information,                                 4     Workflow Orchestrator
+and a framework that automatically propagates these identi-                                 In this section, we detail Kairos’s workflow orchestration
+fiers at runtime. This enables online workflow analysis and                                 capabilities, covering its system identifiers, automated work-
+the continuous collection of latency distributions.                                         flow analysis, and continuous latency distribution analysis.
+   For the Workflow-Aware Priority Scheduler, the core dif-
+ficulty lies in effectively prioritizing requests to minimize                               4.1    System Identifier
+end-to-end queuing delay. This is particularly challenging
+as individual LLM inference latency is inherently unpre-                                    To support workflow analysis and historical data collection,
+dictable, which leads to the inability to effectively rank re-                              Kairos introduces a set of system identifiers.
+quests. Kairos addresses this by leveraging the statistical                                       • Agent Name: Used to distinguish different agents,
+diversity in remaining execution latencies across different                                         reflecting their independent behavioral patterns and
+agents. Based on the collected remaining execution latency                                          execution characteristics.
+distributions for each agent, Kairos designs an agent-level                                       • Message ID: Each user request carries a globally
+priority determination mechanism and performs priority                                              unique msg_id to track all agent requests involved
+scheduling accordingly. An intra-agent scheduling mecha-                                            in the entire workflow.
+nism complements this by prioritizing requests with longer                                        • Upstream Name: Records the name of the immediate
+cumulative latency to reduce tail latency.                                                          preceding agent that triggered the current request in
+   Finally, the Memory-Aware Time-Slot Dispatcher is chal-                                          the workflow, to obtain the upstream-downstream
+lenged by efficiently dispatching diverse agent requests to                                         relationships for reconstructing the workflow.
+                                                                                        6
+    Kairos: Low-latency Multi-Agent Serving with Shared LLMs and Excessive Loads in the Public Cloud
+
+                                                                                                                                    Sweep
+1  from Kairos import BaseAgent , Workflow                                                                                           line
+                                                                                                     B1
+2  # ## Implementing the Agent                                                            parallel                                                              C
+                                                                                                                                             parallel
+ 3 PROMPT = " You 're a router assistant , ... "                                            call                                                            D
+                                                                                                          simple                            execution
+
+                                                                                                                       Agents
+ 4 # Subclass BaseAgent and override _run_impl                                                              call                               B3
+ 5 class Router ( BaseAgent ) :
+                                                                                      A              B2            C
+                                                                                                                                                 B2
+ 6      def _run_impl ( self , input_data , metadata ) :
+                                                                                                                                       B1
+ 7          # Fill the prompt
+ 8          question = input_data . get ( " question " )                                             B3            D            A
+                                                                                                                                                 Time
+ 9          prompt = PROMPT . format ( question = question )
+10          # Use the provided function                                                   (a) Parallel workflow          (b) Parallel task span analysis
+11          # to request the LLM service
+                                                                                                                                    Sweep
+12          result = self . generate ( prompt , metadata )                                                  1                        line
+                                                                                                     B
+13          # Determine downstream agent from result                                  sequential
+14          next_agent = ...                                                             call
+                                                                                                                                               sequential
+                                                                                                                                               execution
+                                                                                                                       Agents
+15          # Forward result to the downstream agent                                                        2                                               D
+                                                                                      A              C
+16          return { " question " : question } , next_agent                                                                                         C
+17 # ## Defining the workflow
+                                                                                                                                       B
+18 workflow = Workflow ()                                                                                   3
+                                                                                                     D                          A
+19 workflow . add_engine ( " vllm " , model = " Llama -3 -8 B " )
+                                                                                                                                                 Time
+20 workflow . add_agent ( agent_name = " Router " ,
+        agent_class = Router , use_model = " Llama -3 -8 B " )                        (c) Sequential workflow          (d) Sequential task span analysis
+             Listing 1. Usage Example of the Kairos API
+                                                                                Figure 11. Examples of complex workflows and correspond-
+                                                                                ing runtime analysis: Multiple downstream parallel and se-
+                                                                                quential execution patterns.
+          • Execution Timestamps: Records timestamps for                        distinguish whether these multiple downstream calls are ex-
+            LLM execution’s start and completion for each task,                 ecuted in parallel (Figure 11a) or sequentially (Figure 11c).
+            enabling measurement of task spans and temporal                     Conversely, using only Execution Timestamps could al-
+            causality analysis for workflow reconstruction.                     low for chronological ordering, but might erroneously re-
+       The use of system identifiers is almost transparent to de-               construct upstream-downstream dependencies. For example,
+    velopers. The Agent Name only needs to be explicitly spec-                  the multiple downstream sequential workflow (Figure 11c)
+    ified by the user during the workflow definition phase, as                  might be erroneously interpreted as a sequential chain (A
+    shown in Listing 1. The Message ID, Upstream Name, and                      → B → C → D), rather than correctly identifying Agent
+    Execution Timestamps are automatically generated by                         A as the sole sequential initiator. Such misinterpretations
+    Kairos and transparently propagated across agents through                   would lead to incorrect dependency analysis and distorted
+    the communication mechanism.                                                workflow topologies.
+                                                                                   Based on the upstream-downstream dependencies, Kairos
+    4.2    Automated Workflow Analysis                                          first constructs a preliminary workflow execution graph.
+    We observe that beyond typical workflows as shown in Fig-                   Subsequently, Kairos analyzes the call patterns (parallel or
+    ure 2, more complex workflow structures also exist [44, 53,                 sequential) of each node’s outgoing edges within this graph.
+    58], as illustrated by Figure 11. To enable comprehensive                   If a node has only a single downstream dependency, that
+    and adaptable support for these intricate multi-agent appli-                edge represents a simple call. For nodes with multiple down-
+    cations, Kairos introduces an automated workflow analysis                   stream dependencies, Kairos utilizes a sweep-line algorithm,
+    mechanism. Unlike existing methods that require explicitly                  leveraging temporal span information to identify parallel ex-
+    predefined workflow definitions or data dependencies for                    ecution requests, as illustrated in Figure 11b and Figure 11d.
+    their analysis, this mechanism can automatically reconstruct                   Through this mechanism, Kairos can reconstruct diverse
+    the complete call graph at runtime based on temporal and                    multi-agent application workflows online, including typical
+    upstream-downstream causal relationships.                                   structures in Figure 2, providing a structural and semantic
+       Specifically, Kairos leverages the Message ID to identify                foundation for data collection and scheduling optimization.
+    and collect all request data belonging to the same workflow,
+    including the Agent Name, Upstream Name, and Execu-                         4.3       Latency Distribution Analysis
+    tion Timestamps, for generating upstream-downstream                         Kairos continuously collects LLM execution samples from
+    relationships and temporal task span information.                           various agents at runtime and statistically analyzes their
+       Both Upstream Name and Execution Timestamps are                          execution latency characteristics. Specifically, it constructs
+    critical for robust workflow reconstruction. For instance,                  and maintains two types of distributions.
+    relying solely on the Upstream Name would only reveal                         1. Single-Request Execution Latency Distribution.
+    direct calling relationships, but it would be insufficient to               Kairos continuously collects execution latency samples of
+                                                                            7
+                                                                                                                                J. Chen et al.
+
+
+    Remaining Execution            Agent-Level Priority Determination        Based on this distribution, we introduce a novel workflow-
+    Latency Distributions            Wasserstein Distance Calculation        aware priority scheduling strategy. As illustrated in Fig-
+      Agent A, B, C, ...                                                     ure 12, it first determines agent-level priorities to order
+                                                                             agents and then sorts intra-agent requests through application-
+                                       MDS Embedding (1D Space)
+                                                                             level start time, aiming to reduce the overall queuing latency.
+                                                                             The intuition is that while an individual request’s remaining
+    Application-level                      Agent-Level Priorities            execution latency is uncertain, the relative latency across
+       start time                                                            agents remains statistically stable. Prioritizing agent requests
+                                    Reordering             A>B>C
+ Reqs E2E start time                                                         with shorter remaining latency allows Kairos to globally op-
+    A1      10:20:01.4       ...      C1         B2   B1    A3 A2 A1         timize the queuing order, reducing end-to-end latency.
+    A2      10:20:23.5         Agent C           Agent B       Agent A
+     ...        ...                                                          5.1   Agent-Level Priority Determination Mechanism
+                                                       Reordering
+                                                                             Kairos introduces an agent-level priority determination mech-
+                            Intra-Agent Request Scheduling                   anism that leverages differences in remaining execution
+                                                                             latency distributions.
+ Figure 12. Workflow-aware priority scheduling strategy.                        Kairos first measures the distributional differences among
+                                                                             agents using the Wasserstein distance [17]. This provides a
+LLM requests from each agent online and employs an expo-                     robust and intuitive basis for comparing the remaining exe-
+nentially increasing sampling strategy to determine distribu-                cution latencies across different agents. A pairwise distance
+tion convergence. Each time the sample size doubles, Kairos                  matrix is then constructed based on these Wasserstein dis-
+computes the Wasserstein distance [17] between the cur-                      tances. To enable comparison of the relative latency among
+rent and previous distributions. This distance captures both                 all agents in a unified dimension, Kairos applies Multidi-
+the shape and positional shift between distributions. If this                mensional Scaling (MDS) [15] to embed the distance matrix
+distance falls below a predefined threshold, the distribution                into a one-dimensional coordinate space. MDS preserves the
+is considered converged and can be utilized for subsequent                   original distance relationships as much as possible while
+optimization. This distribution guides the request packing                   transforming the pairwise distributional differences into an
+strategy described in §6.                                                    interpretable 1D representation, facilitating subsequent pri-
+   2. Remaining Execution Latency Distribution. Kairos                       ority determination.
+further constructs the remaining execution latency distri-                      However, the coordinate space obtained by MDS is di-
+bution for each agent, which reflects the time required to                   rectionless and only reflects the relative differences among
+complete the end-to-end workflow from the current execu-                     agents, making it impossible to directly determine which
+tion stage. Based on the workflow structure extracted in §4.2,               agents have shorter remaining execution latency. To assign a
+Kairos computes the remaining end-to-end latency for each                    priority direction to the coordinate space, Kairos introduces
+request. These per-request measurements are then aggre-                      an ideal “zero latency” distribution as an anchor point.
+gated to construct the remaining execution latency distri-                      Kairos includes the “zero latency” distribution into the set
+bution for each agent. This distribution guides the request                  of all agents’ distributions, computes the Wasserstein dis-
+scheduling strategy described in §5.                                         tances among all distributions, and maps these distributions
+   In particular, for applications with autonomous planning                  into a 1D coordinate space via MDS. Agents positioned closer
+capabilities (Figure 2a), some agents may have multiple down-                to the ideal distribution anchor in this coordinate space have
+stream execution paths. In such cases, Kairos collects the                   original distributions more similar to the “zero latency” ideal
+remaining execution latency samples separately for each                      distribution, indicating shorter remaining execution latency
+path and merges them into the overall distribution. This is                  and thus are assigned higher scheduling priorities.
+based on the intuition that historical data reflects the actual                 Through this process, Kairos constructs a stable priority
+distribution of user tasks and can approximate the likelihood                determination mechanism without requiring precise predic-
+of future execution paths. Thus, paths with higher histori-                  tion of individual request execution latency, thereby effec-
+cal frequency (e.g., Router to MathAgent for frequent math                   tively supporting the priority scheduling.
+questions) contribute proportionally more to the remaining
+latency distribution of the upstream agent, thereby reflecting               5.2   Intra-Agent Request Scheduling Mechanism
+anticipated future user request patterns.
+                                                                             As discussed in Section 5.1, Kairos determines inter-agent
+                                                                             request priorities. This section further explores the intra-
+5          Workflow-Aware Priority Scheduler                                 agent request scheduling mechanism.
+As previously described, Kairos continuously constructs the                     Since intra-agent requests originate from the same ap-
+remaining execution latency distribution for each agent.                     plication, they typically share the same end-to-end latency
+                                                                         8
+Kairos: Low-latency Multi-Agent Serving with Shared LLMs and Excessive Loads in the Public Cloud
+
+
+constraints. However, due to the inherent uncertainty of au-                                          Inst. 1                                Inst. 2            Incoming
+                                                                                                  existing mem                            existing mem          req mem
+toregressive inference in LLMs, these requests may accumu-
+                                                                                                                         Instance 2       OOM                         100%
+late significantly different latencies in prior LLM inference
+                                                                                                                                                                 ×
+                                                                                                                                           23%      27%
+stages. Some have already incurred shorter delays, while                                                                          19%                     31%
+                                                                                                                         15%
+others have incurred longer cumulative latency. To further
+
+
+
+
+                                                                                                    Memory Utilization
+reduce end-to-end tail latency, Kairos prioritizes requests
+                                                                                                                         60%      65%      73%      77%   64%
+that have already experienced longer delays in prior stages.
+   Specifically, as described in Section 4.1, Kairos assigns a                                                           Instance 1                                   100%
+globally unique Message ID to each request upon its arrival
+                                                                                                                         15%               23%      27%   31%
+at the frontend. Based on this identifier, Kairos records the                                                                     19%
+                                                                                                                                                                selected
+request’s application-level start time (i.e., its arrival time
+at the frontend), which is used to measure the accumulated                                  try-dispatch 73%                      59%      66%      61%   63%
+latency in prior stages. Kairos maintains a global mapping
+{msg_id: e2e_start_time} to support intra-agent request                                                                  0       0.5      1     1.5    2        2.5
+scheduling decisions. At scheduling, Kairos uses this start                                                                            Future Timeline (s)
+time as the ordering criterion for intra-agent requests, prior-
+itizing those with earlier application-level start time. This                         Figure 13. Memory-aware time-slot packing strategy.
+strategy differs from the default scheduling strategy of cur-
+rent LLM engines that relies solely on the request-level start                         In this equation, 𝑡𝑖 , 𝑠𝑡𝑎𝑟𝑡 can be obtained by Kairos in real
+time (i.e., the arrival time at the current agent stage), as it                     time, whereas 𝑡𝑖 , 𝑒𝑛𝑑 is difficult to predict precisely. As dis-
+captures the accumulated latency of requests in prior stages,                       cussed in Section 2.1.3, since the decoding latency accounts
+thereby effectively reducing end-to-end tail latency.                               for the majority of the overall latency, we approximate 𝑡𝑖 , 𝑒𝑛𝑑
+                                                                                    using the expected execution time 𝑇𝑖 , as shown in Equation 2.
+                                                                                                                             𝑡𝑖 , 𝑒𝑛𝑑 = 𝑡𝑖 , 𝑠𝑡𝑎𝑟𝑡 + 𝑇𝑖                      (2)
+6    Memory-Aware Time-Slot Dispatcher
+After determining the scheduling order, Kairos must decide                             Based on the single-request execution latency distri-
+which LLM instance each request should be dispatched to. As                         bution derived from historical data, we select the point with
+discussed in Section 2.1.3, requests from different agents ex-                      the highest probability density as the expected execution
+hibit significant variations in memory usage. To address this,                      time of the request. This statistic reflects the most common
+we design a memory-aware time-slot packing strategy                                 execution latency experienced by requests from the agent,
+that matches requests to instances in a way that balances                           thereby closely representing actual execution behavior.
+memory load. For example, requests with higher memory                                  Building on the above single-request model, we can model
+demands can be preferentially dispatched to instances with                          the memory usage during request batching as shown in
+larger available memory, thereby reducing the risk of out-of-                       Equation 3, where A 𝑗 denotes the set of requests currently
+memory (OOM) failures and improving resource utilization.                           assigned to instance 𝑗, and 𝑓𝑖 (𝑡) represents the memory usage
+   However, memory usage varies dynamically over time,                              function of request 𝑖. The function 𝐹 𝑗 (𝑡) characterizes the
+making static matching strategies insufficient to capture the                       memory usage of instance 𝑗 over future time, serving as the
+actual resource demands of requests and the real-time status                        foundation for our subsequent packing strategy.
+                                                                                                                     ∑︁
+of instances. Therefore, we model the memory usage of each                                                𝐹 𝑗 (𝑡) =       𝑓𝑖 (𝑡)                (3)
+request as a linear function over time to assist subsequent                                                                                𝑖 ∈ A𝑗
+packing decisions. The KV Cache usage of request 𝑖 during
+its execution can be approximated by Equation 1, where 𝑃𝑖                              We design a time-slot packing strategy that determines the
+denotes the memory usage corresponding to the prompt of                             allocation target for each request. To reduce decision-making
+request 𝑖 (i.e., the memory usage of the prefill phase), which                      overhead, we divide the future timeline into several fixed-
+can be computed online by Kairos in real time; 𝑘 represents                         length time slots, allowing for fast evaluations of instance
+the decoding speed of the request, corresponding to the rate                        memory usage based on these discrete slots. The key process
+of memory usage increase, and is determined through prior                           is illustrated in Figure 13 and involves two steps:
+hardware profiling; and 𝑡𝑖 , 𝑠𝑡𝑎𝑟𝑡 and 𝑡𝑖 , 𝑒𝑛𝑑 denote the start                       1. Time Slot Partitioning and Memory Usage Accu-
+and end times of request 𝑖’s decoding phase, respectively.                          mulation. Shorter slot lengths enable finer-grained eval-
+                                                                                    uation but incur higher computational overhead. Through
+                                                                                    empirical observations, we find that a slot length of 0.5 sec-
+               (                                                                    onds offers a favorable trade-off. When dispatching a request,
+                   𝑃𝑖 + 𝑘 × (𝑡 − 𝑡𝑖,start ),   if 𝑡𝑖,start < 𝑡 < 𝑡𝑖,end             Kairos first identifies the set of time slots S it will span. Then,
+    𝑓𝑖 (𝑡) =                                                              (1)
+                   0,                          otherwise                            Kairos computes the memory usage of the request in each
+                                                                                9
+                                                                                                                            J. Chen et al.
+
+
+time slot and accumulates it with the memory usage of ex-               the original distributions of inter-request intervals through
+isting requests already assigned to the instance for the cor-           proportional sampling. We adjust the overall load rate so that
+responding slots, thus obtaining the total expected memory              the average queueing time ratio (i.e., the ratio of queueing
+usage. Finally, Kairos scans through all time slots in S. If the        time to end-to-end time) ranges from 0% to 90%, thereby
+memory usage in any slot exceeds the total memory capac-                covering a variety of scenarios from low to high loads.
+ity of the instance, the instance is considered temporarily                Metrics. We adopt program-level token latency [37] as
+unavailable for dispatch.                                               the performance metric to measure the end-to-end perfor-
+   2. Instance Selection. For each request, Kairos evaluates            mance of multi-agent applications. This metric is defined
+the availability of all LLM instances in parallel to acceler-           as the end-to-end response time divided by the number of
+ate the process. If none of the instances are available, the            tokens generated, with lower values indicating better perfor-
+request remains in the scheduling queue, awaiting the next              mance. For brevity, we refer to program-level token latency
+scheduling round. Otherwise, Kairos selects the instance                as “latency” in the following. We report both the average
+with the lowest expected total peak memory usage in the                 and the tail latency to reflect the overall performance.
+future among the available instances, aiming to minimize
+the risk of OOM failures caused by estimation errors.                   7.2   End-to-end Performance
+   While this strategy proactively balances memory load,                In this section, we evaluate the end-to-end performance of
+some special cases exist because of the unpredictable nature            Kairos against baselines for individual application workloads,
+of LLM inference. To address this, for requests that execute            specifically across three representative applications and var-
+faster than anticipated, Kairos immediately removes its mem-            ious datasets. We use Llama3-8B as the serving LLM.
+ory usage from subsequent time slots to prevent interference               As shown in Figure 14, Kairos consistently outperforms
+with future request dispatching. Conversely, for requests               Parrot and Ayo across all evaluated applications and datasets.
+that execute slower than anticipated, Kairos monitors for po-           Compared to Parrot, Kairos reduces both average and tail
+tential OOM events, temporarily suspending new dispatches               latency, with average decrease ranging from 17.8% to 28.4%,
+to the affected instance upon detection. Compared to simple             and P90 tail latency decrease ranging from 19.1% to 28.6%.
+strategies that, for instance, rely on static memory threshold-         Furthermore, Kairos also achieves significant gains over Ayo,
+ing (e.g., 90% memory capacity as a threshold), which often             decreasing average latency by 5.8% to 10.8%, and P90 latency
+sacrifices memory utilization, these adaptive measures can              by 13.4% to 20.2%.
+enhance system stability and resource efficiency.                          The advantages stem from Kairos’s workflow-aware pri-
+                                                                        ority scheduling and memory-aware time-slot dispatching.
+7     Evaluation                                                        The scheduling prioritizes agent requests based on their re-
+                                                                        maining execution latencies, allowing requests that can com-
+In this section, we first evaluate Kairos in minimizing end-to-         plete faster to execute first, thereby alleviating request-level
+end latency for multi-agent applications, and then evaluate             head-of-line blocking. The dispatching perceives the mem-
+the effectiveness of Kairos’s each module.                              ory demand differences of agent requests and dynamically
+                                                                        assigns requests to suitable LLM instances, effectively reduc-
+7.1   Experimental Setup                                                ing request preemption and improving resource efficiency.
+Testbed Configuration. We conduct our experiments using                 In contrast, Parrot’s FCFS fails to capture execution differ-
+the configurations detailed in Table 2. The workloads and               ences among requests. While Ayo considers the workflow
+their corresponding datasets are described in Section 2.1.2.            topology depth offers an improvement, it cannot differen-
+   Baseline. We select two representative state-of-the-art              tiate requests with varied execution latencies at the same
+systems as baselines. All methods adopt the same LLM en-                depth. Moreover, both of them employ the Round-Robin that
+gine configuration to ensure fairness.                                  disregards memory demand differences. This results in low
+   Parrot [35]: The First-Come-First-Serve (FCFS) scheduling            memory utilization and frequent preemptions.
+strategy is adopted for scheduling requests from different                 Notably, for QA on the S+S dataset, Kairos’s advantage
+agents. Moreover, Parrot dispatches requests from different             in average latency is less pronounced. This is because So-
+agents of the same application to multiple LLM instances in             cialIQA, a social science question dataset, leads the Humani-
+a Round-Robin manner.                                                   tiesAgent to produce shorter outputs compared to histori-
+   Ayo [52]: A priority scheduling strategy based on work-              cal questions, thereby reducing latency differences between
+flow topology depth is introduced, prioritizing requests with           agents and weakening scheduling effectiveness. For RG and
+fewer remaining downstream stages. Moreover, requests are               CG applications, Kairos’s performance improvement over
+dispatched in a Round-Robin manner.                                     Ayo is comparatively modest. This is because both applica-
+   Loads. To simulate the dynamic arrival patterns of re-               tions predominantly contain simple linear workflow struc-
+quests in the real world, we construct the loads according              tures, which allows Ayo’s priority scheduling to achieve per-
+to a production-level LLM inference trace [41], preserving              formance close to Kairos’s. Nevertheless, Kairos still achieves
+                                                                   10
+Kairos: Low-latency Multi-Agent Serving with Shared LLMs and Excessive Loads in the Public Cloud
+
+
+                                                                                                                                                                       . D L U R V                 3 D U U R W                  $ \ R
+                                                                                         *  0   $ Y J                          0  :   $ Y J                        6  6   $ Y J                          *  0   3                                                                         0  :   3                                       6  6   3  
+
+
+                                          / D W H Q F \   V  W R N H Q 
+                                                                                                                                                            
+                                                                                                                                                                                                                                                                                                                                        
+                                                                               
+                                                                                                                                                                                                                                                                                                                                      
+                                                                               
+                                                                                                                                                                                                                                                                                                         
+                                                                                         7 4   $ Y J                           1 & '   $ Y J                     1 4   $ Y J                 7 4   3                                                                                    1 & '   3                                     1 4   3  
+
+
+
+
+ / D W H Q F \   V  W R N H Q   / D W H Q F \   V  W R N H Q 
+                                                                                                                                                                                                                                                                                                                                         
+                                                                                                                   
+                                                                                                                                                                                                                                                                                                                                          
+                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                                                    
+                                                                                                                                                                                                                                                                                                                           
+                                                                                           + (   $ Y J                          0 % 3 3   $ Y J                     $ 3 3 6   $ Y J                           + (   3                                                                        0 % 3 3   3                                    $ 3 3 6   3  
+                                                                                                                                                       
+                                                                                                                                                                                                                                                                                       
+                                                                                                                                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                                                                         
+                                                                                                                   
+                                                                                                                                                                                                                                                                                                                                    
+                                                                                         5 D W H   U H T  V                   5 D W H   U H T  V               5 D W H   U H T  V                     5 D W H   U H T  V                                                               5 D W H   U H T  V                             5 D W H   U H T  V 
+
+Figure 14. End-to-end performance of individual applications: Question Answer (1st row), Report Generate (2nd row), and Code
+Generate (3rd row). The subcaption of each subfigure indicates the dataset and the latency type (average or tail).
+
+these gains, primarily benefiting from its memory-aware                                                                                                                                                                                                                           . D L U R V                      3 D U U R W                            $ \ R
+time-slot packing strategy in these scenarios.                                                                                                                                                                                                                                         $ Y J                                                     3  
+
+
+                                                                                                                                                                                                                                  / D W H Q F \   V  W R N H Q 
+   In summary, Kairos outperforms baselines in both average
+and tail latencies for individual application workloads.                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                       
+7.3                                                                                Co-located Applications                                                                                                                                                                                                           
+In production-level LLM services, requests from multiple ap-                                                                                                                                                                                                                                                        
+                                                                                                                                                                                                                                                                                                                                                                
+plications typically share LLM instances to improve resource                                                                                                                                                                                                                            3                                                      3  
+
+
+                                                                                                                                                                                                                     / D W H Q F \   V  W R N H Q 
+utilization and reduce costs [35, 51]. To evaluate Kairos’s                                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                                           
+performance in this multi-application co-location scenario,
+we use co-located workload (with datasets G+M for QA, TQ                                                                                                                                                                                                                                                            
+for RG, and HE for CG) and the Llama3-8B model.
+   As shown in Figure 15, Kairos shows a pronounced per-                                                                                                                                                                                                                                                             
+                                                                                                                                                                                                                                                                                                                                                                
+formance advantage in this complex scenario. Compared                                                                                                                                                                                                                            5 D W H   U H T  V                                5 D W H   U H T  V 
+to Parrot, Kairos decreases the average latency by 45.1% to
+72.8%, P90 latency by 45.4% to 72.9%, P95 latency by 56.8%                                                                                                                                           Figure 15. Latency performance of co-located applications
+to 78.3%, and P99 latency by 69.6% to 81.9%. Furthermore,                                                                                                                                            (QA, RG, and CG) using Llama3-8B.
+compared to Ayo, Kairos also decreases the average latency
+by 6.1% to 37.9%, P90 latency by 5.6% to 35.7%, P95 latency                                                                                                                                           7.4          Priority Ordering Accuracy
+by 8.4% to 40.6%, and P99 latency by 6.6% to 57.2%.                                                                                                                                                  To reduce overall queueing latency, Kairos introduces a workflow-
+   Kairos’s advantage lies in precisely identifying differences                                                                                                                                      aware priority scheduling strategy. To further validate the
+in remaining execution latency and memory demands among                                                                                                                                              effectiveness of this strategy, this subsection quantitatively
+diverse agent requests from multiple applications. This is                                                                                                                                           evaluates its sorting accuracy within the queue.
+achieved through unified cross-application modeling, en-                                                                                                                                                Experimental Scenarios. We construct 10 experimental
+abling fine-grained and efficient request scheduling and dis-                                                                                                                                        scenarios, including nine single-application scenarios from
+patching. In contrast, Parrot fails to identify execution differ-                                                                                                                                    Section 7.2, and a scenario representing the co-located work-
+ences among requests, resulting in severe queueing delays                                                                                                                                            load from Section 7.3. For comparison with the theoretically
+and resource waste. Ayo lacks a cross-application joint sched-                                                                                                                                       optimal sorting, each scenario uses all historical execution
+uling, thus its overall performance improvement is limited.                                                                                                                                          data to simulate requests in the queue.
+   These results demonstrate that Kairos exhibits significant                                                                                                                                           Definition of Accuracy. Kairos’s scheduling strategy pri-
+advantages in the multi-application co-location scenario,                                                                                                                                            oritizes requests based on agent-level priority, derived from
+which commonly exists in the real world.                                                                                                                                                             the remaining execution latency distributions of different
+                                                                                                                                                                                             11
+                                                                                                                                                                                                                                                       J. Chen et al.
+
+
+                                                      . D L U R V               3 D U U R W          $ \ R                                                                     . D L U R V                    3 D U U R W                      $ \ R
+                                    
+                                                                                                                                                                                   $ Y J                                             3  
+
+
+                                                                                                                               / D W H Q F \   V  W R N H Q 
+                                                                                                                                                                  
+
+       $ F F X U D F \    
+                                     
+                                                                                                                                                                                                            
+                                                                                                                                                                    
+                                     
+                                                                                                                                                                                                                                                  
+                                                  0  :   6  7 4  & '  4  + (                      3 3  3 6  / R                                                                      3                                            3  
+                                            *    0     6  *      1  *   1  *    0 %   $ 3  & R 
+
+
+                                                                                                                               / D W H Q F \   V  W R N H Q 
+                                      4 $  4 $   4 $  5  5 *  5  &  & *    & *                                                                                  
+                                                                     6 F H Q D U L R V                                                                                                                        
+                                                                                                                                                                    
+Figure 16. Sorting accuracy across 10 experimental scenar-
+ios, including single-application workloads on three datasets                                                                                                                                                
+                                                                                                                                                                                                                                                     
+for each application and a co-located workload.                                                                                                                               5 D W H   U H T  V                         5 D W H   U H T  V 
+
+agents. To quantify its practical effectiveness, we measure                                                             Figure 17. Latency performance of co-located applications
+request-level sorting accuracy. This is calculated by forming                                                           (QA, RG, and CG) using Llama2-13B.
+request pairs for each request in the queue, comparing that
+request with all other agent requests, and determining the
+proportion of correctly sorted pairs. The overall sorting ac-                                                           to 21.4%, and P99 latency by 22.6% to 37.9%. These results
+curacy for a scenario is the average of these request-level                                                             demonstrate that Kairos continues to maintain a significant
+accuracies. A higher accuracy indicates that the system more                                                            performance advantage under a larger LLM, showcasing
+effectively identifies remaining execution latency differences                                                          excellent scalability and adaptability.
+and maps them to the actual scheduling order.
+   Results. As shown in Figure 16, Kairos shows superior                                                                7.6              Ablation Study
+sorting accuracy across various scenarios, achieving an av-                                                             This section reuses the same workload and system configura-
+erage accuracy of 83.5%, while Ayo exhibits an average accu-                                                            tion as in Section 7.3, aiming to validate the effectiveness of
+racy of 75.9%. Parrot adopts the FCFS strategy, which results                                                           Kairos’s two core mechanisms. We construct the following
+in a random sorting accuracy of 50%, because for any given                                                              two ablation variants:
+request pair, either request may arrive and be scheduled first.
+The better performance is attributed to that Kairos can iden-                                                                 • w/o priority: Removes the priority scheduling strat-
+tify remaining execution latency differences among agent                                                                        egy, retaining the request packing strategy.
+requests in both single- and cross-application scenarios, and                                                                 • w/o packing: Removes the request packing strategy,
+accurately map these differences to the actual scheduling.                                                                      retaining the priority scheduling strategy.
+   We can also observe specific nuances in certain scenar-                                                                 Effectiveness of workflow-aware priority scheduling.
+ios: for RG and CG applications, Ayo’s accuracy is close to                                                             As shown in Figure 18, we compare the performance of
+Kairos’s because their workflows are either entirely linear                                                             Kairos to its variant w/o priority under different request rates.
+(for RG) or predominantly contain simple linear structures                                                              The left subfigure illustrates the average latency under a
+(for CG), allowing Ayo’s priority scheduling strategy to per-                                                           representative load where queueing time accounts for 50%.
+form comparably.                                                                                                        The results indicate that Kairos can mitigate the impact of
+                                                                                                                        queueing blocking on system performance through priority
+7.5                          Scalability to Larger LLM                                                                  scheduling, and achieves a 1.63x performance improvement.
+To evaluate Kairos’s performance with a larger LLM, we                                                                  The right subfigure presents the average latency at different
+replace Llama3-8B with Llama2-13B and use the co-located                                                                request rates. As the request rate increases, Kairos’s latency
+workload from Section 7.3 to maintain the production-level                                                              improvement increases from 38.8% to 69.6%. This is because
+LLM service scenario.                                                                                                   request-level head-of-line blocking becomes more frequent
+   As shown in Figure 17, Kairos achieves significant perfor-                                                           under higher loads, while Kairos’s workflow-aware priority
+mance improvements over both Parrot and Ayo. Compared                                                                   scheduling strategy can effectively alleviate such blocking,
+to Parrot, Kairos reduces the average latency by 42.1% to                                                               thereby significantly improving overall system performance.
+57.4%, P90 latency by 43.1% to 56.6%, P95 latency by 48.1%                                                                 Effectiveness of memory-aware time-slot dispatch-
+to 57.1%, and P99 latency by 56.8% to 70.6%. Moreover, com-                                                             ing. As shown in Figure 18, we compare the performance of
+pared to Ayo, Kairos reduces the average latency by 21.8% to                                                            Kairos with its variant w/o packing under different request
+24.6%, P90 latency by 23.2% to 25.9%, P95 latency by 18.4%                                                              rates. The left subfigure indicates that Kairos achieves a 1.12x
+                                                                                                                   12
+Kairos: Low-latency Multi-Agent Serving with Shared LLMs and Excessive Loads in the Public Cloud
+
+
+                                                        Z  R  S U L R U L W \                                               Z  R  S D F N L Q J                           . D L U R V         scheduling [18, 50], kernel accelerating [25, 56], and model
+                                                         [                                                                                                                                    parallelism [33, 38]. For multi-instance load balancing, tech-
+                                                                                                                                             
+
+
+
+                                                                                                $ Y J  / D W H Q F \   V  W R N H Q 
+                                                                                                                                                                                               niques like live migration [51] and disaggregated prefill and
+
+
+       / D W H Q F \   V  W R N H Q 
+                                                                     [     [                                                                                                           decoding [45, 60] have been proposed to improve end-to-end
+                                                                                                                                                                                                  performance. While these methods significantly enhance
+                                              
+                                                                                                                                                                                                 the inference performance of LLMs themselves, they are
+                                                                                                                                                                                               limited in optimizing multi-agent applications as they can-
+                                                                                                                                                                                              not leverage application-level information for end-to-end
+                                                                         \          J  V                                                                                              
+                                                                 R U L W      N L Q  D L U R                                                           5 D W H   U H T  V                     performance optimization. Kairos, however, takes a holistic
+                                                     R   S U L   R  S D F  .
+                                                Z                   Z                                                                                                                             view by focusing on end-to-end optimization for multi-agent
+                                                                                                                                                                                                  applications. These LLM inference layer optimizations are
+                                               Figure 18. Results of the ablation studies.                                                                                                        orthogonal to Kairos and can be seamlessly integrated.
+                                                                                                                                                                                                     LLM orchestration frameworks. To address the com-
+acceleration because its request packing strategy can dynam-                                                                                                                                      plex inter-agent interactions and tool execution within multi-
+ically match appropriate LLM instances based on the mem-                                                                                                                                          agent applications, frameworks like LangChain [10] and Au-
+ory demands of different agent requests, effectively reducing                                                                                                                                     toGen [55] have emerged. These frameworks primarily offer
+resource waste and request preemption. The right subfig-                                                                                                                                          high-level programming abstractions for client-side work-
+ure presents the average latency at different request rates.                                                                                                                                      flow definition to simplify user development, but they do not
+Kairos achieves a stable latency reduction ranging from 9.5%                                                                                                                                      incorporate LLM serving optimizations essential for end-to-
+to 10.6%. The main reason is that most of the GPU memory                                                                                                                                          end application performance [2, 8, 11, 12, 61]. Recognizing
+is effectively utilized by requests, and the remaining wasted                                                                                                                                     this gap, Kairos also provides a front-end orchestrator to
+memory space changes little across different request rates.                                                                                                                                       simplify user programming while concurrently enabling the
+This further demonstrates that Kairos’s request dispatching                                                                                                                                       automated collection of necessary information for LLM serv-
+exhibits stable and reliable optimization capabilities.                                                                                                                                           ing performance optimization.
+                                                                                                                                                                                                     Optimization for applications. Several works have been
+7.7                Overhead of Kairos
+                                                                                                                                                                                                  proposed to optimize LLM-based applications. Parrot [35] is
+We analyze the overhead from two dimensions: real-time                                                                                                                                            an LLM service system optimizing end-to-end performance
+updates of agent-level priority and request execution.                                                                                                                                            of LLM-based applications with semantic variable, adopting
+   Firstly, Kairos computes and updates agent priorities using                                                                                                                                    a FCFS scheduling strategy and a Round-Robin dispatch-
+real-time latency distributions based on Wasserstein distance                                                                                                                                     ing strategy. Ayo [52] is a fine-grained orchestration frame-
+and MDS methods. When calculating the Wasserstein dis-                                                                                                                                            work, which introduces a priority scheduling strategy based
+tance matrix, Kairos only requires incremental computation                                                                                                                                        on workflow topology depth, and dispatches requests in a
+for newly added agents, which results in negligible overhead.                                                                                                                                     Round-Robin manner. However, they fail to account for the
+The MDS method exhibits quadratic computational complex-                                                                                                                                          diverse execution characteristics of agents in multi-agent ap-
+ity with respect to the number of agents [46, 47]. We evaluate                                                                                                                                    plications and lack an effective orchestrator to automatically
+its computation time for agent scales from 10 to 5000, rang-                                                                                                                                      collect and parse such information. This deficiency leads to
+ing approximately from 0.1s to 4.3s, which is overall within                                                                                                                                      inefficient scheduling and dispatching of multi-agent appli-
+an acceptable range. These operations can be triggered at                                                                                                                                         cation requests under excessive load.
+fixed time intervals and executed asynchronously in the
+background, ensuring high scalability and performance in
+large-scale agent scenarios.                                                                                                                                                                      9   Conclusion
+   Additionally, during the execution of each request, Kairos                                                                                                                                     In this paper, we present Kairos, a scalable multi-agent or-
+introduces two types of additional overhead. First, the prior-                                                                                                                                    chestration system for multi-agent applications. The core
+ity scheduling strategy needs to sort queued requests, which                                                                                                                                      idea is to optimize scheduling and dispatching by leverag-
+takes approximately 3.6 ms. Second, the request packing                                                                                                                                           ing the execution differences among agent requests through
+strategy needs to compute GPU memory usage based on                                                                                                                                               three main components: a workflow orchestrator that au-
+time slots, taking approximately 4.1 ms. These overheads are                                                                                                                                      tomatically collects agent-specific information, a workflow-
+negligible compared to the latency of LLM inference.                                                                                                                                              aware scheduler that optimizes priority decisions by per-
+                                                                                                                                                                                                  ceiving the remaining latency of requests across agents, and
+8     Related Work                                                                                                                                                                                a memory-aware dispatcher that efficiently dispatches re-
+LLM Serving. Extensive research has been dedicated to op-                                                                                                                                         quests to LLM instances by considering varying memory de-
+timizing general LLM inference performance across various                                                                                                                                         mands among agents. Experimental results show that Kairos
+directions, including techniques such as continuous batch-                                                                                                                                        reduces the end-to-end latency by 17.8% to 28.4%, compared
+ing [31, 57], KV cache management [31, 34, 49, 59], request                                                                                                                                       to state-of-the-art works.
+                                                                                                                                                                                             13
+                                                                                                                                                       J. Chen et al.
+
+
+References                                                                             [23] Zehui Chen, Kuikun Liu, Qiuchen Wang, Jiangning Liu, Wenwei
+ [1] 2024. Apache Kafka. https://kafka.apache.org                                           Zhang, Kai Chen, and Feng Zhao. 2024. MindSearch: Mimicking
+ [2] 2024. CAMEL. https://www.camel-ai.org                                                  Human Minds Elicits Deep AI Searcher. arXiv:2407.20183
+ [3] 2024. GPT Newspaper.           https://github.com/rotemweiss57/gpt-               [24] Karl Cobbe, Vineet Kosaraju, Mohammad Bavarian, Mark Chen, Hee-
+     newspaper                                                                              woo Jun, Lukasz Kaiser, Matthias Plappert, Jerry Tworek, Jacob Hilton,
+ [4] 2024. World History 1500 QA. https://huggingface.co/datasets/                          Reiichiro Nakano, Christopher Hesse, and John Schulman. 2021. Train-
+     nielsprovos/world-history-1500-qa                                                      ing Verifiers to Solve Math Word Problems. arXiv:2110.14168
+ [5] 2025. About GKE Inference Gateway. https://cloud.google.com/                      [25] Tri Dao, Daniel Y. Fu, Stefano Ermon, Atri Rudra, and Christopher Ré.
+     kubernetes-engine/docs/concepts/about-gke-inference-gateway                            2022. FLASHATTENTION: fast and memory-efficient exact attention
+ [6] 2025. Agno. https://github.com/agno-agi/agno                                           with IO-awareness. In Proceedings of the 36th International Conference
+ [7] 2025. Alibaba Cloud EAS Model Serving. https://www.alibabacloud.                       on Neural Information Processing Systems (NIPS ’22). Curran Associates
+     com/help/en/pai/user-guide/use-llm-intelligent-router-to-improve-                      Inc., Article 1189, 16 pages.
+     inference-efficiency                                                              [26] Dawei Gao, Zitao Li, Xuchen Pan, Weirui Kuang, Zhijian Ma, Bingchen
+ [8] 2025. crewAI. https://www.crewai.com                                                   Qian, Fei Wei, Wenhao Zhang, Yuexiang Xie, Daoyuan Chen, Liuyi
+ [9] 2025. GPT Researcher. https://github.com/assafelovic/gpt-researcher                    Yao, Hongyi Peng, Zeyu Zhang, Lin Zhu, Chen Cheng, Hongzhu Shi,
+[10] 2025. LangChain. https://www.langchain.com                                             Yaliang Li, Bolin Ding, and Jingren Zhou. 2024. AgentScope: A Flexible
+[11] 2025. Langflow. https://www.langflow.org                                               yet Robust Multi-Agent Platform. arXiv:2402.14034
+[12] 2025. LangGraph. https://langchain-ai.github.io/langgraph                         [27] Dan Hendrycks, Steven Basart, Saurav Kadavath, Mantas Mazeika,
+[13] 2025. Langroid. https://github.com/langroid/langroid                                   Akul Arora, Ethan Guo, Collin Burns, Samir Puranik, Horace He,
+[14] 2025. LazyLLM. https://github.com/LazyAGI/LazyLLM                                      Dawn Song, and Jacob Steinhardt. 2021. Measuring Coding Challenge
+[15] 2025. Multidimensional scaling. https://en.wikipedia.org/wiki/                         Competence With APPS. NeurIPS (2021).
+     Multidimensional_scaling                                                          [28] Dan Hendrycks, Collin Burns, Steven Basart, Andy Zou, Mantas
+[16] 2025. OpenAl Platform. https://platform.openai.com/docs/api-                           Mazeika, Dawn Song, and Jacob Steinhardt. 2021. Measuring Massive
+     reference/introduction                                                                 Multitask Language Understanding. In International Conference on
+[17] 2025. Wasserstein metric. https://en.wikipedia.org/wiki/Wasserstein_                   Learning Representations.
+     metric                                                                            [29] Sirui Hong, Mingchen Zhuge, Jonathan Chen, Xiawu Zheng, Yuheng
+[18] Amey Agrawal, Nitin Kedia, Ashish Panwar, Jayashree Mohan, Nipun                       Cheng, Jinlin Wang, Ceyao Zhang, Zili Wang, Steven Ka Shing Yau,
+     Kwatra, Bhargav Gulavani, Alexey Tumanov, and Ramachandran Ram-                        Zijuan Lin, Liyang Zhou, Chenyu Ran, Lingfeng Xiao, Chenglin Wu,
+     jee. 2024. Taming Throughput-Latency Tradeoff in LLM Inference                         and Jürgen Schmidhuber. 2024. MetaGPT: Meta Programming for A
+     with Sarathi-Serve. In 18th USENIX Symposium on Operating Systems                      Multi-Agent Collaborative Framework. In The Twelfth International
+     Design and Implementation (OSDI 24). USENIX Association, 117–134.                      Conference on Learning Representations.
+[19] Aida Amini, Saadia Gabriel, Shanchuan Lin, Rik Koncel-Kedziorski,                 [30] Tom Kwiatkowski, Jennimaria Palomaki, Olivia Redfield, Michael
+     Yejin Choi, and Hannaneh Hajishirzi. 2019. MathQA: Towards In-                         Collins, Ankur Parikh, Chris Alberti, Danielle Epstein, Illia Polosukhin,
+     terpretable Math Word Problem Solving with Operation-Based For-                        Jacob Devlin, Kenton Lee, Kristina Toutanova, Llion Jones, Matthew
+     malisms. In Proceedings of the 2019 Conference of the North American                   Kelcey, Ming-Wei Chang, Andrew M. Dai, Jakob Uszkoreit, Quoc Le,
+     Chapter of the Association for Computational Linguistics: Human Lan-                   and Slav Petrov. 2019. Natural Questions: A Benchmark for Question
+     guage Technologies, Volume 1 (Long and Short Papers), Jill Burstein,                   Answering Research. Transactions of the Association for Computational
+     Christy Doran, and Thamar Solorio (Eds.). Association for Computa-                     Linguistics 7 (2019), 452–466.
+     tional Linguistics, 2357–2367.                                                    [31] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin
+[20] Jacob Austin, Augustus Odena, Maxwell Nye, Maarten Bosma, Henryk                       Zheng, Cody Hao Yu, Joseph E. Gonzalez, Hao Zhang, and Ion Stoica.
+     Michalewski, David Dohan, Ellen Jiang, Carrie Cai, Michael Terry,                      2023. Efficient Memory Management for Large Language Model
+     Quoc Le, and Charles Sutton. 2021. Program Synthesis with Large                        Serving with PagedAttention. In Proceedings of the ACM SIGOPS 29th
+     Language Models. arXiv:2108.07732                                                      Symposium on Operating Systems Principles.
+[21] Guangyao Chen, Siwei Dong, Yu Shu, Ge Zhang, Jaward Sesay, Börje                  [32] Kenton Lee, Ming-Wei Chang, and Kristina Toutanova. 2019. Latent
+     Karlsson, Jie Fu, and Yemin Shi. 2024. AutoAgents: a framework for                     Retrieval for Weakly Supervised Open Domain Question Answering.
+     automatic agent generation. In Proceedings of the Thirty-Third Interna-                In Proceedings of the 57th Annual Meeting of the Association for Compu-
+     tional Joint Conference on Artificial Intelligence (IJCAI ’24). Article 3,             tational Linguistics, Anna Korhonen, David Traum, and Lluís Màrquez
+     9 pages.                                                                               (Eds.). Association for Computational Linguistics, 6086–6096.
+[22] Mark Chen, Jerry Tworek, Heewoo Jun, Qiming Yuan, Henrique Ponde                  [33] Zhuohan Li, Lianmin Zheng, Yinmin Zhong, Vincent Liu, Ying Sheng,
+     de Oliveira Pinto, Jared Kaplan, Harri Edwards, Yuri Burda, Nicholas                   Xin Jin, Yanping Huang, Zhifeng Chen, Hao Zhang, Joseph E. Gonzalez,
+     Joseph, Greg Brockman, Alex Ray, Raul Puri, Gretchen Krueger,                          and Ion Stoica. 2023. AlpaServe: Statistical Multiplexing with Model
+     Michael Petrov, Heidy Khlaaf, Girish Sastry, Pamela Mishkin, Brooke                    Parallelism for Deep Learning Serving. In 17th USENIX Symposium
+     Chan, Scott Gray, Nick Ryder, Mikhail Pavlov, Alethea Power, Lukasz                    on Operating Systems Design and Implementation (OSDI 23). USENIX
+     Kaiser, Mohammad Bavarian, Clemens Winter, Philippe Tillet, Fe-                        Association, 663–679.
+     lipe Petroski Such, Dave Cummings, Matthias Plappert, Fotios                      [34] Bin Lin, Chen Zhang, Tao Peng, Hanyu Zhao, Wencong Xiao, Minmin
+     Chantzis, Elizabeth Barnes, Ariel Herbert-Voss, William Hebgen Guss,                   Sun, Anmin Liu, Zhipeng Zhang, Lanbo Li, Xiafei Qiu, Shen Li, Zhi-
+     Alex Nichol, Alex Paino, Nikolas Tezak, Jie Tang, Igor Babuschkin,                     gang Ji, Tao Xie, Yong Li, and Wei Lin. 2024. Infinite-LLM: Efficient
+     Suchir Balaji, Shantanu Jain, William Saunders, Christopher Hesse, An-                 LLM Service for Long Context with DistAttention and Distributed
+     drew N. Carr, Jan Leike, Josh Achiam, Vedant Misra, Evan Morikawa,                     KVCache. arXiv:2401.02669
+     Alec Radford, Matthew Knight, Miles Brundage, Mira Murati, Katie                  [35] Chaofan Lin, Zhenhua Han, Chengruidong Zhang, Yuqing Yang, Fan
+     Mayer, Peter Welinder, Bob McGrew, Dario Amodei, Sam McCan-                            Yang, Chen Chen, and Lili Qiu. 2024. Parrot: efficient serving of LLM-
+     dlish, Ilya Sutskever, and Wojciech Zaremba. 2021. Evaluating Large                    based applications with semantic variable. In Proceedings of the 18th
+     Language Models Trained on Code. arXiv:2107.03374                                      USENIX Conference on Operating Systems Design and Implementation
+                                                                                            (OSDI’24). USENIX Association, Article 50, 17 pages.
+
+                                                                                  14
+Kairos: Low-latency Multi-Agent Serving with Shared LLMs and Excessive Loads in the Public Cloud
+
+
+[36] Stephanie Lin, Jacob Hilton, and Owain Evans. 2022. TruthfulQA:               [49] Ying Sheng, Shiyi Cao, Dacheng Li, Coleman Hooper, Nicholas Lee,
+     Measuring How Models Mimic Human Falsehoods. In Proceedings of                     Shuo Yang, Christopher Chou, Banghua Zhu, Lianmin Zheng, Kurt
+     the 60th Annual Meeting of the Association for Computational Linguis-              Keutzer, Joseph E. Gonzalez, and Ion Stoica. 2024. S-LoRA: Serving
+     tics (Volume 1: Long Papers), Smaranda Muresan, Preslav Nakov, and                 Thousands of Concurrent LoRA Adapters. arXiv:2311.03285
+     Aline Villavicencio (Eds.). Association for Computational Linguistics,        [50] Ying Sheng, Shiyi Cao, Dacheng Li, Banghua Zhu, Zhuohan Li,
+     3214–3252.                                                                         Danyang Zhuo, Joseph E. Gonzalez, and Ion Stoica. 2024. Fairness
+[37] Michael Luo, Xiaoxiang Shi, Colin Cai, Tianjun Zhang, Justin Wong,                 in serving large language models. In Proceedings of the 18th USENIX
+     Yichuan Wang, Chi Wang, Yanping Huang, Zhifeng Chen, Joseph E.                     Conference on Operating Systems Design and Implementation (OSDI’24).
+     Gonzalez, and Ion Stoica. 2025. Autellix: An Efficient Serving Engine              USENIX Association, Article 52, 24 pages.
+     for LLM Agents as General Programs. arXiv:2502.13965                          [51] Biao Sun, Ziming Huang, Hanyu Zhao, Wencong Xiao, Xinyi Zhang,
+[38] Xupeng Miao, Chunan Shi, Jiangfei Duan, Xiaoli Xi, Dahua Lin, Bin                  Yong Li, and Wei Lin. 2024. Llumnix: Dynamic Scheduling for Large
+     Cui, and Zhihao Jia. 2024. SpotServe: Serving Generative Large Lan-                Language Model Serving. In 18th USENIX Symposium on Operating
+     guage Models on Preemptible Instances. In Proceedings of the 29th ACM              Systems Design and Implementation (OSDI 24). USENIX Association,
+     International Conference on Architectural Support for Programming Lan-             173–191.
+     guages and Operating Systems, Volume 2 (ASPLOS ’24). Association for          [52] Xin Tan, Yimin Jiang, Yitao Yang, and Hong Xu. 2025. Towards End-to-
+     Computing Machinery, 1112–1127.                                                    End Optimization of LLM-based Applications with Ayo. In Proceedings
+[39] Rishabh Misra. 2022. News Category Dataset. arXiv:2209.11429                       of the 30th ACM International Conference on Architectural Support for
+[40] Arkil Patel, Satwik Bhattamishra, and Navin Goyal. 2021. Are NLP                   Programming Languages and Operating Systems, Volume 2 (ASPLOS
+     Models really able to Solve Simple Math Word Problems?. In Pro-                    ’25). Association for Computing Machinery, 1302–1316.
+     ceedings of the 2021 Conference of the North American Chapter of the          [53] Junlin Wang, Jue Wang, Ben Athiwaratkun, Ce Zhang, and James Zou.
+     Association for Computational Linguistics: Human Language Technolo-                2024. Mixture-of-Agents Enhances Large Language Model Capabilities.
+     gies, Kristina Toutanova, Anna Rumshisky, Luke Zettlemoyer, Dilek                  arXiv:2406.04692
+     Hakkani-Tur, Iz Beltagy, Steven Bethard, Ryan Cotterell, Tanmoy               [54] Yuxin Wang, Yuhan Chen, Zeyu Li, Xueze Kang, Yuchu Fang, Yeju
+     Chakraborty, and Yichao Zhou (Eds.). Association for Computational                 Zhou, Yang Zheng, Zhenheng Tang, Xin He, Rui Guo, Xin Wang,
+     Linguistics, Online, 2080–2094.                                                    Qiang Wang, Amelie Chi Zhou, and Xiaowen Chu. 2025. BurstGPT:
+[41] Pratyush Patel, Esha Choukse, Chaojie Zhang, Aashaka Shah, Íñigo                   A Real-World Workload Dataset to Optimize LLM Serving Systems.
+     Goiri, Saeed Maleki, and Ricardo Bianchini. 2024. Splitwise: Efficient             In Proceedings of the 31st ACM SIGKDD Conference on Knowledge
+     Generative LLM Inference Using Phase Splitting. In 2024 ACM/IEEE                   Discovery and Data Mining V.2 (KDD ’25). ACM.
+     51st Annual International Symposium on Computer Architecture (ISCA).          [55] Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu, Beibin Li, Erkang
+     118–132.                                                                           Zhu, Li Jiang, Xiaoyun Zhang, Shaokun Zhang, Jiale Liu, Ahmed Has-
+[42] Archit Patke, Dhemath Reddy, Saurabh Jha, Haoran Qiu, Christian                    san Awadallah, Ryen W White, Doug Burger, and Chi Wang. 2023.
+     Pinto, Chandra Narayanaswami, Zbigniew Kalbarczyk, and Ravis-                      AutoGen: Enabling Next-Gen LLM Applications via Multi-Agent Con-
+     hankar Iyer. 2024. Queue Management for SLO-Oriented Large Lan-                    versation. arXiv:2308.08155
+     guage Model Serving. In Proceedings of the 2024 ACM Symposium on              [56] Guangxuan Xiao, Ji Lin, Mickael Seznec, Hao Wu, Julien Demouth, and
+     Cloud Computing (SoCC ’24). Association for Computing Machinery,                   Song Han. 2023. SmoothQuant: accurate and efficient post-training
+     18–35.                                                                             quantization for large language models. In Proceedings of the 40th
+[43] Chen Qian, Wei Liu, Hongzhang Liu, Nuo Chen, Yufan Dang, Jiahao                    International Conference on Machine Learning (ICML’23). JMLR.org,
+     Li, Cheng Yang, Weize Chen, Yusheng Su, Xin Cong, Juyuan Xu, Dahai                 Article 1585, 13 pages.
+     Li, Zhiyuan Liu, and Maosong Sun. 2024. ChatDev: Communicative                [57] Gyeong-In Yu, Joo Seong Jeong, Geon-Woo Kim, Soojeong Kim, and
+     Agents for Software Development. arXiv:2307.07924                                  Byung-Gon Chun. 2022. Orca: A Distributed Serving System for
+[44] Bo Qiao, Liqun Li, Xu Zhang, Shilin He, Yu Kang, Chaoyun Zhang,                    Transformer-Based Generative Models. In 16th USENIX Symposium
+     Fangkai Yang, Hang Dong, Jue Zhang, Lu Wang, Minghua Ma, Pu                        on Operating Systems Design and Implementation (OSDI 22). USENIX
+     Zhao, Si Qin, Xiaoting Qin, Chao Du, Yong Xu, Qingwei Lin, Saravan                 Association, 521–538.
+     Rajmohan, and Dongmei Zhang. 2024. TaskWeaver: A Code-First                   [58] Chaoyun Zhang, Liqun Li, Shilin He, Xu Zhang, Bo Qiao, Si Qin,
+     Agent Framework. arXiv:2311.17541                                                  Minghua Ma, Yu Kang, Qingwei Lin, Saravan Rajmohan, Dongmei
+[45] Ruoyu Qin, Zheming Li, Weiran He, Jialei Cui, Feng Ren, Mingxing                   Zhang, and Qi Zhang. 2024. UFO: A UI-Focused Agent for Windows
+     Zhang, Yongwei Wu, Weimin Zheng, and Xinran Xu. 2025. Mooncake:                    OS Interaction. arXiv:2402.07939
+     Trading More Storage for Less Computation — A KVCache-centric                 [59] Lianmin Zheng, Liangsheng Yin, Zhiqiang Xie, Chuyue Sun, Jeff
+     Architecture for Serving LLM Chatbot. In 23rd USENIX Conference on                 Huang, Cody Hao Yu, Shiyi Cao, Christos Kozyrakis, Ion Sto-
+     File and Storage Technologies (FAST 25). USENIX Association, 155–170.              ica, Joseph E. Gonzalez, Clark Barrett, and Ying Sheng. 2024.
+[46] Ketan Rajawat and Sandeep Kumar. 2017. Stochastic Multidimensional                 SGLang: Efficient Execution of Structured Language Model Programs.
+     Scaling. IEEE Transactions on Signal and Information Processing over               arXiv:2312.07104
+     Networks 3, 2 (2017), 360–375.                                                [60] Yinmin Zhong, Shengyu Liu, Junda Chen, Jianbo Hu, Yibo Zhu, Xu-
+[47] Yang Ruan and Geoffrey Fox. 2013. A Robust and Scalable Solution                   anzhe Liu, Xin Jin, and Hao Zhang. 2024. DistServe: Disaggregating
+     for Interpolative Multidimensional Scaling with Weighting. In 2013                 Prefill and Decoding for Goodput-optimized Large Language Model
+     IEEE 9th International Conference on e-Science. 61–69.                             Serving. In 18th USENIX Symposium on Operating Systems Design and
+[48] Maarten Sap, Hannah Rashkin, Derek Chen, Ronan Le Bras, and Yejin                  Implementation (OSDI 24). USENIX Association, 193–210.
+     Choi. 2019. Social IQa: Commonsense Reasoning about Social Interac-           [61] Wangchunshu Zhou, Yuchen Eleanor Jiang, Long Li, Jialong Wu,
+     tions. In Proceedings of the 2019 Conference on Empirical Methods in               Tiannan Wang, Shi Qiu, Jintian Zhang, Jing Chen, Ruipu Wu, Shuai
+     Natural Language Processing and the 9th International Joint Conference             Wang, Shiding Zhu, Jiyu Chen, Wentao Zhang, Xiangru Tang, Ningyu
+     on Natural Language Processing (EMNLP-IJCNLP), Kentaro Inui, Jing                  Zhang, Huajun Chen, Peng Cui, and Mrinmaya Sachan. 2023. Agents:
+     Jiang, Vincent Ng, and Xiaojun Wan (Eds.). Association for Computa-                An Open-source Framework for Autonomous Language Agents.
+     tional Linguistics, 4463–4473.                                                     arXiv:2309.07870
+
+
+                                                                              15
+

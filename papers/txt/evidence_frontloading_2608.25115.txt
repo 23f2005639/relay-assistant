@@ -1,0 +1,769 @@
+                                                     Less can be More: Relieving RAG Bottlenecks
+                                             via Evidence Frontloading and Pressure-Adaptive Budgeting
+                                                                       Weibin Cai                                                              Reza Zafarani
+                                                                weibin44@data.syr.edu                                                      reza@data.syr.edu
+                                                              Data Lab, EECS Department                                                Data Lab, EECS Department
+                                                                 Syracuse University                                                      Syracuse University
+                                                                  Syracuse, NY, USA                                                        Syracuse, NY, USA
+
+                                         Abstract                                                                                    Denser reranker input, Higher final recall
+                                         Existing methods for improving Retrieval-Augmented Generation                                            3.Less can be more            Ours (PACE)
+
+
+
+
+arXiv:2608.25115v1 [cs.CL] 25 Aug 2026
+                                                                                                                   Evidence Recall
+                                         (RAG) efficiency mainly optimize downstream LLM generation,
+                                         such as context compression or serving optimization. However,                                                      1.Evidence
+                                         RAG is an end-to-end system, and its bottleneck can shift between                                                     Frontloading
+                                                                                                                     Recall
+                                         upstream reranking and downstream generation under different                Gain
+                                         serving loads and reranking budgets. In this paper, we first empiri-                                                                Standard dense retrieval
+                                         cally characterize this shifting-bottleneck behavior and show that
+                                         upstream reranking can become the dominant bottleneck under
+                                         high query rates or large reranking budgets. Reducing the reranking
+                                         budget can relieve this bottleneck, but it may also drop supporting
+                                                                                                                                                                                            Reranking Budget D
+                                         evidence and degrade recall. To address this problem, we propose
+                                         PACE (Prioritized Adaptive Coverage of Evidence), a training-                                         Adaptive 𝐷                       Fixed 𝐷
+                                         free framework that combines evidence frontloading with pressure-                                                  2.Pressure-adaptive Budgeting
+                                         adaptive budgeting. PACE first reorders candidates by marginal
+                                         evidence coverage, prioritizing documents that are query-relevant,         Generation-heavy                                                        Ranking-heavy
+                                         complementary, and useful for forming multi-hop evidence chains.                                                       Lower Latency
+                                         We show that this objective is monotone submodular, giving greedy
+                                                                                                                   Figure 1: How PACE improves RAG effectiveness and effi-
+                                         selection a (1 − 1/𝑒) approximation guarantee. PACE then dynami-
+                                                                                                                   ciency. (1) Evidence frontloading makes top-ranked candi-
+                                         cally adjusts the reranking budget according to the relative pressure
+                                                                                                                   dates more evidence-dense, achieving higher evidence recall
+                                         of the reranker and the LLM. Experiments on three multi-hop QA
+                                                                                                                   at a smaller reranking budget 𝐷. (2) Pressure-adaptive bud-
+                                         datasets and online serving simulations show that PACE improves
+                                                                                                                   geting then reduces 𝐷 under ranking-heavy workloads to
+                                         evidence recall, reduces p95 latency under ranking-heavy work-
+                                                                                                                   lower latency. (3) Together, PACE enables denser reranker
+                                         loads. More importantly, the two components together reveal that
+                                                                                                                   input and higher final recall with fewer reranked documents.
+                                         less can be more: an evidence-dense top-ranked candidates enable
+                                         higher final recall with fewer reranked documents.                        Increasing 𝑘 can improve evidence recall, but longer contexts also
+                                                                                                                   make RAG systems harder to process effectively and efficiently:
+                                         CCS Concepts                                                              useful information may be lost in the middle [18], noisy sentences
+                                         • Information systems → Retrieval models and ranking; Eval-               can degrade generation [28], and long inputs introduce substantial
+                                         uation of retrieval results.                                              inference overhead [8, 40]. Existing work addresses these issues
+                                                                                                                   from two main directions. At the system level, techniques such as
+                                         Keywords                                                                  KV-cache reuse [41], scheduling [39], and optimized prefilling [1]
+                                         Retrieval-augmented generation, RAG bottleneck mitigation, evi-           accelerate LLM inference. At the data and algorithm level, context
+                                         dence frontloading, pressure-adaptive budgeting, evidence recall,         compressors [6, 11, 37] aim to preserve core information while re-
+                                         multi-hop question answering                                              moving irrelevant tokens from the retrieved context. These methods
+                                                                                                                   reduce input length or accelerate generation, thereby alleviating
+                                                                                                                   downstream bottlenecks (i.e., generation stage bottleneck) while
+                                         1   Introduction                                                          largely maintaining question-answering performance.
+                                         RAG has become a widely used paradigm for equipping Large Lan-               However, RAG is an end-to-end system, and improving it re-
+                                         guage Models (LLMs) with external knowledge across diverse down-          quires coordinating upstream retrieval/reranking with downstream
+                                         stream tasks [3, 17, 29]. A typical RAG pipeline first retrieves query-   generation for both effectiveness and efficiency. For effectiveness,
+                                         relevant chunks from a corpus using a dense retriever [12, 14, 35],       if necessary evidence is not recalled upstream, removing noisy
+                                         then applies a reranker [20, 21, 30] to refine their order and feeds      context downstream cannot recover the missing information or im-
+                                         the top-𝑘 chunks to the LLM as context. The quality of the gen-           prove answer accuracy. For efficiency, If queries are already queued
+                                         erated answer therefore largely depends on whether the context            at the reranker, optimizing only the generator may not improve
+                                         (top-𝑘 chunks) covers the evidence needed to answer the query.            end-to-end latency. Consequently, approaches that mainly optimize
+                                                                                                                                Cai and Zafarani
+
+
+downstream generation may not generalize across different RAG             the reranking budget can shift the dominant bottleneck from genera-
+configurations and serving loads. In particular, as the reranking         tion to upstream reranking. This finding motivates us to focus on
+budget (i.e., the number of retrieved candidates sent to the reranker)    the ranking-heavy scenario, where reducing downstream genera-
+and QPS (queries per second) vary, the system bottleneck can shift        tion cost alone is insufficient. To address this problem, we propose
+between ranking and generation. When queries arrive frequently            PACE, short for Prioritized Adaptive Coverage of Evidence, to re-
+and many documents must be reranked, the ranking stage can                lieve upstream reranking bottlenecks while preserving evidence
+become the bottleneck; otherwise, latency may be dominated by             recall. PACE consists of two components. First, evidence frontload-
+generation. We refer to these two scenarios as ranking-heavy and          ing reorders candidates so that the top-ranked candidates contain
+generation-heavy. Although using a small fixed reranking budget           evidence that is directly relevant to the query, complementary to
+can relieve ranking-heavy workloads, this fixed budget is difficult       already selected documents, and useful for forming a complete ev-
+to choose under dynamic serving loads, and an overly small budget         idence chain. We formulate this as a marginal evidence coverage
+can miss necessary evidence and degrade answer quality. There-            problem: using fewer documents to cover more query semantics.
+fore, how to dynamically relieve upstream ranking bottlenecks while       Each document’s coverage is weighted by its direct query rele-
+preserving evidence recall remains an open problem. A promising           vance and its potential to bridge evidence chains. This objective
+solution requires two key properties, as illustrated in Figure 1:         is monotone submodular, giving greedy frontloading a (1 − 1/𝑒)
+Evidence frontloading. This is especially important for multi-            approximation guarantee. Second, pressure-adaptive budgeting
+hop questions, where answering a query often requires multiple            dynamically adjusts the reranking budget according to the relative
+supporting documents rather than a single highly relevant chunk.          queueing pressure of the reranker and the LLM, reducing reranker
+If these supporting documents can be frontloaded into the first           workload when upstream ranking becomes the bottleneck. Together,
+few candidates, the system can use a smaller reranking budget,            the two components enable a key effect: less can be more when the
+reducing upstream workload while preserving evidence recall. Ex-          top-ranked candidates are evidence-dense. Although adaptive budget-
+isting retrieval-side methods partially address this goal through         ing sends fewer candidates to the reranker, evidence frontloading
+multi-hop retrieval or diversity-aware ranking. Multi-hop retriev-        makes these candidates more useful and less noisy, increasing the
+ers usually acquire supporting evidence through iterative retrieval       chance that the reranker promotes complete evidence into the final
+or reasoning-guided search [13, 33, 36], but they require specialized     top-𝐾 context. Figure 1 summarizes how these two components
+retriever training or introduce additional LLM-retrieval iterations,      jointly improve RAG effectiveness and efficiency, leading to the
+which can increase serving cost. In contrast, the goal in this scenario   “less can be more” effect. Our contributions are as follows:
+is not to acquire new evidence through extra retrieval steps, but to           • We empirically identify shifting bottlenecks in RAG serving,
+prioritize evidence within an existing candidate pool so that a smaller          showing that the dominant bottleneck can move between
+reranking budget can still preserve recall under serving pressure.               reranking and generation as the number of queries per
+Diversity-aware methods are closer to this setting because they                  second and the reranking budget change.
+usually reorder existing candidates by reducing redundancy. For ex-            • We propose PACE, a training-free framework that combines
+ample, maximal marginal relevance (MMR) [5] penalizes similarity                 marginal evidence frontloading with pressure-adaptive bud-
+to previously selected documents, while Dartboard [22] optimizes                 geting to reduce upstream reranking workload while pre-
+relevant information gain for diverse RAG retrieval. However, these              serving evidence recall. We further show that the proposed
+methods remain limited for multi-hop evidence frontloading due                   evidence coverage objective of PACE is monotone submod-
+to three issues: (i) coarse-grained relevance modeling, as they typ-             ular, which leads to its greedy selection to provide a (1−1/𝑒)
+ically rely on document-level similarity rather than fine-grained                approximation guarantee under a cardinality constraint.
+semantic dimensions; (ii) missing inter-document dependencies, as              • Experiments on three multi-hop QA datasets and online
+a supporting document may be weakly related to the query but                     serving simulations show that PACE improves evidence
+strongly connected to another evidence document; and (iii) limited               recall, substantially reduces latency under ranking-heavy
+robustness, as their performance often depends on dataset-sensitive              workloads, and demonstrate that less can be more when top-
+hyperparameters and lacks principled performance guaranties.                     ranked candidates are evidence-dense: achieve higher final
+Pressure-adaptive budgeting. Instead of relying on a fixed budget,               recall with a smaller reranking budget.
+it should dynamically choose the largest budget that does not make
+reranking a bottleneck relative to generation. This requires jointly
+considering upstream reranking pressure and downstream genera-
+                                                                          2   RAG Bottlenecks Shift Across Configurations
+tion pressure, so that the system can preserve as much evidence as            and Loads
+possible while relieving ranking-heavy workloads. Together, these         In a RAG system, the LLM contains most of the parameters and
+two properties enable the system to use a smaller reranking budget        computational complexity, so it is often assumed to be the main
+with higher evidence recall, thereby reducing upstream bottlenecks        serving bottleneck. However, the bottleneck is not always fixed
+while maintaining or even improving evidence recall.                      at generation. It can shift between upstream reranking and down-
+In this work. We first characterize RAG bottlenecks under on-             stream generation under different model choices, configurations
+line serving simulation with varying QPS and reranking budgets.           (e.g., reranking budget 𝐷), and serving loads (e.g., queries per sec-
+Our analysis shows that the bottleneck is not determined solely           ond). We characterize this shift by comparing how long requests
+by the relative size of the reranker and the LLM: increasing QPS or       wait in the reranker queue and the LLM queue: if requests wait
+                                                                          longer in the reranker queue than in the LLM queue, reranking is
+Less can be More: Relieving RAG Bottlenecks
+via Evidence Frontloading and Pressure-Adaptive Budgeting
+
+                                                                                                                                                                                                  D=100, K=5, 128 output tokens                                                                     D=50, K=5, 128 output tokens
+                                                           D=200, K=5, natural EOS (max 128 tokens)                                                                         Compression                                                                                       Compression
+                                                                                                                                                                             w/o compressor                                                                                    w/o compressor
+                                        8 Ranking-heavy                                                                                                                      w/ compressor                                                                            102      w/ compressor
+                                                                                                                                                                    102
+                                                                                                                                                                                Measured time                                                                                     Measured time
+                                        6                                                                                                                                       End-to-end latency                                                                                End-to-end latency
+
+
+
+
+P95 queue-time ratio (reranker / LLM)
+                                                                                                                                                                                Reranker queue time                                                                               Reranker queue time
+
+
+
+
+                                                                                                                                            P95 latency (seconds)                                                                             P95 latency (seconds)
+                                                                                                                                                                                LLM queue time                                                                                    LLM queue time
+                                        4
+                                                                         Generation model / ranking model: parameter ratio                                                                                                                                            101
+                                                                      Qwen-3B / DeBERTa: 7.1×         Qwen-3B / MiniLM-L12: 92.5×
+                                        2                             Qwen-7B / DeBERTa: 17.5×        Qwen-7B / MiniLM-L12: 228.3×
+                                                                                                                                                                    101
+                                        0
+
+                                        2                                                                                                                                                                                                                             100
+
+                                        4                                                                                                                           100
+                                            Generation-heavy
+                                            0.50    0.75       1.00    1.25      1.50      1.75             2.00         2.25        2.50                                 0.5              0.75          1      1.15 1.3 1.45     1.6   1.8                                 0.5              0.75          1      1.15 1.3 1.45    1.6   1.8
+                                                                       Queries Per Second (QPS)                                                                                                       Queries per Second (QPS)                                                                          Queries per Second (QPS)
+
+(a) Bottleneck tendency across reranker–LLM                                                                                                                                     (b) Ranking-heavy workloads                                                                  (c) Generation-heavy workloads
+model pairs under increasing QPS.
+
+Figure 2: Shifting RAG bottlenecks under different configurations and serving loads. Here, 𝐷 denotes reranking budget and 𝐾 de-
+notes the number of documents sent to the LLM. In (a), we vary QPS across two rerankers: trecdl22-crossencoder-debertav3,
+                                                                                                                          and
+                                                                                                                             
+                                                                                                                                                                                                                                                                                                                P95 reranker queue time
+ms-marco-MiniLM-L12-v2, and two LLMs: Qwen2.5-3B-Instruct, and Qwen2.5-7B-Instruct. We report log2       P95 LLM queue time  ,
+where positive values indicate ranking-heavy serving and negative values indicate generation-heavy serving. In (b) and (c) we
+use Qwen2.5-3B-Instruct and trecdl22-crossencoder-debertav3 pair and vary 𝐷 with and without context compressor.
+the bottleneck; otherwise, generation is the bottleneck. We report                                                                                                                                                 3      PACE: Prioritized Adaptive Coverage of
+p95 queueing latency, i.e., the latency below which 95% of requests                                                                                                                                                       Evidence
+fall, because serving bottlenecks often appear as tail latency and
+                                                                                                                                                                                                                   The observations in Section 2 show that RAG bottlenecks shift with
+indicate system saturation under high load. This paper focuses on
+                                                                                                                                                                                                                   serving load and system configuration. To relieve shifting bottle-
+the reranking and generation stages, and measures their queue-
+                                                                                                                                                                                                                   necks, the system should adaptively allocate the reranking budget
+ing delays to identify which stage limits system throughput. To
+                                                                                                                                                                                                                   𝐷 rather than using a fixed value. However, simply reducing 𝐷 may
+study RAG bottlenecks under realistic serving conditions, we use
+                                                                                                                                                                                                                   miss necessary evidence and degrade answer quality. We therefore
+an open-loop workload, where requests are issued according to a
+                                                                                                                                                                                                                   propose PACE (Prioritized Adaptive Coverage of Evidence), to pace
+fixed arrival process independent of previous request completion.
+                                                                                                                                                                                                                   the RAG system by addressing two requirements: (1) adapting the
+The detailed datasets, models, and serving setup are described in
+                                                                                                                                                                                                                   reranking budget to system pressure, and (2) preserving evidence
+Section 4.1; here we focus on the observed bottleneck behavior.
+                                                                                                                                                                                                                   recall by moving useful evidence into top-ranked candidates.
+1. Model size affects bottleneck tendency, while load and rerank-
+ing budget determine the actual bottleneck. Figure 2a shows                                                                                                                                                        3.1       Evidence Frontloading
+that, across different reranker–LLM model pairs, increasing queries
+per second generally increases upstream reranking pressure. Rela-                                                                                                                                                  To preserve evidence recall under a small reranking budget, we first
+tive model size affects the bottleneck, but high load can still make                                                                                                                                               frontload useful evidence to the top of the candidate ranking. Given
+                                                                                                                                                                                                                                                                        𝐷 max
+reranking the bottleneck even with a much larger LLM. For ex-                                                                                                                                                      a query 𝑞 and a candidate document set C = {𝑑𝑖 }𝑖=1        returned by
+ample, the parameter ratio between Qwen-3B and MiniLM-L12 is                                                                                                                                                       the dense retriever, where 𝐷 max denotes the maximum of reranking
+92.5, and this pair behaves as generation-heavy under low QPS but                                                                                                                                                  budget, e.g., top-100, our goal is to reorder C so that the first few
+shifts to ranking-heavy when QPS reaches 2.5. Reranking budget                                                                                                                                                     documents cover as much necessary and non-redundant evidence
+also changes the bottleneck. For the Qwen-3B and DeBERTa pair,                                                                                                                                                     as possible. To make the top-ranked documents useful, each se-
+Figure 2b shows that with reranking budget 𝐷 = 100, end-to-end                                                                                                                                                     lected document should satisfy two conditions. First, it should be
+latency becomes dominated by reranker queueing delay once QPS                                                                                                                                                      relevant to the query and cover part of the query’s information
+reaches 1, whereas Figure 2c shows that with 𝐷 = 50, latency                                                                                                                                                       need, such as a specific entity, event, or location. Second, it should
+remains dominated by LLM queueing delay.                                                                                                                                                                           provide complementary evidence rather than repeat dimensions
+                                                                                                                                                                                                                   that have already been covered by previously selected documents.
+2. Relieving downstream bottlenecks cannot necessarily reduce
+                                                                                                                                                                                                                   Thus, documents should be prioritized not only by their individual
+upstream reranking pressure. Figures 2b and 2c show that context
+                                                                                                                                                                                                                   query relevance, but also by their marginal contribution to the
+compression reduces LLM queueing delay by shortening the input
+                                                                                                                                                                                                                   uncovered evidence space. As more documents are selected, the
+context. As a result, it improves end-to-end latency when genera-
+                                                                                                                                                                                                                   remaining uncovered dimensions become fewer, and the gain of
+tion is the dominant bottleneck. However, this gain becomes limited
+                                                                                                                                                                                                                   adding redundant documents naturally decreases. We formalize
+when the system is ranking-heavy. In Figure 2b, once QPS reaches
+                                                                                                                                                                                                                   this intuition as a marginal evidence coverage problem.
+1, most latency comes from the reranker queue. Although compres-
+sion accelerates LLM processing, it does not reduce reranker queue-                                                                                                                                                   Marginal evidence covergae. Let 𝑞(𝑣) ≥ 0 and 𝑑𝑖 (𝑣) ≥ 0 denote
+ing delay; moreover, the compressor consumes additional compute,                                                                                                                                                   the representation values of query 𝑞 and document 𝑑𝑖 on semantic
+which can further increase reranker pressure and queueing time.                                                                                                                                                    dimension 𝑣, respectively. The value on each dimension reflects the
+As a result, its end-to-end benefit remains limited, especially under                                                                                                                                              amount of information carried by the query or document along
+high QPS and large 𝐷.                                                                                                                                                                                              that dimension. For a selected document set 𝑆 ⊆ C, we define the
+                                                                                                                                  Cai and Zafarani
+
+
+coverage objective as                                                   where 𝑏 𝑗 = norm(𝜌 𝑗 ), 𝑎¯ 𝑗 = norm(𝑎 𝑗 ), and norm(·) denotes min-
+                            ∑︁                 √                      max normalization. The refined weight 𝜌˜ 𝑗 is then used as the rel-
+                 𝐹 (𝑆) =         𝑞(𝑣) max           𝜌𝑖 𝑑𝑖 (𝑣) .   (1)
+                                       𝑑𝑖 ∈𝑆                            evance weight in Eq. 1, allowing the coverage objective to favor
+                             𝑣
+                                                                        documents that are directly relevant to the query while also recov-
+where 𝜌𝑖 denotes the query-document relevance weight, which can         ering documents connected to query-relevant evidence through
+be instantiated by the dense retriever score. The current coverage      document-document dependencies. This refinement can be applied
+of dimension 𝑣 is                                                       either before or after reranking to improve recall; the only differ-
+                                   √        
+                    𝑚𝑆 (𝑣) = max 𝜌𝑖 𝑑𝑖 (𝑣) .                    (2)     ence is the source of the query-document relevance score in Eq. 5.
+                                  𝑑𝑖 ∈𝑆
+                                                                        Before reranking, 𝜌𝑖 is obtained from the dense retriever, while
+Thus, the marginal gain of adding document 𝑑𝑖 to 𝑆 is                   after reranking, it is obtained from the reranker. We evaluate this
+                     ∑︁          √                                     combination of usage in Section 4.3, Figure 7.
+         Δ(𝑑𝑖 | 𝑆) =
+                                                      
+                        𝑞(𝑣) max 𝜌𝑖 𝑑𝑖 (𝑣) − 𝑚𝑆 (𝑣), 0 .          (3)
+                        𝑣                                                 Theoretical property. Beyond its empirical effectiveness, the pro-
+At each step, we greedily select the document with the largest          posed marginal evidence coverage objective 𝐹 (𝑆) is monotone sub-
+marginal gain:                                                          modular, which gives greedy selection a standard approximation
+                   𝑑 ★ = arg max Δ(𝑑𝑖 | 𝑆).                (4)          guarantee to the optimal evidence coverage under a cardinality
+                                   𝑑𝑖 ∈ C\𝑆                             constraint.
+This produces a ranking prefix that prioritizes relevant and com-
+                                                                          Theorem 3.1. Assume 𝑞(𝑣) ≥ 0, 𝜌˜𝑖 ≥ 0, and 𝑑𝑖 (𝑣) ≥ 0 for all 𝑣
+plementary evidence.
+                                                                        and 𝑑𝑖 . Then 𝐹 (𝑆) is monotone submodular.
+   Soft-anchor relevance refinement. However, using only the dense
+                                                                          Proof. First, we prove monotonicity. For any 𝐴 ⊆ 𝐵 ⊆ C and
+retriever score as 𝜌𝑖 can miss supporting documents that are weakly
+                                                                        any dimension 𝑣, we have
+related to the query but strongly connected to other evidence docu-                        h√︁      i      h√︁       i
+ments. This is common in multi-hop QA, where one document may                         max 𝜌˜𝑖 𝑑𝑖 (𝑣) ≤ max 𝜌˜𝑖 𝑑𝑖 (𝑣) .          (10)
+provide an intermediate fact or entity bridge rather than directly                      𝑑𝑖 ∈𝐴                  𝑑𝑖 ∈𝐵
+
+matching the query. To capture such dependencies, we refine the         Since 𝑞(𝑣) ≥ 0, summing over all dimensions gives
+relevance weight using soft anchors, i.e., candidate documents with                                   𝐹 (𝐴) ≤ 𝐹 (𝐵).                         (11)
+high query relevance that serve as evidence seeds. Documents sim-
+ilar to these anchors receive higher weights, allowing the ranking      Therefore, 𝐹 (·) is monotone.
+prefix to include not only directly query-relevant documents but          Next, we prove submodularity by showing diminishing returns.
+also bridge documents that connect multiple supporting evidence         For any 𝐴 ⊆ 𝐵 ⊆ C and any 𝑑 𝑗 ∉ 𝐵, define
+                                                                                            h√︁     i              h√︁       i
+into a more complete evidence chain. Together with marginal evi-            𝑚𝐴 (𝑣) = max 𝜌˜𝑖 𝑑𝑖 (𝑣) , 𝑚𝐵 (𝑣) = max 𝜌˜𝑖 𝑑𝑖 (𝑣) .   (12)
+dence coverage, this refined relevance weight enables the system to                   𝑑𝑖 ∈𝐴                             𝑑𝑖 ∈𝐵
+frontload evidence that is both comprehensive and useful. We next       Because 𝐴 ⊆ 𝐵, we have 𝑚𝐴 (𝑣) ≤ 𝑚𝐵 (𝑣) for every 𝑣. Therefore,
+describe how to compute this refinement.                                      h√︁                    i     h√︁                      i
+   Let 𝜌𝑖 denote the initial query-document relevance score from         max 𝜌˜ 𝑗 𝑑 𝑗 (𝑣) − 𝑚𝐴 (𝑣), 0 ≥ max 𝜌˜ 𝑗 𝑑 𝑗 (𝑣) − 𝑚𝐵 (𝑣), 0 . (13)
+the dense retriever, and let sim(𝑑𝑖 , 𝑑 𝑗 ) denote the similarity be-   Multiplying by 𝑞(𝑣) ≥ 0 and summing over 𝑣 yields
+tween two candidate documents. We first robustly standardize the
+                                                                                                 Δ(𝑑 𝑗 | 𝐴) ≥ Δ(𝑑 𝑗 | 𝐵).                    (14)
+relevance scores using the median absolute deviation:
+                                 𝜌𝑖 − median(𝜌)                         Thus, 𝐹 (·) is monotone submodular.
+                        𝑧𝑖 =                    ,                 (5)                                                                           □
+                                  MAD(𝜌) + 𝜖
+where 𝜖 = 10−12 is used for numerical stability, and                       Corollary 3.2. Under a cardinality constraint |𝑆 | ≤ 𝐾, let 𝑆 greedy
+                                                                        be the set selected by the greedy algorithm that iteratively adds the
+              MAD(𝜌) = median𝑖 |𝜌𝑖 − median(𝜌)| .                 (6)   document with the largest marginal gain. Then,
+We then convert the standardized scores into soft-anchor weights:                             𝐹 (𝑆 greedy ) ≥ (1 − 1/𝑒)𝐹 (𝑆 ★),              (15)
+                                  exp(𝑧𝑖 )                              where
+                            𝑤𝑖 = Í             .                  (7)
+                                   𝑗 exp(𝑧 𝑗 )                                                    𝑆 ★ = arg max 𝐹 (𝑆).                       (16)
+                                                                                                             |𝑆 | ≤𝐾
+Thus, candidates with higher query relevance receive larger weights     is the optimal document set under the same constraint.
+and act as soft evidence anchors. We estimate each document’s soft-
+anchor relevance by aggregating its similarity to these anchors:           Proof. Since 𝐹 (𝑆) is non-negative, monotone, and submodular,
+                           Í                                            the result follows from the classical greedy approximation guar-
+                             𝑖≠𝑗 𝑤 𝑖 sim(𝑑𝑖 , 𝑑 𝑗 )
+                      𝑎𝑗 =       Í                  .           (8)     antee for monotone submodular maximization under a cardinality
+                                    𝑖≠𝑗 𝑤 𝑖                             constraint [19].                                              □
+Finally, we combine the direct query-document relevance and the
+                                                                           This result shows that greedy evidence frontloading achieves at
+anchor-based relevance as
+                                                                        least a (1 − 1/𝑒) approximation to the optimal evidence coverage,
+                     𝜌˜ 𝑗 = 1 − (1 − 𝑏 𝑗 )(1 − 𝑎¯ 𝑗 ),            (9)   while remaining efficient enough for reranking-time use.
+Less can be More: Relieving RAG Bottlenecks
+via Evidence Frontloading and Pressure-Adaptive Budgeting
+
+
+      Table 1: Notation for pressure-adaptive budgeting.                  4     Experiments
+ Symbol      Meaning                                                      We evaluate PACE from two perspectives: whether evidence front-
+                                                                          loading improves evidence recall among the top-ranked candidates,
+ 𝑃𝑅          Number of unprocessed document pairs in the reranker queue   and whether pressure-adaptive budgeting reduces end-to-end la-
+ 𝜇ˆ𝑅         Real-time estimated reranker throughput
+                                                                          tency under shifting bottlenecks while preserving recall. All ex-
+ 𝑊𝑅          Estimated time to clear the reranker queue
+  |𝑄 𝐿 |     Number of queries waiting in the LLM queue
+                                                                          periments are conducted on Quadro RTX 6000 GPUs with approxi-
+ 𝐵𝐿          LLM batch size                                               mately 22 GB of available memory.
+ 𝐵𝑅          Reranker batch size
+ 𝑇ˆ𝐿         Estimated execution time of one LLM batch                    4.1    Experimental Settings
+ 𝑇remain     Remaining time of the current LLM batch
+ 𝐸𝑅          Excess reranker workload compared with the LLM               Model selection. Following prior work [6], we use splade-v3 [16]
+ 𝐷 min       Minimum reranking budget                                     as the retriever. It produces non-negative query and document
+ 𝐷 max       Maximum reranking budget                                     representations, satisfying the assumptions in Section 3.1. We use
+ 𝑡 now       Current timestamp                                            trecdl22-crossencoder-debertav3 [9] as the reranker, Prov
+ 𝑡 start     Start timestamp of the current LLM batch
+                                                                          ence [6] as the context compressor, and Qwen2.5- 3B- Instru
+                                                                          ct [23] as the generator under a resource-limited serving setting.
+3.2     Pressure-adaptive Budgeting                                       All generation experiments use prefilling.
+Evidence frontloading makes the ranking prefix more evidence-             Datasets. We evaluate on the dev splits of three multi-hop QA
+dense, but the system still needs to decide how many candidates           datasets with gold evidence annotations: HotpotQA [38] with 1,087
+should be processed by the reranker under changing serving pres-          queries, MuSiQue [32] with 2,317 queries, and 2WikiMultiHop
+sure. A fixed reranking budget 𝐷 is suboptimal: a large 𝐷 preserves       QA [10] with 2,861 queries. For each dataset, we reserve an ad-
+recall but can create a reranker bottleneck, while a small 𝐷 reduces      ditional 100 queries to tune baselines that require hyperparameter
+latency but may miss necessary evidence. We therefore introduce           calibration; these queries are excluded from evaluation. Our method
+pressure-adaptive budgeting, which dynamically selects the largest        does not use this calibration set. For HotpotQA and 2WikiMulti-
+affordable reranking budget for each query based on the relative          HopQA, we retain queries whose complete supporting evidence
+pressure of the reranker and the LLM. Together with evidence              appears in the top-100 retrieved documents. This controls for initial
+frontloading, this policy balances the pressure between the two           retrieval failures and lets us focus on how effectively each method
+stages while preserving high evidence recall. Table 1 summarizes          ranks supporting evidence toward earlier positions at different
+the notation used in this section.                                        document budgets. Following Provence [6], we use the Wikipedia
+   We estimate reranker pressure as the time needed to clear the          corpus preprocessing and passage segmentation provided through
+current reranker backlog:                                                 BERGEN [24]. For MuSiQue, we use the official closed-context
+                                         𝑃𝑅                               candidate paragraphs; therefore, all queries are retained, the maxi-
+                                 𝑊𝑅 =        .                    (17)    mum reranking budget is 20, and no external Wikipedia retrieval
+                                         𝜇ˆ𝑅
+                                                                          or additional passage segmentation is performed.
+For the LLM, we estimate the remaining service time by combining
+                                                                          Metrics. To evaluate evidence frontloading, we measure evidence re-
+the current batch and the queued batches:
+                                                                          call among top-ranked candidates. We report complete evidence
+                                                                          recall@D, the percentage of queries whose top-𝐷 documents con-
+                                                      
+              𝑇remain = max 𝑇ˆ𝐿 − (𝑡 now − 𝑡 start ), 0 ,    (18)
+                                                                          tain all gold supporting evidence, and supporting evidence re-
+                                                                        call@D, the average fraction of gold supporting evidence covered
+                                              |𝑄 𝐿 | ˆ
+                        𝑊𝐿 = 𝑇remain +                𝑇𝐿 .        (19)    by the top-𝐷 documents. We evaluate document selection for 𝐷 =
+                                               𝐵𝐿                         1, . . . , 100 on HotpotQA and 2WikiMultiHopQA, and 𝐷 = 1, . . . , 20
+When 𝑊𝑅 ≤ 𝑊𝐿 , reranking is not more congested than generation,           on MuSiQue, whose closed-context setting provides at most 20
+so the system uses 𝐷 max . When 𝑊𝑅 > 𝑊𝐿 , we estimate the excess          candidate paragraphs per query. To evaluate pressure-adaptive bud-
+reranker backlog as                                                       geting, we report p95 end-to-end latency, p95 reranker queue
+                                                                          time, and p95 LLM queue time. Here, p95 latency is the latency
+                            𝐸𝑅 = 𝜇ˆ𝑅 (𝑊𝑅 − 𝑊𝐿 ).                  (20)    below which 95% of requests complete.
+Given reranker batch size 𝐵𝑅 , we reduce the reranking budget by          Batch size calibration. To ensure that both reranker and LLM
+full reranker batches:                                                    achieve maximum processing speed on the local device, thereby
+                                             
+                                              𝐸𝑅                          yielding reliable efficiency results. We profile reranker and LLM
+               𝐷 (𝑞) = max 𝐷 min, 𝐷 max − 𝐵𝑅      .         (21)          on our hardware before the main experiments. For the reranker,
+                                              𝐵𝑅
+                                                                          batch size denotes the number of query-document pairs scored
+This rule keeps the largest possible reranking budget when rerank-        together, and we sweep 𝐵𝑟 ∈ {2, 4, 8, 16, 32, 64}. For the LLM, batch
+ing is not the bottleneck, and decreases 𝐷 (𝑞) only when reranker         size denotes the maximum number of concurrent generation se-
+pressure exceeds LLM pressure. Together with evidence frontload-          quences, and we sweep 𝐵𝑙 ∈ {6, 7, 8, 9, 10, 11, 12} with a maximum
+ing, it reduces upstream workload under ranking-heavy conditions          of 128 new tokens. Each candidate batch size is evaluated on the
+while keeping useful evidence concentrated in the processed prefix.       same 100 randomly sampled TydiQA queries [7]. In this profiling
+                                                                                                                                Cai and Zafarani
+
+
+run, the reranker processes the top-50 retrieved documents and                 • Adaptive-K [31]: It heuristically selects 𝐷 by stopping
+returns the top-5 documents to the LLM. We measure throughput,                   where query-document similarity has the largest drop be-
+p95 latency, and GPU memory usage, repeat each run three times                   tween two consecutive ranked documents. Since 𝐷 is de-
+with a fixed random seed. We select the smallest batch size whose                termined by the method rather than fixed externally, we
+throughput is within 95% of the best observed throughput while                   report the mean selected 𝐷 and its corresponding recall as
+satisfying latency and memory constraints. The selected batch sizes,             a single point in the plots.
+𝐵𝑅 = 8 for DeBERTa and 𝐵𝐿 = 10 for Qwen2.5-3B, are fixed in all          To further analyze the role of the relevance weight in Eq. 1, we
+main experiments so that bottleneck shifts are caused by workload        conduct ablation studies with three variants:
+changes rather than per-setting batch-size tuning.
+                                                                               • w/o query & anchor relevance: removes the relevance
+Online serving simulation. To study RAG bottlenecks under re-                    weight 𝜌𝑖 from the coverage objective:
+alistic serving conditions, we use an open-loop workload, where                                     ∑︁
+requests are issued according to a fixed arrival process independent                        𝐹 (𝑆) =    𝑞(𝑣) max [𝑑𝑖 (𝑣)] .       (22)
+                                                                                                             𝑑𝑖 ∈𝑆
+                                                                                                     𝑣
+of previous request completion. Queries arrive following a Pois-
+                                                                               • w/o query relevance: uses only soft-anchor relevance by
+son process [25], with QPS varying from 0.5 to 2.5. We deploy the
+                                                                                 setting 𝑏 𝑗 = 0 in Eq. 9.
+reranker and the LLM on separate GPUs and connect them with
+                                                                               • w/o anchor relevance: uses only direct query relevance
+independent asynchronous queues to enable pipeline parallelism.
+                                                                                 by setting 𝑎¯ 𝑗 = 0 in Eq. 9.
+To examine whether downstream context reduction translates into
+system-level efficiency gains, we insert Provence [6], a context
+                                                                         4.2    Evidence Frontloading Improves Recall
+compressor, between the reranker and the LLM and run it on a
+separate GPU. For analyzing RAG bottlenecks in Figure 2, we use          We first evaluate the effectivenes of PACE evidence frontloading
+the first 60 seconds as warm-up and record per-stage latency over        under a fixed budget of 𝐷 = 100, focusing on whether it can move
+the following 300 seconds. For the end-to-end evaluation of PACE         supporting evidence into top-ranked candidates. Figure 3 and 4
+in Figure 7 and 6, we set 𝐷 min = 20, and 𝐷 max = 100, issue all eval-   report evidence recall at different reranking budgets. Across all
+uation queries according to the target QPS and continue running          three datasets, PACE consistently improves both complete evidence
+until all queries are completed. This allows us to measure evidence      recall@D and supporting evidence recall@D over training-free
+recall under dynamically selected 𝐷 in an online setting. We fix the     baselines, especially at small 𝐷, which is the key regime for reducing
+query order and document order across workloads for fair compar-         reranker workload. For example, on HotpotQA, PACE at 𝐷 = 20
+ison. Generation uses natural end-of-sequence termination with a         achieves comparable evidence recall to the best baseline at 𝐷 = 40,
+maximum of 128 output tokens.                                            using only half of the reranking budget.
+                                                                            The baselines show that heuristic diversity does not necessarily
+   Use of AI tools. We used AI tools to assist with the implemen-        improve evidence coverage. MMR and Dartboard often underper-
+tation of experimental scripts for online serving simulation. All        form the original dense ranking because they penalize similar docu-
+generated code was reviewed, tested, and validated by the authors.       ments, while multi-hop supporting documents can be semantically
+The AI tool was not used to generate datasets, labels or conclusions.    related and jointly necessary for answering. PRF can benefit from
+Baselines. To evaluate the effectiveness of evidence frontload-          expanding the query with top-ranked documents, but it is sensitive
+ing, we compare with training-free reordering methods that do            to noisy initial results and may suffer from query drift. Adaptive-K
+not require additional model training. All methods operate on the        is shown as a single point because it selects 𝐷 automatically; its
+same candidate set returned by the retriever. For baselines with         recall is bounded by the original dense ranking at the selected posi-
+tunable hyperparameters, we select the best configuration on the         tion since it does not reorder documents. These results show that
+100 query calibration set of each dataset and apply it unchanged to      PACE moves necessary evidence into top-ranked candidates, rather
+the evaluation split.                                                    than only improving recall at large budgets.
+                                                                            Figure 5 further analyzes the relevance weight 𝜌 in the marginal
+     • Standard Dense: It uses the original ranking returned by          evidence coverage objective in Eq. 1. Removing both query and
+       the dense retriever without any reordering.                       anchor relevance usually leads to the worst performance, show-
+     • Rocchio Pseudo-Relevance Feedback (PRF) [26]: It as-              ing that pure coverage without relevance guidance cannot reliably
+       sumes the top retrieved documents are pseudo-relevant,            identify useful evidence. Using only query relevance prioritizes doc-
+       updates the query representation by combining the original        uments directly related to the question, but can miss evidence that
+       query with these documents, and then reorders candidates          is weakly related to the query but instead connected to its one-hop
+       using the expanded query.                                         evidence. Using only anchor relevance can recover such evidence,
+     • The Maximal Marginal Relevance (MMR) [5]: It greed-               but may also promote irrelevant documents when the anchors are
+       ily selects documents by balancing query relevance and            noisy. As a result, using either source alone is generally suboptimal,
+       novelty, explicitly penalizing candidates that are similar to     especially at small 𝐷, where PACE consistently achieves higher
+       previously selected documents.                                    recall. MuSiQue shows a slightly different pattern, where anchor
+     • Dartboard [22]: It selects documents by maximizing rele-          relevance is relatively more effective than query relevance. This
+       vant information gain, encouraging the selected context to        is likely because MuSiQue uses a closed-context setting with at
+       contain information that is both useful for the query and         most 20 candidates, which reduces noise in anchor estimation, and
+       diverse from previously selected documents.                       its questions are constructed by composing single-hop questions
+Less can be More: Relieving RAG Bottlenecks
+via Evidence Frontloading and Pressure-Adaptive Budgeting
+
+
+                                                                Standard dense      Rocchio PRF          MMR           Dartboard          Ours (PACE)      Adaptive-K
+
+                                              HotpotQA                                                      MuSiQue                                                        2WikiMultiHopQA
+                             1.0
+
+                             0.8
+
+
+
+
+Complete Evidence Recall
+                             0.6
+
+                             0.4
+
+                             0.2
+
+                             0.0
+                                       20   40       60        80          100      2.5     5.0       7.5      10.0    12.5        15.0   17.5    20.0            20           40       60   80   100
+                                                 D                                                                D                                                                 D
+Figure 3: Complete evidence recall@D across three multi-hop QA datasets. PACE tends to cover all required evidence with
+smaller reranking budgets than training-free baselines.
+                                                                Standard dense      Rocchio PRF          MMR           Dartboard          Ours (PACE)      Adaptive-K
+
+                                              HotpotQA                                                      MuSiQue                                                        2WikiMultiHopQA
+                             1.0
+
+                             0.8
+
+
+
+
+Supporting Evidence Recall
+                             0.6
+
+                             0.4
+
+                             0.2
+
+                             0.0
+                                       20   40       60        80          100      2.5     5.0       7.5      10.0    12.5        15.0   17.5    20.0            20           40       60   80   100
+                                                 D                                                                D                                                                 D
+Figure 4: Supporting evidence recall@D across three multi-hop QA datasets. PACE retrieves a larger fraction of supporting
+evidence with small reranking budgets.
+                                                          w/o query & anchor relevance            w/o anchor relevance               w/o query relevance         Ours (PACE)
+                                              HotpotQA                                                      MuSiQue                                                        2WikiMultiHopQA
+                             1.0
+
+                             0.8
+
+
+
+
+Complete Evidence Recall
+                             0.6
+
+                             0.4
+
+                             0.2
+
+                             0.0
+                                       20   40       60        80          100      2.5     5.0       7.5      10.0    12.5        15.0   17.5    20.0            20           40       60   80   100
+                                                 D                                                                D                                                                 D
+Figure 5: Ablation study of the marginal evidence coverage objective in Eq. 1. Removing query relevance, anchor relevance, or
+both weakens complete evidence recall, showing that direct query relevance and soft-anchor document dependencies jointly
+contribute to effective evidence frontloading.
+through bridge entities. This also explains why PRF performs rela-                                                    whether PACE can translate this advantage into end-to-end latency
+tively better on MuSiQue than on the open-domain datasets, since                                                      gains under online serving, while preserving evidence recall after
+its pseudo-relevance feedback is less affected by noisy top-ranked                                                    dynamically reducing 𝐷. We conduct online serving experiments
+documents in the closed-context candidate set. Overall, combining                                                     on HotpotQA and report latency in Figure 6 and recall in Figures 7.
+query and anchor relevance gives the strongest and most stable                                                        Pressure-adaptive budget selection improves system latency. Figure 6
+evidence frontloading across datasets.                                                                                compares PACE with a fixed 𝐷 = 100 reranking budget under
+                                                                                                                      ranking-heavy workloads. As QPS increases, the fixed-𝐷 = 100
+4.3                                PACE Improves Efficiency while Preserving                                          baseline quickly accumulates reranker queueing delay, causing p95
+                                   Recall                                                                             end-to-end latency to grow sharply. In contrast, PACE dynamically
+The static offline results in Section 4.2 show that evidence front-                                                   reduces the reranking budget according to system pressure, which
+loading improves recall across different cutoffs 𝐷. We now evaluate
+                                                                                                                                                                                                                                                                                           Cai and Zafarani
+
+
+                                                                                                                                                     Fixed D=100                      Ours (PACE)
+
+                                                P95 end-to-end latency                                                                                  P95 reranker queue time                                                                                   P95 LLM queue time
+                                                                                                                                                                                                                                   7
+                                                                                                                           102
+                                                                                                                                                                                                                                   6
+                      102
+                                                                                                                                                                                                                                   5
+Seconds                                                                                                          Seconds   101                                                                                           Seconds
+                                                                                                                                                                                                                                   4
+                                                                                                                                                                                                                                   3
+                      101
+                                                                                                                           100                                                                                                     2
+                                  0.6         0.8      1.0       1.2         1.4            1.6          1.8                             0.6          0.8       1.0        1.2            1.4          1.6      1.8                        0.6              0.8      1.0      1.2        1.4         1.6         1.8
+                                                               QPS                                                                                                       QPS                                                                                                QPS
+
+Figure 6: Latency comparison under ranking-heavy workloads. PACE substantially reduces p95 end-to-end latency by lowering
+reranker queueing time with a smaller adaptive reranking budget. Although LLM queueing time may increase as more requests
+pass through the reranker, but the dominant upstream bottleneck is greatly relieved. The fixed baseline uses 𝐷 = 100 throughout.
+                                                                                                   Fixed D=100               Rocchio PRF              Dartboard                                  w/o anchor relevance              Ours (PACE)
+                                                                                                   Dense                     MMR                      w/o query & anchor relevance               w/o query relevance
+                                   Complete Evidence Recall@D                                                  Supporting Evidence Recall@D                                                     Complete Evidence Recall@5                                               Supporting Evidence Recall@5
+                                                                                                                                                                                                                                                          0.800
+               1.00                                                                         1.00
+                                                                                                                                                                               0.60                                                                       0.775
+                                                                                            0.98
+               0.95                                                                                                                                                                                                                                       0.750
+                                                                                            0.96                                                                               0.55
+               0.90                                                                         0.94                                                                                                                                                          0.725
+                                                                                                                                                                               0.50
+Recall         0.85                                                                Recall   0.92                                                                      Recall                                                                     Recall   0.700
+                                                                                            0.90                                                                               0.45                                                                       0.675
+               0.80                                                                         0.88
+                                                                                                                                                                               0.40                                                                       0.650
+               0.75                                                                         0.86
+                                                                                                                                                                                                                                                          0.625
+                                                                                            0.84                                                                               0.35
+                            0.6         0.8   1.0     1.2     1.4   1.6      1.8                        0.6      0.8         1.0     1.2       1.4      1.6    1.8                       0.6     0.8     1.0     1.2    1.4        1.6     1.8                     0.6     0.8   1.0     1.2   1.4         1.6    1.8
+                                                    QPS                                                                            QPS                                                                         QPS                                                                     QPS
+
+Figure 7: Evidence recall under pressure-adaptive budgeting on HotpotQA. The first two subfigures report recall@D before
+reranking, and the last two report recall@5 after reranking, where 𝐷 is dynamically selected and 𝐾 = 5 documents are sent to
+the LLM. Less can be more when the top-ranked candidates are evidence-dense: as QPS increases, PACE reduces the reranking
+budget but maintains higher complete and supporting evidence recall than baselines and ablation variants.
+
+                            Fixed D=100                     MMR                                                            w/o anchor relevance                                  result, all adaptive methods operate with similar latency and compa-
+                            Dense                           Dartboard                                                      w/o query relevance
+                            Rocchio PRF                     w/o query & anchor relevance                                   Ours (PACE)                                           rable selected reranking budgets, since reordering a small candidate
+                                                                                                                                                                                 set is negligible compared with total serving latency; for example,
+                                                                             Selected D                                                                                          PACE selection accounts for less than 0.007% of p95 end-to-end
+                      100                                                                                                                                                        latency. This allows us to focus on how evidence recall changes
+                       90                                                                                                                                                        under increasing serving load. Figure 8 shows that as QPS increases,
+
+
+
+Number of documents
+                                                                                                                                                                                 PACE gradually reduces 𝐷, similar to other adaptive methods. At
+                       80                                                                                                                                                        QPS= 1.8, most adaptive methods select a budget around 50–60
+                       70                                                                                                                                                        documents to relieve reranker pressure.
+                                                                                                                                                                                    Figure 7 reports evidence recall at two stages: recall@D before
+                       60                                                                                                                                                        reranking, and recall@K after reranking, where we use the common
+                       50                                                                                                                                                        setting 𝐾 = 5 [6]. Before reranking, the fixed 𝐷 = 100 baseline main-
+                                        0.6            0.8             1.0            1.2                      1.4                 1.6                1.8
+                                                                                                                                                                                 tains recall@D 1.0 because no candidates are dropped. All adaptive
+                                                                                   QPS                                                                                           methods show lower recall@D as QPS increases because their se-
+Figure 8: Average selected reranking budget under increasing                                                                                                                     lected 𝐷 decreases. However, PACE maintains higher complete and
+QPS. PACE reduces 𝐷 as serving pressure grows, but main-                                                                                                                         supporting evidence recall than baselines and ablation variants at
+tains higher evidence recall than other methods at compara-                                                                                                                      comparable budgets. This shows that its latency reduction does
+ble selected budgets.                                                                                                                                                            not come from simply dropping candidates, but from combining
+substantially lowers reranker queueing time and stabilizes end-to-                                                                                                               adaptive budgeting to an evidence-dense candidate ranking.
+end latency. Although LLM queue time can increase slightly because                                                                                                                  After reranking, PACE shows that less can be more when the
+more requests pass through the reranker, the dominant upstream                                                                                                                   top-ranked candidates are evidence-dense: it achieves the highest re-
+bottleneck is relieved, leading to much lower overall latency.                                                                                                                   call@5 among the documents sent to the LLM, even surpassing the
+                                                                                                                                                                                 fixed 𝐷 = 100, and remains stable as QPS increases. This suggests
+PACE preserves recall under smaller adaptive budget. To fairly com-
+                                                                                                                                                                                 that a larger reranking budget does not always improve final top-𝐾
+pare methods in the online serving setting, we apply the same
+                                                                                                                                                                                 evidence recall, since additional candidates may introduce noise.
+pressure-adaptive budgeting policy to all reordering methods. As a
+Less can be More: Relieving RAG Bottlenecks
+via Evidence Frontloading and Pressure-Adaptive Budgeting
+
+
+Table 2: Less can be more. Complete evidence recall under                    Adaptive-K [31] selects the budget at the largest drop in query-
+fixed reranking budgets. Fixed 𝐷 = 100 denotes the full-                     document similarity. These methods reduce reranking computation
+budget baseline, and 𝑅@𝐾 with 𝐾 = 5 measures final evidence                  or choose a heuristic budget point, but they do not explicitly adapt
+recall after reranking. Values in parentheses indicate abso-                 the reranking budget to real-time reranker–LLM pressure. PACE
+lute percentage-point changes in 𝑅@𝐾 over the full-budget                    is complementary: it keeps the reranker unchanged, but controls
+baseline on the same dataset.                                                which candidates enter reranking and how many are processed
+                                                                             under online serving pressure.
+    Dataset      Method               𝐷      Comp. R@𝐷      Comp. R@𝐾        Improving evidence recall. Evidence recall is often improved
+                 Standard Dense       100         100           41.13        through multi-hop retrieval or diversity-aware ranking. Multi-hop
+                                      80         95.31      40.48 (−0.65)    retrievers acquire supporting evidence through iterative retrieval
+                 Dartboard            50         83.17      38.18 (−2.95)    or reasoning-guided search: MDR [36] recursively conditions later
+    HotpotQA                                                                 retrieval steps on previously retrieved evidence, Baleen [13] uses
+                                      20         52.99      33.22 (−7.91)
+                                                                             condensed intermediate evidence to guide subsequent hops, and
+                                      80         97.25      60.81 (+19.68)
+                 PACE                 50         91.36      62.38 (+21.25)
+                                                                             IRCoT [33] interleaves LLM reasoning with retrieval. These meth-
+                                      20         77.10      60.26 (+19.13)   ods target evidence acquisition, but require specialized retriever
+                                                                             training or additional LLM-retrieval iterations, which can increase
+                 Standard Dense       100         100           48.76
+                                                                             serving cost. Diversity-aware methods, which improves recall by
+                                      80         95.15      48.10 (−0.66)    selecting non-redundant documents from a candidate set. MMR [5]
+                 Dartboard            50         81.97      47.40 (−1.36)    balances query relevance with novelty, xQuAD [27] promotes cov-
+    2Wiki
+                                      20         53.41      39.96 (−8.80)    erage of different query aspects, and Dartboard [22] maximizes
+                                      80         97.24      54.22 (+5.46)    relevant information gain for diverse RAG retrieval. These methods
+                 PACE                 50         91.06      54.39 (+5.63)    are closer to our setting because they reorder or select from existing
+                                      20         75.19      53.94 (+5.18)    candidates. However, they typically rely on coarse document-level
+                                                                             distances or manually designed trade-offs, while multi-hop QA may
+By frontloading useful evidence before reranking and reducing 𝐷              require preserving documents that are similar but jointly necessary.
+under pressure, PACE provides the reranker with a smaller but more           PACE differs by measuring complementarity over fine-grained se-
+evidence-dense candidate set, making useful evidence more likely             mantic dimensions, supporting both diversity and evidence chaining
+to appear in the final context. For example, at QPS= 1.8, PACE uses          without additional training or tuned parameters, and providing mono-
+nearly half the reranking budget of fixed 𝐷 = 100, but achieves              tone submodular objective with a (1 − 1/𝑒) approximation guarantee.
+about 20% higher recall@5. In contrast, most baselines fall below
+fixed 𝐷 = 100 after reranking, and their recall generally decreases          6    Conclusion
+as QPS increases because the adaptive budget becomes smaller. We             In this paper, we study RAG as an end-to-end serving system and
+further validate this effect under different fixed reranking budgets         show that its bottleneck is not fixed at LLM generation. Instead, the
+on two datasets in Table 2: PACE achieves higher final recall at             dominant bottleneck can shift between reranking and generation
+𝐾 = 5 than the full-budget baseline even with substantially smaller          as query arrival rates and reranking budgets change. Motivated by
+𝐷, showing that its gains come from evidence frontloading rather             this observation, we propose PACE, a training-free framework that
+than simply preserving more candidates.                                      relieves upstream reranking bottlenecks while preserving evidence
+5      Related Work                                                          recall. PACE frontloads useful evidence into the top of the candi-
+                                                                             date ranking through a monotone submodular marginal coverage
+Relieving generation-heavy bottlenecks. Existing work on effi-
+                                                                             objective, and then adaptively selects the reranking budget based
+cient RAG often reduces the cost of downstream LLM generation.
+                                                                             on real-time reranker and LLM pressure. Experiments on multi-
+Serving systems improve throughput and latency through opti-
+                                                                             hop QA datasets and online serving simulations demonstrate that
+mized batching, scheduling, KV-cache management, and prefill
+                                                                             PACE improves evidence recall, substantially reduces latency under
+execution [1, 15, 39, 41]. METIS [25] adapts query-level configura-
+                                                                             ranking-heavy workloads, and shows that less can be more when
+tions, such as retrieved chunks and synthesis methods, to balance
+                                                                             the top-ranked candidates are evidence-dense: a smaller reranking
+response quality and latency. Context compression methods, such
+                                                                             budget can lead to higher final evidence recall.
+as RECOMP [37], LLMLingua [11], and Provence [6], shorten re-
+trieved contexts by removing or summarizing less useful tokens.
+These methods reduce generation-side cost, but they do not directly          References
+address shifting bottlenecks between reranking and generation or              [1] Amey Agrawal, Nitin Kedia, Ashish Panwar, Jayashree Mohan, Nipun Kwatra,
+                                                                                  Bhargav Gulavani, Alexey Tumanov, and Ramachandran Ramjee. 2024. Taming
+relieve reranker-side pressure while preserving evidence recall.                  { Throughput-Latency } tradeoff in { LLM } inference with { Sarathi-Serve } . In
+Relieving ranking-heavy bottlenecks. Rerankers improve re-                        18th USENIX symposium on operating systems design and implementation (OSDI
+                                                                                  24). 117–134.
+trieval quality but become expensive when many query-document                 [2] Yuwei An, Yihua Cheng, Seo Jin Park, and Junchen Jiang. 2025. Hyperrag:
+pairs must be scored [2, 8, 40]. Prior work mainly reduces this                   Enhancing quality-efficiency tradeoffs in retrieval-augmented generation with
+cost by accelerating the reranker itself. Early-exit methods make                 reranker kv-cache reuse. arXiv preprint arXiv:2504.02921 (2025).
+                                                                              [3] Sebastian Borgeaud, Arthur Mensch, Jordan Hoffmann, Trevor Cai, Eliza Ruther-
+decisions at intermediate Transformer layers using auxiliary clas-                ford, Katie Millican, George Bm Van Den Driessche, Jean-Baptiste Lespiau, Bog-
+sifiers [34] or layer-wise query-document similarity estimates [4].               dan Damoc, Aidan Clark, et al. 2022. Improving language models by retrieving
+                                                                                                                                                                 Cai and Zafarani
+
+
+     from trillions of tokens. In International conference on machine learning. PMLR,            31st symposium on operating systems principles. 606–622.
+     2206–2240.                                                                             [26] Joseph John Rocchio Jr. 1971. Relevance feedback in information retrieval. The
+ [4] Francesco Busolin, Claudio Lucchese, Franco Maria Nardini, Salvatore Orlando,               SMART retrieval system: experiments in automatic document processing (1971).
+     Raffaele Perego, Salvatore Trani, and Alberto Veneri. 2025. Efficient re-ranking       [27] Rodrygo LT Santos, Jie Peng, Craig Macdonald, and Iadh Ounis. 2010. Explicit
+     with cross-encoders via early exit. In Proceedings of the 48th International ACM            search result diversification through sub-queries. In European conference on
+     SIGIR Conference on Research and Development in Information Retrieval. 2534–                information retrieval. Springer, 87–99.
+     2544.                                                                                  [28] Freda Shi, Xinyun Chen, Kanishka Misra, Nathan Scales, David Dohan, Ed H
+ [5] Jaime G Carbonell and Jade Goldstein. 1998. The use of MMR, diversity-based                 Chi, Nathanael Schärli, and Denny Zhou. 2023. Large language models can be
+     reranking for reordering documents and producing summaries.. In SIGIR, Vol. 98.             easily distracted by irrelevant context. In International Conference on Machine
+     290941–291025.                                                                              Learning. PMLR, 31210–31227.
+ [6] Nadezhda Chirkova, Thibault Formal, Vassilina Nikoulina, and Stéphane Clin-            [29] Kurt Shuster, Spencer Poff, Moya Chen, Douwe Kiela, and Jason Weston. 2021.
+     chant. 2025. Provence: efficient and robust context pruning for retrieval-                  Retrieval augmentation reduces hallucination in conversation. In Findings of the
+     augmented generation. In The Thirteenth International Conference on Learning                Association for Computational Linguistics: EMNLP 2021. 3784–3803.
+     Representations. https://openreview.net/forum?id=TDy5Ih78b4                            [30] Weiwei Sun, Lingyong Yan, Xinyu Ma, Shuaiqiang Wang, Pengjie Ren, Zhumin
+ [7] Jonathan H. Clark, Eunsol Choi, Michael Collins, Dan Garrette, Tom Kwiatkowski,             Chen, Dawei Yin, and Zhaochun Ren. 2023. Is ChatGPT good at search? inves-
+     Vitaly Nikolaev, and Jennimaria Palomaki. 2020. TyDi QA: A Benchmark for                    tigating large language models as re-ranking agents. In Proceedings of the 2023
+     Information-Seeking Question Answering in Typologically Diverse Languages.                  conference on empirical methods in natural language processing. 14918–14937.
+     Transactions of the Association for Computational Linguistics (2020).                  [31] Chihiro Taguchi, Seiji Maekawa, and Nikita Bhutani. 2025. Efficient Context
+ [8] Hervé Déjean and Stéphane Clinchant. 2026. Efficient Listwise Reranking with                Selection for Long-Context QA: No Tuning, No Iteration, Just Adaptive-k. In
+     Compressed Document Representations. arXiv preprint arXiv:2604.26483 (2026).                Proceedings of the 2025 Conference on Empirical Methods in Natural Language
+ [9] Hervé Déjean, Stéphane Clinchant, and Thibault Formal. 2024. A thorough                     Processing. 20116–20141.
+     comparison of cross-encoders and LLMs for reranking SPLADE. arXiv preprint             [32] Harsh Trivedi, Niranjan Balasubramanian, Tushar Khot, and Ashish Sabhar-
+     arXiv:2403.10407 (2024).                                                                    wal. 2022. musique: Multihop questions via single-hop question composition.
+[10] Xanh Ho, Anh-Khoa Duong Nguyen, Saku Sugawara, and Akiko Aizawa. 2020.                      Transactions of the Association for Computational Linguistics 10 (2022), 539–554.
+     Constructing A Multi-hop QA Dataset for Comprehensive Evaluation of Reason-            [33] Harsh Trivedi, Niranjan Balasubramanian, Tushar Khot, and Ashish Sabharwal.
+     ing Steps. In Proceedings of the 28th International Conference on Computational Lin-        2023. Interleaving retrieval with chain-of-thought reasoning for knowledge-
+     guistics. International Committee on Computational Linguistics, Barcelona, Spain            intensive multi-step questions. In Proceedings of the 61st annual meeting of the
+     (Online), 6609–6625. https://www.aclweb.org/anthology/2020.coling-main.580                  association for computational linguistics (volume 1: long papers). 10014–10037.
+[11] Huiqiang Jiang, Qianhui Wu, Chin-Yew Lin, Yuqing Yang, and Lili Qiu. 2023.             [34] Ji Xin, Rodrigo Nogueira, Yaoliang Yu, and Jimmy Lin. 2020. Early exiting BERT
+     Llmlingua: Compressing prompts for accelerated inference of large language                  for efficient document ranking. In Proceedings of SustaiNLP: Workshop on Simple
+     models. In Proceedings of the 2023 conference on empirical methods in natural               and Efficient Natural Language Processing. 83–88.
+     language processing. 13358–13376.                                                      [35] Lee Xiong, Chenyan Xiong, Ye Li, Kwok-Fung Tang, Jialin Liu, Paul Bennett,
+[12] Vladimir Karpukhin, Barlas Oguz, Sewon Min, Patrick Lewis, Ledell Wu, Sergey                Junaid Ahmed, and Arnold Overwijk. 2020. Approximate nearest neighbor nega-
+     Edunov, Danqi Chen, and Wen-tau Yih. 2020. Dense passage retrieval for open-                tive contrastive learning for dense text retrieval. arXiv preprint arXiv:2007.00808
+     domain question answering. In Proceedings of the 2020 conference on empirical               (2020).
+     methods in natural language processing (EMNLP). 6769–6781.                             [36] Wenhan Xiong, Xiang Lorraine Li, Srini Iyer, Jingfei Du, Patrick Lewis,
+[13] Omar Khattab, Christopher Potts, and Matei Zaharia. 2021. Baleen: Robust multi-             William Yang Wang, Yashar Mehdad, Wen-tau Yih, Sebastian Riedel, Douwe
+     hop reasoning at scale via condensed retrieval. Advances in Neural Information              Kiela, et al. 2020. Answering complex open-domain questions with multi-hop
+     Processing Systems 34 (2021), 27670–27682.                                                  dense retrieval. arXiv preprint arXiv:2009.12756 (2020).
+[14] Omar Khattab and Matei Zaharia. 2020. Colbert: Efficient and effective passage         [37] Fangyuan Xu, Weijia Shi, and Eunsol Choi. 2023. Recomp: Improving retrieval-
+     search via contextualized late interaction over bert. In Proceedings of the 43rd            augmented lms with compression and selective augmentation. arXiv preprint
+     International ACM SIGIR conference on research and development in Information               arXiv:2310.04408 (2023).
+     Retrieval. 39–48.                                                                      [38] Zhilin Yang, Peng Qi, Saizheng Zhang, Yoshua Bengio, William Cohen, Ruslan
+[15] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng,                          Salakhutdinov, and Christopher D Manning. 2018. HotpotQA: A dataset for
+     Cody Hao Yu, Joseph Gonzalez, Hao Zhang, and Ion Stoica. 2023. Efficient                    diverse, explainable multi-hop question answering. In Proceedings of the 2018
+     memory management for large language model serving with pagedattention. In                  conference on empirical methods in natural language processing. 2369–2380.
+     Proceedings of the 29th symposium on operating systems principles. 611–626.            [39] Gyeong-In Yu, Joo Seong Jeong, Geon-Woo Kim, Soojeong Kim, and Byung-
+[16] Carlos Lassance, Hervé Déjean, Thibault Formal, and Stéphane Clinchant. 2024.               Gon Chun. 2022. Orca: A distributed serving system for { Transformer-Based }
+     SPLADE-v3: New baselines for SPLADE. arXiv preprint arXiv:2403.06789 (2024).                generative models. In 16th USENIX symposium on operating systems design and
+[17] Patrick Lewis, Ethan Perez, Aleksandra Piktus, Fabio Petroni, Vladimir                      implementation (OSDI 22). 521–538.
+     Karpukhin, Naman Goyal, Heinrich Küttler, Mike Lewis, Wen-tau Yih, Tim Rock-           [40] Yue Yu, Wei Ping, Zihan Liu, Boxin Wang, Jiaxuan You, Chao Zhang, Moham-
+     täschel, et al. 2020. Retrieval-augmented generation for knowledge-intensive nlp            mad Shoeybi, and Bryan Catanzaro. 2024. Rankrag: Unifying context ranking
+     tasks. Advances in neural information processing systems 33 (2020), 9459–9474.              with retrieval-augmented generation in llms. Advances in Neural Information
+[18] Nelson F Liu, Kevin Lin, John Hewitt, Ashwin Paranjape, Michele Bevilacqua,                 Processing Systems 37 (2024), 121156–121184.
+     Fabio Petroni, and Percy Liang. 2024. Lost in the middle: How language models          [41] Lianmin Zheng, Liangsheng Yin, Zhiqiang Xie, Chuyue Sun, Jeff Huang, Cody H
+     use long contexts. Transactions of the association for computational linguistics 12         Yu, Shiyi Cao, Christos Kozyrakis, Ion Stoica, Joseph E Gonzalez, et al. 2024.
+     (2024), 157–173.                                                                            Sglang: Efficient execution of structured language model programs. Advances in
+[19] George L Nemhauser, Laurence A Wolsey, and Marshall L Fisher. 1978. An analy-               neural information processing systems 37 (2024), 62557–62583.
+     sis of approximations for maximizing submodular set functions—I. Mathematical
+     programming 14, 1 (1978), 265–294.
+[20] Rodrigo Nogueira and Kyunghyun Cho. 2019. Passage Re-ranking with BERT.
+     arXiv preprint arXiv:1901.04085 (2019).
+[21] Rodrigo Nogueira, Zhiying Jiang, Ronak Pradeep, and Jimmy Lin. 2020. Docu-
+     ment ranking with a pretrained sequence-to-sequence model. In Findings of the
+     association for computational linguistics: EMNLP 2020. 708–718.
+[22] Marc Pickett, Jeremy Hartman, Ayan Kumar Bhowmick, Raquib-ul Alam, and
+     Aditya Vempaty. 2024. Better rag using relevant information gain. arXiv preprint
+     arXiv:2407.12101 (2024).
+[23] A Yang Qwen, Baosong Yang, Beichen Zhang, Binyuan Hui, Bo Zheng, Bowen
+     Yu, Chengpeng Li, Dayiheng Liu, Fei Huang, Haoran Wei, et al. 2025. Qwen2. 5
+     technical report. arXiv preprint arXiv:2412.15115 (2025), 2412–15115.
+[24] David Rau, Hervé Déjean, Nadezhda Chirkova, Thibault Formal, Shuai Wang,
+     Stéphane Clinchant, and Vassilina Nikoulina. 2024. BERGEN: A benchmarking
+     library for retrieval-augmented generation. In Findings of the Association for
+     Computational Linguistics: EMNLP 2024. 7640–7663.
+[25] Siddhant Ray, Rui Pan, Zhuohan Gu, Kuntai Du, Shaoting Feng, Ganesh Anan-
+     thanarayanan, Ravi Netravali, and Junchen Jiang. 2025. Metis: fast quality-aware
+     rag systems with configuration adaptation. In Proceedings of the ACM SIGOPS
+

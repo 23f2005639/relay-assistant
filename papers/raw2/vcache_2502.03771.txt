@@ -1,0 +1,1727 @@
+Published as a conference paper at ICLR 2026
+V C ACHE : V ERIFIED S EMANTIC P ROMPT C ACHING
+Luis Gaspar Schroeder1,2 Aditya Desai1 Alejandro Cuadron1,3 Kyle Chu1
+Shu Liu1 Mark Zhao4 Stephan Krusche2 Alfons Kemper2 Matei Zaharia1
+Joseph E. Gonzalez1
+1
+arXiv:2502.03771v5 [cs.LG] 21 Feb 2026
+4
+University of California, Berkeley
+Stanford University
+2
+Technical University of Munich
+3
+ETH Zurich
+A BSTRACT
+Semantic caches return cached responses for semantically similar prompts to reduce LLM inference latency and cost. They embed cached prompts and store
+them alongside their response in a vector database. Embedding similarity metrics
+assign a numerical score to quantify the similarity between a request and its nearest
+neighbor prompt from the cache. Existing systems use the same static similarity
+threshold across all requests to determine whether two prompts can share similar responses. However, we observe that static thresholds do not give formal correctness
+guarantees, result in unexpected error rates, and lead to suboptimal cache hit rates.
+This paper proposes vCache, the first verified semantic cache with user-defined
+error rate guarantees for predictable performance. It employs an online learning algorithm to estimate an optimal threshold for each cached prompt, enabling reliable
+cache responses without additional training. Our experiments show that vCache
+consistently meets the specified error bounds while outperforming state-of-the-art
+static-threshold and fine-tuned embedding baselines with up to 12.5× higher cache
+hit and 26× lower error rates. We release the vCache implementation and four
+benchmarks to support future research.
+1
+I NTRODUCTION
+Large language models (LLMs) power applications ranging from conversational assistants to search
+engines and code generation, but their widespread use is limited by the high computational cost and
+inference latency (Zhao et al., 2023; Xiong et al., 2024; Achiam et al., 2023). Each new prompt
+requires multiple expensive forward passes through the model, which makes deployments costly and
+slow (Kwon et al., 2023). Prompt caching offers a natural way to mitigate this issue: if a prompt
+has already been answered, the system can return the cached response instead of performing another
+inference. Traditional exact string-match caching reduces cost by returning responses for repeated
+prompts, but it fails whenever the same intent is expressed in different words (Zhu et al., 2024). For
+example, a cache that already answered “Which city is Canada’s capital?” should also return the
+same response when later asked “What is the capital of Canada?”. Semantic caching addresses this
+limitation by retrieving responses for prompts that are semantically similar, even if their lexical form
+differs, and reduces inference latency by up to 100× (Bang, 2023). Semantic caches are effective in
+single-turn interactions with short to medium context, such as web search queries or classification
+tasks, where requests reappear in paraphrased forms but map to the same underlying response (Liu
+et al., 2024b; Wang et al., 2024). In this paper, we study the reliability of semantic caches in returning
+correct responses for semantically similar prompts.
+Semantic caches operate as follows. The cache embeds every prompt request x into a vector E(x) ∈
+Rd and retrieves the semantically most similar prompt nn(x), alongside its response r(nn(x)), from
+a vector database (Pan et al., 2024). The cache 
+measures similarity (e.g., cosine similarity) between
+two embeddings using s(x) = sim E(x), E(y) ∈ [0, 1]. If no sufficiently similar prompt is found,
+an LLM generates a response and adds the embedded prompt along with the response to the vector
+database in the cache.
+To determine whether a new prompt is sufficiently close to an existing prompt in the cache, stateof-the-art semantic caches rely on a user-selected threshold t ∈ [0, 1] (Bang, 2023; Li et al., 2024;
+1
+Published as a conference paper at ICLR 2026
+Dasgupta et al., 2025; Razi et al., 2024; Sudarsan & MasayaNishimaki, 2024). If s(x) ≥ t, the
+system performs exploitation (cache hit) by returning the cached response r(nn(x)). Otherwise, it
+performs exploration (cache miss) by querying the model for a new response r(x). The cache adds
+E(x) to the vector database, stores r(x) in its metadata, and returns r(x).
+However, selecting an appropriate threshold t is nontrivial. If the threshold t is set too low, the system
+may treat unrelated prompts as similar, resulting in cache hits where the retrieved response r(nn(x))
+differs from the correct output r(x). These false positives reduce response quality and compromise
+cache reliability. If t is too high, the system may forgo correct cache hit opportunities and invoke the
+model unnecessarily (Rekabsaz et al., 2017).
+Existing systems use the same static similarity threshold across all requests. Users either use a
+predefined threshold (e.g., 0.8) or determine one by testing multiple values upfront (Dasgupta et al.,
+2025; Li et al., 2024; Dan Lepow, 2025; Razi et al., 2024; lit, 2025; Bang, 2023). This approach
+assumes that similarity correlates uniformly with correctness across all prompts and their embeddings.
+However, two prompts may be close in embedding space yet require different responses. Figure 3
+illustrates that correct and incorrect cache hits have highly overlapping similarity distributions,
+suggesting that fixed thresholds are either unreliable or must be set extremely high to avoid errors,
+making them suboptimal. Another significant limitation of existing semantic caches is the lack of
+error-rate guarantees. While the latency benefits of caching are appealing, the risk of returning
+incorrect responses can outweigh those advantages. For widespread adoption, semantic caches must
+adhere to user-defined error rate tolerances.
+We propose vCache, the first verified semantic cache with theoretical correctness guarantees. vCache
+learns a separate threshold (Figure 1) for each embedding in the cache, capturing the threshold
+variability observed in Figure 3. It requires no upfront training, is agnostic to the underlying
+embedding model, and dynamically adapts its thresholds to the data distribution it encounters. As
+a consequence, vCache is robust to out-of-distribution inputs. To our knowledge, no prior work in
+semantic caching 1) learns thresholds in an online manner and 2) guarantees their correctness.
+We adopt a probabilistic framework to bound the error rate conditioned on a learned per-embedding
+threshold. When deploying vCache, the user specifies a maximum error rate bound δ, and the system
+maximizes the cache hit rate subject to this correctness constraint (Figure 2). Let vCache(x) denote
+the response returned by vCache. Let τ denote the exploration probability—a value monotonically
+decreasing in the likelihood of being correct—and calibrated such that the overall error rate remains
+below the user-specified bound (Section 4). The decision rule modeling the probability of being
+correct for whether to exploit the cached response or explore an LLM inference is given by:
+
+r(nn(x)) Uniform(0, 1) > τ,
+vCache(x) =
+(1)
+LLM(x) otherwise.
+An illustrative overview of the vCache workflow and system architecture is provided in Appendix B.
+We evaluate the effectiveness of vCache in terms of correctness guarantees and overall performance.
+To assess generalizability, we compare vCache across three embedding models, two LLMs, and
+five datasets. We find that vCache consistently meets the error-rate bounds and outperforms static
+threshold baselines, even when using fine-tuned embeddings. Specifically, it achieves up to 12.5×
+higher cache hit rates and reduces error rates by up to 26×. Our main contributions are as follows:
+1. We propose vCache, the first predictable semantic cache that enforces a user-defined correctness
+guarantee by bounding the error rate.
+2. We introduce an online threshold learning algorithm that requires no prior supervised training,
+adapts to the observed data distribution, and is agnostic to the choice of embedding model.
+3. We demonstrate that embedding-specific, dynamic thresholds improve decision quality. By
+learning a separate threshold per cached embedding, vCache achieves equal or better performance
+compared to both static thresholding and fine-tuned embeddings.
+4. We introduce four benchmarks, derived from five real-world datasets, that capture common
+semantic cache use cases: classification tasks, search queries, and open-ended prompt distributions.
+5. We release the vCache implementation1 and four benchmarks2 to support future research.
+1
+2
+https://github.com/vcache-project/vCache
+https://huggingface.co/vCache
+2
+Published as a conference paper at ICLR 2026
+Existing Cache Decision Boundary
+Rm
+P2
+P1
+P4
+P3
+P6
+Rn
+P5
+vCache Decision Boundary
+Rm
+P2
+P1
+P6
+P3
+P4
+Rn
+P5
+Figure 1: The static threshold in existing semantic caches enforces naive decision boundaries, resulting in either low cache hit or high
+error rates. vCache’s embedding-specific and
+dynamic thresholds learn decision boundaries
+to guarantee a user-defined maximum error
+rate. Gradient shading reflects decreasing
+confidence in correctness as similarity to the
+cached embedding decreases.
+2
+Figure 2: Exploration probability for emb42 and
+emb128 . Top: Observations are perfectly separable.
+Bottom: Observations are overlapping. vCache
+selects the optimal t̂ and adjusts the exploration
+probability based on the user-defined δ = 0.01.
+R ELATED W ORK
+Existing semantic caches, such as GPTCache (Bang, 2023) and industry variants (Razi et al., 2024;
+Dan Lepow, 2025; lit, 2025; Dasgupta et al., 2025; Li et al., 2024), use a global similarity threshold
+to make cache hit decisions. This assumes a uniform correlation between similarity and correctness
+across all prompts and embeddings. However, as illustrated in Figure 3, similarity distributions vary
+widely, making fixed thresholds unreliable. Further details are provided in Appendix F.9.
+Semantic Cache Optimization. The threshold dilemma illustrated in Figure 3 can be addressed via
+two approaches: optimizing the embedding space or learning more effective thresholding strategies.
+Embedding Fine-tuning: Zhu et al. (2024) propose a distillation-based method that fine-tunes
+embeddings for semantic caching, improving alignment between semantically equivalent prompts
+and their responses. A related challenge arises in image retrieval, where systems must determine
+whether a nearest neighbor corresponds to the correct target class. Zhang et al. (2023a) address this
+by introducing the Threshold-Consistent Margin loss, which enforces tighter intra-class cohesion
+and clearer inter-class separation by selectively penalizing negative pairs. However, they require
+supervised training, are limited to open-source embedding models, and can fail to generalize to out-ofdistribution data at inference time (Hajipour et al., 2024). vCache’s online learning algorithm does not
+require training, is model-agnostic, and generalizes to out-of-distribution data (see Appendix H.1).
+Threshold Optimization: Threshold optimization learns a decision boundary over existing embeddings
+without modifying the embedding model itself (Zhang et al., 2023b). To our knowledge, no prior work
+in semantic caching learns thresholds online at inference time. Yet, as shown in Figure 3, the optimal
+similarity threshold varies significantly across embeddings, motivating embedding-specific and online
+threshold estimation. Related ideas have been explored in incremental learning. For example, Rudd
+et al. (2017) propose the Extreme Value Machine (EVM), which models class boundaries using
+extreme value theory to support generalization to unseen categories. However, these methods do not
+guarantee user-defined error rates. In contrast, we introduce the first online algorithm that estimates
+per-embedding thresholds for semantic caches while satisfying a user-defined error bound.
+Semantic Cache Guarantees. Even with high-quality embeddings and a presumably carefully
+tuned threshold, semantic caches remain inherently approximate. Unless a threshold of 1.0 is used
+(effectively restricting cache hits to exact prompt matches), there is always a risk of returning
+incorrect responses (Razi et al., 2024; Jim Allen Wallace, 2024). Despite this, existing semantic
+caching systems rely on fixed thresholds to decide whether to return a cached response (Dasgupta
+3
+Published as a conference paper at ICLR 2026
+et al., 2025; Li et al., 2024; Dan Lepow, 2025; Razi et al., 2024; lit, 2025; Bang, 2023). As a result,
+they offer no formal guarantees on accuracy or error rates, making it difficult to justify their reliability
+in production environments. To address this, we propose vCache, the first semantic caching system
+that combines competitive performance with a user-defined correctness guarantee.
+3
+OVERVIEW OF S EMANTIC C ACHING
+Let {x1 , x2 , . . . , xn } be the set of all prompts inserted into the cache, in that order. Note that this set
+excludes prompts for which a cache hit was found and served. Let D denote all the data stored in
+the cache. For each prompt x inserted into the cache, we store its vector embedding E(x) ∈ Rd , the
+true response r(x) = LLM(x) produced by the LLM, and optional additional metadata O(x). Given
+E(x), the cache retrieves the most similar prompt from the vector database with an approximate
+nearest neighbor search (Arya et al., 1998), where
+
+nn(x) = arg max sim E(x), E(y) .
+(2)
+y∈C
+In vCache, for a prompt xi , the metadata O(xi ) stores similarity and response match information
+for all future prompts xj (with j > i) such that nn(xj ) = xi . The exact workings of vCache are
+presented in Algorithm 1. The sets D and O can be represented as follows:
+n
+n
+on
+ on
+
+D=
+E(xi ), r(xi ), O(xi )
+O(xi ) =
+s(xj ), c(xj ) nn(xj ) = xi
+(3)
+i=0
+j=i+1
+where s(x) ∈ [0, 1] is the similarity between x and its nearest neighbor nn(x) and c(x) indicates if
+the cached response of nn(x), r(nn(x)), matches the true response r(x).
+
+
+1 if r nn(x) = r(x),
+s(x) = sim(E(x), E(nn(x)))
+c(x) =
+(4)
+0 otherwise.
+Algorithm. Given a prompt, say x, we first compute the embedding E(x) and find its nearest
+neighbor nn(x). The caching policy P then determines whether we should use the cached response
+for this prompt (exploit) or run the LLM inference (explore). In case we decide to exploit, r(nn(x))
+is returned. Otherwise, we run r(x) = LLM(x), compute s(x) and c(x), update the observations
+O(nn(x)) and add x to the database D using,
+O(nn(x)) = O(nn(x)) ∪ {s(x), c(x)},
+D = D ∪ {(E(x), r(x), ∅)}.
+(5)
+The key challenge lies in designing a decision policy P(. . .), as it directly impacts both the cache hit
+rate and the overall error rate.
+Policy of existing systems (PgptCache (s(x))). In existing semantic caching systems, the decision
+function is implemented as a fixed threshold rule. Given a user-defined threshold t, the cache exploits
+if s(x) ≥ t by returning the cached response r(nn(x)). Otherwise, it explores by invoking the model
+for a response. As discussed in Section 2, this approach lacks formal guarantees and does not adapt
+to variation in similarity value distributions.
+Policy of vCache (PvCache (s(x), O(nn(x)), δ)). vCache replaces static thresholding with an
+embedding-specific decision function that respects a user-defined error bound δ. If the function returns
+exploit, the cache is sufficiently confident and outputs the cached response r(nn(x)) (Algorithm 1,
+L5). Otherwise, it returns explore by inferring the LLM. Section 4 provides further details.
+Scope of definitions. All quantities such as nn(x), s(x), and c(x), are evaluated at a fixed (but
+arbitrary) point in time. Since the analysis is performed online, these definitions apply consistently
+across time steps. Policy discussion always refers to a specific embedding in the cache, with all
+parameters and estimates interpreted as conditional on it.
+For ease of reference, a glossary of all symbols and functions is provided in Appendix A.
+4
+V C ACHE
+Given a user-defined maximum error rate δ, vCache maximizes the cache hit rate while ensuring the
+probability of correctness remains above 1 − δ. Instead of relying on an unreliable static threshold or
+4
+Published as a conference paper at ICLR 2026
+Algorithm 1 vCache Workflow
+1: ex ← E(x)
+2: y ← nn(x)
+3: s(x) ← sim(ex , E(y))
+4: if P(s, O(y), δ) = exploit then
+5:
+return r(y)
+6: else
+7:
+r(x) ← LLM(x)
+8:
+c(x) = 1(r(x) = r(y))
+9:
+O(y) ← O(y) ∪ {(s(x), c(x))}
+10:
+if ¬c(x) then
+11:
+D ← D ∪ {(E(x), r(x), ∅)}
+12:
+end if
+13:
+return r(x)
+14: end if
+vCache workflow for deciding whether to exploit a cached response (cache hit) or explore
+an LLM inference (cache miss). The decision
+relies on the PvCache policy (Section 4) and
+guarantees a user-defined error rate bound δ.
+Figure 3: Results from 45k samples in the SemCacheClassification benchmark. Motivates the
+need for dynamic, embedding-specific thresholds.
+Top: Similarity values of correct and incorrect explorations exhibit highly overlapping distributions.
+Bottom: Optimal per-embedding thresholds vary
+substantially, indicating that no single threshold
+can suffice across embeddings (see Appendix F.9).
+fine-tuned embeddings, vCache models probability distributions to make cache hit or miss decisions.
+The distributions are specific to each embedding in the cache and model the probability of correct
+cache hits for a given similarity value. To remain dataset agnostic and avoid costly offline training,
+vCache estimates these distributions online by selectively generating labels for uncertain similarity
+values. Since generating a label requires an LLM inference, equivalent in cost to not using a cache,
+vCache minimizes such inferences. We refer to such inferences as explore and classify them as a
+cache miss. For a given prompt x, the cached response r(nn(x)) is considered uncertain when the
+observations O(nn(x)) do not provide sufficient evidence to determine whether the cached response
+is correct (c(x) = 1). In contrast, if O(nn(x)) provides sufficient evidence, vCache proceeds with
+exploit by returning the cached response r(nn(x)) without an LLM inference. The rest of this section
+formalizes these ideas and provides a detailed explanation of the vCache policy, PvCache .
+4.1
+U SER G UARANTEE
+One of the key features of vCache is that it takes a user-defined maximum error rate, δ, and ensures
+that the overall performance of the cache remains within this error bound. Let vCache(x) denote
+the response returned by vCache, regardless of whether the decision was to explore or exploit. Then,
+an error rate guarantee of δ implies:
+Definition 4.1 (user-guarantee). An error-rate guarantee of δ for vCache implies that the marginal
+probability of vCache returning the correct answer, given any arbitrary prompt x, is lower bounded
+by (1 − δ). In other words,
+Pr(vCache(x) = r(x)) ≥ (1 − δ).
+(6)
+To achieve the error guarantee, vCache probabilistically decides when to explore and when to exploit.
+Let Prexplore (x|D) be the probability that, given a prompt x and having accumulated data D, vCache
+decides to explore. Then, we can decompose the probability that vCache is correct as,
+Pr(vCache(x)=r(x)) = Pr(explore|x, D) + (1 − Pr(explore|x, D))Pr(c(x) = 1|x, D). (7)
+This expression reflects two disjoint events. First, vCache decides to explore with probability
+Pr(explore|x, D), and in this case, the output vCache(x) is same as LLM(x) by design. In the
+second case, the vCache decides to exploit with probability (1 − Pr(explore|x, D)) and in this case,
+the probability of vCache being correct is represented as Pr(c(x) = 1|x, D) using notation from the
+5
+Published as a conference paper at ICLR 2026
+previous section. To ensure error guarantees are maintained, we should have,
+(1 − δ) − Pr(c(x) = 1|x, D)
+Pr(explore|x, D) ≥
+= τnn(x) (s(x)).
+(8)
+1 − Pr(c(x) = 1|x, D)
+To meet the guarantees, vCache models the Pr(c(x) = 1|x, D). This inequality provides an
+actionable constraint: if the estimated probability of correctness from the cache is high, the system
+may exploit; if the estimate is low, the system must explore. As long as Pr(explore|x, D) is larger
+than the τnn(x) (s(x)), the guarantees are achieved. Notation of τ is chosen to emphasize that it is a
+function over similarities and is specific to each embedding in the cache.
+Since vCache can only estimate Pr(c(x) = 1 | x, D) based on a limited number of samples, it
+accounts for the uncertainty in the estimation by considering the confidence band of Pr(c(x) = 1 |
+x, D). The modeling details and the vCache policy are presented in the following subsection.
+4.2
+V C ACHE M ODELING
+vCache imposes a sigmoid parametric model on the relationship between similarity and correctness.
+Specifically, for an arbitrary prompt x, the probability of correct cache hit is defined as
+1
+,
+(9)
+Pr(c(x) = 1|x, D) = L(s(x), t, γ) =
+1 + e−γ(s(x)−t)
+where s(x) ∈ [0, 1] is the similarity of x with its near neighbour. t ∈ [0, 1] is an embedding-specific
+decision boundary parameter, and γ > 0 is a parameter controlling the steepness of the function. The
+sigmoid form is well-suited for this task: it induces a smooth and monotonic relationship between
+similarity and correctness probability and enables efficient maximum-likelihood estimation (MLE) of
+the threshold t from labeled data (justification in Appendix E). By fitting a continuous likelihood
+function rather than enforcing a hard threshold, vCache generalizes better from limited observations.
+The MLE estimates for the parameters, say t̂nn(x) and γ̂nn(x) , using all the meta-data Onn(x) solves
+the binary cross entropy loss,
+h
+ 
+i
+t̂nn(x) , γ̂nn(x) = arg min E(s,c)∈Onn(x) c · log(L(s, t, γ)) + (1−c) · log(1 − L(s, t, γ))
+t,γ
+(10)
+Note that these parameters belong to a specific embedding in the cache (specifically nn(x)).
+Since these estimates are based on a limited number of samples, estimating the true Pr(c(x)=1|x, D),
+and thus the correct τnn(x) (s(x)) is not possible. To ensure we still achieve guarantees, vCache,
+instead computes a upper bound, say τ̂ for τnn(x) (s(x)) using pessimistic values for t, γ from the
+(1 − ϵ) confidence band for these points for some ϵ ∈ (0, 1). Let these estimates be t′ (ϵ), γ ′ (ϵ). We
+compute τ̂ using,
+(1 − δ) − (1 − ϵ)L(s(x), t′ (ϵ), γ ′ (ϵ)))
+τ̂ = min
+≥ τnn(x) (s(x)).
+(11)
+1 − (1 − ϵ)L(s(x), t′ (ϵ), γ ′ (ϵ))
+ϵ∈(0,1)
+The details of why τ̂ ≥ τnn(x) (s(x)) and how to obtain confidence bands for t and γ are explained in
+Appendix C. Once we have τ̂ , we have to ensure that the probability of exploration is above this value
+(see Eq 8 ). This is achieved by sampling a uniform random variable u ∼ Uniform(0, 1). If u ≤ τ̂ ,
+the vCache explores, i.e., runs the LLM model to obtain the correct response. Otherwise, it exploits
+the cache by returning r(nn(x)). This randomized policy ensures that, in expectation, the system
+explores sufficiently often to meet the correctness guarantee while maximizing cache usage when
+reliability is high. The exact algorithm of how explore and exploit decisions are made is presented
+in Algorithm 2. Figure 2 illustrates the vCache modeling, where each subplot shows one cached
+embedding. Green and red points indicate correct and incorrect responses to observed similarities.
+The yellow dashed curve is the sigmoid model, with threshold t̂ obtained by MLE. The blue dashed
+curve represents the sigmoid fit based on confidence bounds, with threshold t′ selected to meet the
+user-defined error bound δ. The dark green curve τ (s) denotes the exploration probability, where for
+a given similarity s, vCache explores with probability τ (s) and exploits the cache otherwise.
+4.3
+V C ACHE A LGORITHM
+To summarize, the final vCache algorithm works as follows. First, for each incoming prompt x, it
+retrieves its nearest cached embedding y = nn(x) and fits a logistic decision boundary t̂(y) using
+6
+Published as a conference paper at ICLR 2026
+Algorithm 2 vCache Policy PvCache s(x), O(nn(x)), δ
+1: function PvCache (s(x), O(nn(x)), δ)
+2:
+t̂, γ̂ ← arg mint,γ LogisticLoss(t, γ, O)
+3:
+▷ i.e solve Eq 10
+4:
+τ ← minϵ∈[0,1] Gτ (x, t̂, δ, ϵ)
+5:
+u ∼ Uniform(0, 1)
+6:
+if u ≤ τ then
+7:
+return explore
+8:
+else
+9:
+return exploit
+10:
+end if
+11: end function
+
+1: function Gτ (s, t̂, γ̂, δ, ϵ)
+2:
+t′ , γ ′ ← ϕ−1 (t̂, γ̂, 1 − ϵ)
+3:
+α ← (1 − ϵ) L(x, t′ , γ ′ )
+(1 − δ) − α
+1−α
+5:
+return τ
+6: end function
+4:
+τ←
+all labeled examples observed for y. It then computes the τ̂ using Eq 11 by iterating over different
+values of confidence ϵ. Then we use a uniform random variable u ∼ U nif orm[0, 1] and explore if
+u ≤ τ and exploit otherwise.
+vCache makes two assumptions. First, the data D received by the cache is independently and
+identically drawn from the underlying distribution. Second, the true probability of correctness of
+response match given similarity, i.e. Pr(c(x) = 1|D, x) is well represented by the sigmoid family of
+functions (Eq 9).. Under these assumptions, the vCache policy can provide user-defined error-rate
+guarantees, as summarized in the following theorem.
+Theorem 4.1. Let δ ∈ (0, 1) be the user-provided maximum error tolerance. Let D, |D| = n be the
+set of prompts seen by vCache at an arbitrary point in time. Then under the assumptions that prompts
+D are drawn i.i.d. from underlying distribution and sigmoid family of functions (defined in Eq 9)
+correctly model the true likelihood of correctness for each embedding, the probability of correct
+response from vCache for any arbitrary prompt x, executed in an online manner in accordance with
+Algorithm 2, is guaranteed to be greator than 1 − δ. i.e.
+Pr(vCache(x) = r(x)|D) ≥ (1 − δ)∀x, n
+5
+(12)
+E VALUATION
+For our experiments, we use three popular embedding models (GteLargeENv1-5 (Zhang et al., 2024),
+E5-large-v2 (Wang et al., 2022), and OpenAI text-embedding-3-small (ope, 2025)), and two LLMs
+(Llama-3-8B-Instruct (Dubey et al., 2024) and GPT-4o-mini (gpt, 2024)), representing both highquality proprietary models and efficient open alternatives. We use the HNSW vector database (Malkov
+& Yashunin, 2018) with cosine similarity, a standard metric for comparing vector embeddings in
+semantic caching systems (Bang, 2023; Li et al., 2024; Dasgupta et al., 2025). All experiments are
+conducted on a machine running Ubuntu 24.04.2 LTS, with an Intel Xeon Platinum 8570 CPU and an
+NVIDIA Blackwell with 192 GB of memory.
+Metrics. We measure the following metrics. (1) Error Rate: (Lower is better) defined as F P/n,
+where FP is the number of false positives and n is the total number of prompts. (2) Cache hit rate:
+(Higher is better) defined as (T P + F P )/n where TP and FP are true positives and false positives,
+respectively. Together, TP and FP measure the total cache hits. We also show ROC curves Hoo et al.
+(2017). For the non-deterministic evaluation of vCache (Algorithm 2, Line 5), we compute 95%
+confidence intervals using Wallis binomial confidence bounds and contingency tests Wallis (2013).
+Baselines. We use the following Cache-settings in our experiments
+• GPTCache (zilliztech): SOTA using a static threshold for all embeddings (Parameter: threshold).
+• GPTCache + Fine-tuned embedding: Changing the embedding model in GPTCache. Embedding
+models are fine-tuned on data and method provided by Zhu et al. (2024) (Parameter: threshold).
+• vCache: This is our proposed method (Parameter: error-rate bound δ).
+• vCache + Fine-tuned embedding (Zhu et al., 2024): Same as vCache, but uses a fine-tuned
+embedding model (Parameter: error-rate bound δ).
+We implement additional baselines for ablations and show the results in Appendix F.8.
+7
+Published as a conference paper at ICLR 2026
+δ = 0.015
+E5-large-v2 embedding model, OpenAI GPT-4o mini LLM, SemCacheLmArena benchmark
+δ = 0.02
+δ = 0.015
+δ = 0.015
+E5-large-v2 embedding model, OpenAI GPT-4o mini LLM, SemCacheLmArena benchmark
+GteLargeENv1 embeddingmodel,
+model,Llama
+Llama 3.1-8B
+3.1-8B LLM,
+LLM, SemCacheSearchQueries
+benchmark
+GteLargeENv1embedding
+SemCacheClassification benchmark
+δ = 0.015
+GteLargeENv1embedding model, Llama 3.1-8B LLM, SemCacheClassification benchmark
+δ = 0.015
+OpenAI text-embedding-3-small model, OpenAI GPT 4.1-nano LLM, SemCacheLMArena benchmark
+δ = 0.03
+SemBenchLMArena w OpenAI Emb
+GteLargeENv1 embedding model, Llama 3.1-8B LLM, SemCacheCombo benchmark
+Figure 4: vCache meets the user-defined maximum error rate bound δ with steadily increasing
+cache hit rates (vCache is learning). GPTCache shows increasing error and hit rates, illustrating the
+unreliability of static thresholds. Static baselines use fixed thresholds. See Figure 5 for a threshold vs.
+δ Pareto comparison.
+SemBenchCombo
+8
+Published as a conference paper at ICLR 2026
+δ =.08
+t=.97
+δ =.08
+δ =.01
+t=.84
+t=.93
+t=.99
+t=.99
+t=.96
+t=.99
+δ =.08
+δ =.01
+δ =.01
+E5-large-v2 embedding model, OpenAI GPT-4o mini LLM, SemCacheLmArena benchmark
+t=.97
+δ =.07
+δ =.08
+δ =.01
+t =.955
+t=.85
+t=.84
+δ =.07
+δ =.01
+δ =.08
+t=.99δ =.03
+t =.955
+t =.97
+δ =.08
+t =.98
+t=.99
+t =.985
+t=.99
+t=.99
+t =.955
+t =.96
+t=.93
+t =.99
+t=.9975
+t=.99
+δ =.01
+δ =.08
+t=.99
+δ =.01
+t =.999
+δ =.01
+t=.96
+δ =.07
+t=.9975
+t=.99
+δ =.08
+δ =.08
+t =.999
+δ =.01
+δ =.01
+δ =.01
+t=.99
+δ =.01t =.999
+E5-large-v2
+embedding
+model,
+OpenAI
+GPT-4o
+mini
+LLM,
+SemCacheLmArena benchmark
+GteLargeENv1
+embedding
+model,
+Llama
+3.1-8B
+LLM,
+SemCacheSearchQueries
+benchmark
+GteLargeENv1embedding model, Llama 3.1-8B LLM, SemCacheClassification benchmark
+δ =.07
+δ =.07
+t=.85
+t=.99
+t=.99
+t=.99
+t=.9975
+t=.9975
+δ =.07
+δ =.01
+δ =.01
+t=.99
+δ =.01
+t=.99
+GteLargeENv1embedding model, Llama 3.1-8B LLM, SemCacheClassification benchmark
+t = .80
+t = .83
+t = .92
+δ = .07
+δ = .07
+t = .99
+δ = .02
+t = .99
+δ = .01
+δ = .07
+t = .98
+δ = .01
+δ = .01
+t = .99
+OpenAI text-embedding-3-small model, OpenAI GPT 4.1-nano LLM, SemCacheLMArena benchmark
+t = .80
+t = .86
+δ = .07
+t = .80
+δ = .07
+δ = .02
+SemBenchLMArena
+w OpenAI Emb
+δ = .01
+t = .99
+δ = .01
+t = .99
+t = .95
+t = .99
+δ = .07
+δ = .01
+GteLargeENv1 embedding model, Llama 3.1-8B LLM, SemCacheCombo benchmark
+Figure 5: Pareto comparison across a range of thresholds and δ values. Each point represents a full
+run on all samples of a dataset.
+Datasets. To the best of our knowledge, no realistic
+open-source benchmark currently exists for
+SemBenchCombo
+evaluating semantic caches. We introduce and open-source four diverse benchmarks designed to
+reflect common caching scenarios. Appendix H provides the complete dataset and benchmark cards.
+9
+Published as a conference paper at ICLR 2026
+• SemCacheLMArena: Randomly sampled subset of 60,000 queries from the LM-Arena human
+preference dataset (Chiang et al., 2024), containing open-ended, and user-generated prompts.
+• SemCacheClassification: Benchmark of 45,000 prompts derived from three classification
+datasets (Saurabh Shahane, 2023; Talmor et al., 2018; Ni et al., 2019).
+• SemCacheSearchQueries: Random subset of 150,000 web-search queries (Craswell et al., 2020).
+• SemCacheCombo: 27,500-prompt benchmark combining SemCacheSearchQueries and distinct
+SemCacheLMArena queries to model partial workloads with no cache hits.
+vCache respects user-defined error-rate requirements. We evaluate whether vCache satisfies the
+user-defined error rate bound δ while maintaining competitive performance. As shown in Figure 4,
+vCache consistently meets the maximum error rate across δ values, with actual error remaining below
+the specified bound. The small gap between maximum error rate and observed error stems from the
+conservative t′ estimation, which ensures robustness and can be further refined. Notably, as the error
+rate stabilizes, vCache continues to increase its cache hit rate, demonstrating effective learning over
+time. In contrast, GPTCache baselines exhibit increasing error rates with sample size, reflecting the
+inherent limitations of fixed thresholds despite improving hit rates.
+Dynamic and embedding-specific thresholds are superior to static thresholds. We evaluate
+whether semantic caches benefit from dynamic, embedding-specific thresholds over a single static
+threshold. To this end, we compare vCache with static-threshold baselines by systematically varying
+threshold values for GPTCache and the maximum error rate (δ) for vCache across a feasible range.
+Each point in Figure 5 represents a complete evaluation over the benchmark dataset, enabling
+direct Pareto comparison between vCache and static-threshold configurations. vCache achieves
+better ROC curves, higher cache-hit rates at a given error rate, and lower average latency. On
+SemCacheLMArena, it achieves up to 26× lower error, 12.5× higher hit rates, and reduced latency.
+On SemCacheClassification, vCache outperforms all baselines for error bounds above 1.5%, where
+static methods either violate constraints or underutilize the cache. For bounds below 1.5%, vCache is
+more conservative, reflecting its strategy of prioritizing correctness by increasing exploration under
+uncertainty. We note that GPTCache error rates have not fully converged and exhibit an upward trend
+(Figure 4), suggesting the reported results likely overstate GPTCache performance.
+Convergence, Sigmoid, Latency, vLLM, and Additional Baselines. We report additional experiments on the convergence speed (Appendix D), aggregate empirical correctness probability (Appendix E), τ computation (Appendix F.4), embedding generation (Appendix F.5), logistic regression
+(Appendix F.6), vLLM inference (Appendix F.7), and extended baseline evaluations (Appendix F.8).
+6
+L IMITATIONS
+There are two main limitations of vCache. First, for responses longer than a few words, string
+matching is insufficient and vCache uses LLM-as-a-judge (Zheng et al., 2023a) to assess response
+equivalence (Algorithm 1, L8), requiring an additional LLM inference. However, this can be executed
+asynchronously outside the critical path, not impacting latency (see vCache implementation). Since
+the output is a single token (e.g., ”yes” or ”no”), the overhead is minimal (Leviathan et al., 2023). In
+SemCacheLMArena and SemCacheSearchQueries, response equivalence is assessed with LLM-asa-judge, whereas in SemCacheClassification it is determined by string matching. vCache performs
+reliably under evaluation regimes (Figure 4). Second, vCache relies on i.i.d. data and a sigmoid
+function family to represent the probability of correctness. If these assumptions are violated, the
+analysis may not hold. Nonetheless, both assumptions are natural and appear to model most use cases
+well, as supported by our experimental results (Appendix E).
+7
+C ONCLUSION
+We introduced vCache, a semantic cache that provides correctness guarantees by learning an optimal
+similarity threshold for each cached embedding online. This approach addresses the limitations of
+static thresholds and embedding fine-tuning in the semantic caching domain, ensuring that the error
+rate remains below a user-specified bound. Our experiments demonstrate that vCache consistently
+satisfies this guarantee while outperforming existing methods w.r.t error and cache hit rates. These
+results suggest that reliable, interpretable caching for LLMs is both practical and deployable.
+10
+Published as a conference paper at ICLR 2026
+8
+ACKNOWLEDGMENT
+The authors thank Sebastien Gautier-Jean-Jacques Beurnier and Siavash Ameli for their invaluable
+contributions. This research is partly supported by gifts from Accenture, Amazon, AMD, Anyscale,
+Broadcom, Google, IBM, Intel, Intesa Sanpaolo, Lambda, Lightspeed, Mibura, NVIDIA, Samsung
+SDS, and SAP.
+9
+E THICS S TATEMENT
+This work contributes to the advancement of machine learning by improving the efficiency of
+large language model (LLM) inference. By reducing both computational cost and latency, our
+approach makes LLM-based systems more accessible to organizations and individuals with limited
+computational resources, thereby lowering the barrier to adoption. In addition, by decreasing the
+frequency of full LLM invocations, our method reduces overall compute demand and, consequently,
+the environmental impact associated with training and operating large-scale AI infrastructure.
+10
+R EPRODUCIBILITY S TATEMENT
+We have taken several steps to ensure reproducibility of our work. The full implementation of
+vCache, including all algorithms and experiments, is publicly available in a GitHub repository3 .
+The four semantic caching benchmarks introduced in this paper are released on HuggingFace4 , and
+Appendix H describes their construction and preprocessing in detail. All experimental settings,
+including hardware, software, and model configurations, are specified in Section 5. Theoretical
+assumptions and complete proofs of our correctness guarantees are provided in Appendix C. Together,
+these resources ensure that our results can be verified and extended by future work.
+R EFERENCES
+gpt, 2024. URL https://openai.com/index/gpt-4o-mini-advancing-cost-eff
+icient-intelligence/. [Accessed 11-11-2024].
+Cache LLM Responses, 11 2025. URL https://docs.litellm.ai/docs/proxy/cachi
+ng. [Accessed 02-05-2025].
+text-embedding-3-small., 2025. URL https://platform.openai.com/docs/models/
+text-embedding-3-small. [Accessed 11-11-2025].
+Josh Achiam, Steven Adler, Sandhini Agarwal, Lama Ahmad, Ilge Akkaya, Florencia Leoni Aleman,
+Diogo Almeida, Janko Altenschmidt, Sam Altman, Shyamal Anadkat, et al. Gpt-4 technical report.
+arXiv preprint arXiv:2303.08774, 2023.
+Sunil Arya, David M Mount, Nathan S Netanyahu, Ruth Silverman, and Angela Y Wu. An optimal
+algorithm for approximate nearest neighbor searching fixed dimensions. Journal of the ACM
+(JACM), 45(6):891–923, 1998.
+Fu Bang. Gptcache: An open-source semantic cache for llm applications enabling faster answers and
+cost savings. In Proceedings of the 3rd Workshop for Natural Language Processing Open Source
+Software (NLP-OSS 2023), pp. 212–218, 2023.
+Wei-Lin Chiang, Lianmin Zheng, Ying Sheng, Anastasios Nikolas Angelopoulos, Tianle Li, Dacheng
+Li, Banghua Zhu, Hao Zhang, Michael Jordan, Joseph E Gonzalez, et al. Chatbot arena: An open
+platform for evaluating llms by human preference. In Forty-first International Conference on
+Machine Learning, 2024.
+Nick Craswell, Daniel Campos, Bhaskar Mitra, Emine Yilmaz, and Bodo Billerbeck. Orcas: 18
+million clicked query-document pairs for analyzing search. In Proceedings of the 29th ACM
+International Conference on Information & Knowledge Management, pp. 2983–2989, 2020.
+3
+4
+https://github.com/vcache-project/vCache
+https://huggingface.co/vCache
+11
+Published as a conference paper at ICLR 2026
+Robby Millsap Dan Lepow, Arie Heinrich. Enable semantic caching for Azure OpenAI APIs in
+Azure API Management, 01 2025. URL https://learn.microsoft.com/en-us/az
+ure/api-management/azure-openai-enable-semantic-caching. [Accessed
+22-01-2025].
+Soumik Dasgupta, Anurag Wagh, Lalitdutt Parsai, Binay Gupta, Geet Vudata, Shally Sangal, Sohom
+Majumdar, Hema Rajesh, Kunal Banerjee, and Anirban Chatterjee. wallmartcache: A distributed,
+multi-tenant and enhanced semantic caching system for llms. In International Conference on
+Pattern Recognition, pp. 232–248. Springer, 2025.
+Abhimanyu Dubey, Abhinav Jauhri, Abhinav Pandey, Abhishek Kadian, Ahmad Al-Dahle, Aiesha
+Letman, Akhil Mathur, Alan Schelten, Amy Yang, Angela Fan, et al. The llama 3 herd of models.
+arXiv preprint arXiv:2407.21783, 2024.
+Kai Franz, Samuel Arch, Denis Hirn, Torsten Grust, Todd C. Mowry, and Andrew Pavlo. Dear
+user-defined functions, inlining isn’t working out so great for us. let’s try batching to make our
+relationship work. sincerely, sql. In Conference on Innovative Data Systems Research, 2024. URL
+https://api.semanticscholar.org/CorpusID:266738256.
+Hossein Hajipour, Ning Yu, Cristian-Alexandru Staicu, and Mario Fritz. SimSCOOD: Systematic analysis of out-of-distribution generalization in fine-tuned source code models. In Kevin
+Duh, Helena Gomez, and Steven Bethard (eds.), Findings of the Association for Computational Linguistics: NAACL 2024, pp. 1400–1416, Mexico City, Mexico, June 2024. Association for Computational Linguistics. doi: 10.18653/v1/2024.findings- naacl.90. URL
+https://aclanthology.org/2024.findings-naacl.90/.
+Zhe Hui Hoo, Jane Candlish, and Dawn Teare. What is an roc curve?, 2017.
+Jim Allen Wallace. Semantic caching for faster, smarter LLM apps, 7 2024. URL https:
+//redis.io/blog/what-is-semantic-caching/. [Accessed 05-04-2025].
+Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin Zheng, Cody Hao Yu, Joseph
+Gonzalez, Hao Zhang, and Ion Stoica. Efficient memory management for large language model
+serving with pagedattention. In Proceedings of the 29th Symposium on Operating Systems
+Principles, pp. 611–626, 2023.
+Yaniv Leviathan, Matan Kalman, and Yossi Matias. Fast inference from transformers via speculative
+decoding. In International Conference on Machine Learning, pp. 19274–19286. PMLR, 2023.
+Jiaxing Li, Chi Xu, Feng Wang, Isaac M von Riedemann, Cong Zhang, and Jiangchuan Liu. Scalm:
+Towards semantic caching for automated chat services with large language models. arXiv preprint
+arXiv:2406.00025, 2024.
+Lin Liu, Jiajun Meng, and Yongliang Yang. Llm technologies and information search. Journal of
+Economy and Technology, 2:269–277, 2024a.
+Shu Liu, Asim Biswal, Audrey Cheng, Xiangxi Mo, Shiyi Cao, Joseph E Gonzalez, Ion Stoica, and
+Matei Zaharia. Optimizing llm queries in relational workloads. arXiv preprint arXiv:2403.05821,
+2024b.
+Yu A Malkov and Dmitry A Yashunin. Efficient and robust approximate nearest neighbor search using
+hierarchical navigable small world graphs. IEEE transactions on pattern analysis and machine
+intelligence, 42(4):824–836, 2018.
+Jianmo Ni, Jiacheng Li, and Julian McAuley. Justifying recommendations using distantly-labeled
+reviews and fine-grained aspects. In Proceedings of the 2019 conference on empirical methods
+in natural language processing and the 9th international joint conference on natural language
+processing (EMNLP-IJCNLP), pp. 188–197, 2019.
+James Jie Pan, Jianguo Wang, and Guoliang Li. Survey of vector database management systems. The
+VLDB Journal, 33(5):1591–1615, 2024.
+12
+Published as a conference paper at ICLR 2026
+Kamran Razi, Anila Joshi, Sungmin Hong, and Yash Shah. Build a read-through semantic cache with
+Amazon OpenSearch Serverless and Amazon Bedrock, 11 2024. URL https://aws.amaz
+on.com/blogs/machine-learning/build-a-read-through-semantic-cac
+he-with-amazon-opensearch-serverless-and-amazon-bedrock/. [Accessed
+17-01-2025].
+Navid Rekabsaz, Mihai Lupu, and Allan Hanbury. Exploration of a threshold for similarity based on
+uncertainty in word embedding. In Advances in Information Retrieval: 39th European Conference
+on IR Research, ECIR 2017, Aberdeen, UK, April 8-13, 2017, Proceedings 39, pp. 396–409.
+Springer, 2017.
+Ethan M Rudd, Lalit P Jain, Walter J Scheirer, and Terrance E Boult. The extreme value machine.
+IEEE transactions on pattern analysis and machine intelligence, 40(3):762–768, 2017.
+Saurabh Shahane. Ecommerce text classification, 10 2023. URL https://www.kaggle.c
+om/datasets/saurabhshahane/ecommerce-text-classification. [Accessed
+12-11-2024].
+Tomshapland Sudarsan and MasayaNishimaki. Optimize azure openai applications with semantic
+caching, Apr 2024. URL https://techcommunity.microsoft.com/blog/azure
+architectureblog/optimize-azure-openai-applications-with-semanti
+c-caching/4106867. [Accessed 12-11-2024].
+Alon Talmor, Jonathan Herzig, Nicholas Lourie, and Jonathan Berant. Commonsenseqa: A question
+answering challenge targeting commonsense knowledge. arXiv preprint arXiv:1811.00937, 2018.
+Sean Wallis. Binomial confidence intervals and contingency tests: Mathematical fundamentals and
+the evaluation of alternative methods. Journal of Quantitative Linguistics, 20(3):178–208, 2013.
+doi: 10.1080/09296174.2013.799918.
+Liang Wang, Nan Yang, Xiaolong Huang, Binxing Jiao, Linjun Yang, Daxin Jiang, Rangan Majumder,
+and Furu Wei. Text embeddings by weakly-supervised contrastive pre-training. arXiv preprint
+arXiv:2212.03533, 2022.
+Liang Wang, Nan Yang, Xiaolong Huang, Linjun Yang, Rangan Majumder, and Furu Wei. Large
+search model: Redefining search stack in the era of llms. In ACM SIGIR Forum, volume 57, pp.
+1–16. ACM New York, NY, USA, 2024.
+Haoyi Xiong, Jiang Bian, Yuchen Li, Xuhong Li, Mengnan Du, Shuaiqiang Wang, Dawei Yin, and
+Sumi Helal. When search engine services meet large language models: visions and challenges.
+IEEE Transactions on Services Computing, 2024.
+Qin Zhang, Linghan Xu, Qingming Tang, Jun Fang, Ying Nian Wu, Joe Tighe, and Yifan
+Xing. Threshold-consistent margin loss for open-world deep metric learning. arXiv preprint
+arXiv:2307.04047, 2023a.
+Qinghua Zhang, Chengying Wu, Shuyin Xia, Fan Zhao, Man Gao, Yunlong Cheng, and Guoyin Wang.
+Incremental learning based on granular ball rough sets for classification in dynamic mixed-type
+decision system. IEEE Transactions on Knowledge and Data Engineering, 35(9):9319–9332,
+2023b.
+Xin Zhang, Yanzhao Zhang, Dingkun Long, Wen Xie, Ziqi Dai, Jialong Tang, Huan Lin, Baosong
+Yang, Pengjun Xie, Fei Huang, et al. mgte: Generalized long-context text representation and
+reranking models for multilingual text retrieval. arXiv preprint arXiv:2407.19669, 2024.
+Wayne Xin Zhao, Kun Zhou, Junyi Li, Tianyi Tang, Xiaolei Wang, Yupeng Hou, Yingqian Min,
+Beichen Zhang, Junjie Zhang, Zican Dong, et al. A survey of large language models. arXiv
+preprint arXiv:2303.18223, 1(2), 2023.
+Lianmin Zheng, Wei-Lin Chiang, Ying Sheng, Siyuan Zhuang, Zhanghao Wu, Yonghao Zhuang,
+Zi Lin, Zhuohan Li, Dacheng Li, Eric Xing, et al. Judging llm-as-a-judge with mt-bench and
+chatbot arena. Advances in Neural Information Processing Systems, 36:46595–46623, 2023a.
+13
+Published as a conference paper at ICLR 2026
+Lianmin Zheng, Liangsheng Yin, Zhiqiang Xie, Jeff Huang, Chuyue Sun, Cody Hao Yu, Shiyi Cao,
+Christos Kozyrakis, Ion Stoica, Joseph E Gonzalez, et al. Efficiently programming large language
+models using sglang. arXiv e-prints, pp. arXiv–2312, 2023b.
+Hanlin Zhu, Banghua Zhu, and Jiantao Jiao. Efficient prompt caching via embedding similarity.
+arXiv preprint arXiv:2402.01173, 2024.
+zilliztech. GPTCache : A Library for Creating Semantic Cache for LLM Queries. URL https:
+//github.com/zilliztech/GPTCache. [Accessed 23-01-2025].
+14
+Published as a conference paper at ICLR 2026
+A
+N OTATION G LOSSARY
+For clarity, we summarize the key symbols and functions used throughout the paper in Table 1. The
+glossary covers cache contents, decision policies, probability functions, and modeling parameters.
+Each entry is accompanied by a short explanation and, where applicable, references to the defining
+equations, algorithms, or sections.
+Table 1: A glossary of notations used in the paper and their explanations
+Notation
+Explanation
+r(x)
+E(x)
+nn(x)
+Response produced by the LLM for prompt x.
+Vector embedding of prompt x.
+Current nearest neighbor of x in the cache; may change as the
+cache grows (see Equation 2).
+Similarity between prompt x and nn(x) (see Equation 4).
+Correctness: 1 if r(nn(x)) = r(x), else 0 (see Equation 4).
+Cache contents: (E(xi ), r(xi ), O(xi ))ni=1 (see Equation 3).
+Metadata for cached prompt xi : all observed (s(xj ), c(xj )) with
+nn(xj ) = xi (see Equation 3).
+s(x)
+c(x)
+D
+O(xi )
+PgptCache (s(x))
+Static-threshold policy used by existing systems.
+PvCache (s(x), O(nn(x)), δ) vCache policy using embedding-specific modeling under a userdefined error bound δ (Section 4).
+δ
+Pr(vCache(x) = r(x))
+τnn(x) (s(x))
+τ̂
+u ∼ Uniform(0, 1)
+L(s(x), t, γ)
+t, γ
+t̂, γ̂
+t′ , γ ′
+User-defined maximum error tolerance (see Section 4.1).
+Probability that vCache returns the correct response (see Equation 8).
+Required exploration probability to satisfy the guarantee (see Equation 8).
+Upper bound used for exploration probability (see Equation 11).
+Random draw used to realize the exploration decision (see Algorithm 2).
+Sigmoid likelihood modeling Pr(c(x) = 1 | x, D) (see Equation 9).
+True threshold (t) and slope (γ) parameters of L (see Equation 9).
+MLE estimates of t and γ based on O(nn(x)) (see Equation 10).
+Conservative estimates of the logistic parameters t, γ, selected
+from the confidence band of the MLE estimates. These values are
+used to compute τ̂ and ensure that vCache respects the user-defined
+error bound δ (see Equation 11).
+15
+Published as a conference paper at ICLR 2026
+B
+V C ACHE S EMANTIC C ACHE A RCHITECTURE
+Figure 6 illustrates the vCache architecture. When a new prompt gets processed, it is first embedded
+into a vector representation and queried against the vector database to retrieve the nearest cached
+prompt. The similarity score and metadata of the retrieved embedding are passed to the similarity
+evaluator, which compares the correctness estimate against the user-defined error bound δ (see vCache
+decision policy in Section 4.2). If the policy returns exploit, the cached response is retrieved from the
+response store and served immediately. If the policy returns explore, the system performs an LLM
+inference to generate the true response, determines the correctness of the cached response with respect
+to the newly generated one, updates the metadata of the nearest neighbor, adds the new embedding to
+the vector database, adds the generated response to the response store, and returns it to the user (see
+Algorithm 1). In the vector database, the green balls represent the confidence bounds specific to the
+currently processed prompt. Larger balls indicate lower thresholds (more conservative exploitation).
+In comparison, smaller balls correspond to higher thresholds (more conservative exploration).
+Figure 6: Workflow of the vCache architecture. Prompts are embedded, nearest neighbors retrieved,
+and the decision policy selects between exploiting a cached response or exploring via an LLM
+inference while ensuring the user-defined error bound δ.
+16
+Published as a conference paper at ICLR 2026
+C
+V C ACHE M ODELING P ROOF
+We provide the proof for Theorem 4.1 in this section.
+Recall we use the following notation in the paper,
+• x : prompt under consideration
+• D : data inserted into the cache
+• τnn(x) (s(x)) : minimum probability of exploration associated with embedding nn(x) at
+similarity value s(x)
+• Prc = 1 − δ
+Computing the exact probability Pr(c(x) = 1 | D, x) is expensive, so we derive a simpler upper
+bound. If we have an upper bound, then computing an upper bound for τnn(x) (s(x)) is straightforward.
+Lemma C.1 (Upper-Bounding τ ). if Pr(c(x) = 1|D, x) ≥ α, then,
+δ
+1−α
+τnn(x) (s(x)) ≤ 1 −
+Proof. Rewrite τ to isolate the unknown probability:
+(1 − δ) − Pr(c(x)=1|D, x)
+1 − Pr(c(x)=1|D, x)
+δ
+=1−
+1 − Pr(c(x)=1|D, x)
+τnn(x) (s(x)) =
+(13)
+Next, suppose we have a known lower bound
+Pr c(x) = 1 | D, x
+
+≥ α.
+
+≤ 1 − α,
+Then
+1 − Pr c(x) = 1 | D, x
+and since δ > 0, it follows that
+δ
+δ
+ ≥
+.
+1−α
+1 − Pr c(x) = 1 | D, x
+(14)
+Hence, to guarantee the exploration probability meets τ , it suffices to ensure
+Prexplore (x, Dn ) ≥ τ ′ = 1 −
+δ
+≥ τnn(x) (s(x)).
+1−α
+(15)
+Lemma C.2 (Lower-Bounding Cache-Correctness Probability). Given D, let t̂nn(x) and γ̂nn(x) be
+the MLE estimates computed as,
+h
+ 
+i
+t̂nn(x) , γ̂nn(x) = arg min E(s,c)∈Onn(x) c · log(L(s, t, γ)) + (1−c) · log(1 − L(s, t, γ))
+t,γ
+(16)
+Let t∗ and γ ∗ be the true parameters such that L(s(x), t∗ , γ ∗ ) is the true probability of correct cache
+hits. Consider an arbitrary ϵ ∈ (0, 1). Let t′ , γ ′ be such that,
+Pr(t∗ > t′ ||γ ∗ < γ ′ ) < ϵ
+(17)
+Pr(c(x) = 1|D, x) ≥ (1 − ϵ)L(s(x), t′ , γ ′ )
+(18)
+Then,
+17
+Published as a conference paper at ICLR 2026
+Proof. By the law of total probability:
+Pr(c(x) = 1|D, x)
+= Pr(t∗ > t′ ||γ ∗ < γ ′ ) · Pr(c(x) = 1|D, x, (t∗ > t′ ||γ ∗ < γ ′ ))
++ Pr(¬(t∗ > t′ ||γ ∗ < γ ′ )) · Pr(c(x) = 1|D, x, t∗ ≤ t′ , γ ∗ ≥ γ ′ )
+∗
+′
+∗
+′
+∗
+′
+∗
+(19)
+′
+≥ Pr(¬(t > t ||γ < γ )) · Pr(c(x) = 1|D, x, t ≤ t , γ ≥ γ )
+
+≥ (1 − ϵ) · Pr c(x) = 1 | D, x, t∗ ≤ t′ , γ ∗ ≥ γ ′ .
+
+(1 − ϵ) · Pr c(x) = 1 | D, x, t∗ ≤ t′ , γ ∗ ≥ γ ′ ,
+Z t′ Z ∞
+Pr(t∗ = t, γ ∗ = γ|t ≤ t′ , γ ≥ γ ′ ) Pr(c(x) = 1|D, x, t∗ = t, γ ∗ = γ)dtdγ
+≥ (1 − ϵ)
+γ′
+0
+!
+Z ′Z
+t
+∞
+Pr(t∗ = t, γ ∗ = γ|t ≤ t′ , γ ≥ γ ′ )dtdγ
+≥ (1 − ϵ)
+0
+= (1 − ϵ)
+= (1 − ϵ)
+γ′
+inf
+Pr(c(x) = 1|D, x, t)
+inf
+L(x, t, γ)
+t≤t′ ,γ≥γ ′
+·
+inf
+t≤t′ ,γ≥γ ′
+Pr(c(x) = 1|D, x, t)
+t≤t′ ,γ≥γ ′
+′
+′
+= (1 − ϵ) · L(x, t , γ )
+(20)
+since, L(x, t1 , γ) < L(x, t2 , γ), ∀x. t1 > t2 and L(x, t, γ1 ) < L(x, t, γ2 ), ∀x. γ1 < γ2
+Combining these results lets us set
+α = (1 − ϵ) · L(x, t′ , γ ′ )
+=⇒
+τ ′ (ϵ) = 1 −
+δ
+,
+1−α
+(21)
+and then use τ ′ . To find the best τ ′ closest to the actual lower bound of exploration probability, we
+search for the minimum τ ′ over the entire range of ϵ ∈ (0, 1) Thus,
+
+
+δ
+′
+(22)
+τ = min 1 −
+1 − (1 − ϵ)L(s(x), t′ (ϵ), γ ′ (ϵ)
+ϵ∈(0,1)
+Confidence Bound on Optimal Threshold To find t′ , γ ′ from the estimated t̂, γ̂, we can use the
+confidence intervals by assuming a uniform prior on t∗ and γ ∗ . Since, under uniform prior the
+distributions of Pr(t∗ |t̂) and Pr(t̂, t∗ ) are the same,
+Pr(t∗ |t̂) =
+Pr(t̂|t∗ )Pr(t∗ )
+Pr(t̂)
+Pr(t∗ |t̂) ∝ Pr(t̂|t∗ )
+(23)
+Pr(t∗ |t̂) = Pr(t̂|t∗ )
+Thus we can obtain t′ , γ ′ using CDF of Pr(t̂, γ|t∗ , γ ∗ )
+In our experiments, we only use confidence intervals for t, i.e., we use the t′ parameter to adjust the
+likelihood. We estimate and use the point estimate γ̂ for γ.
+D
+C ONVERGENCE S PEED E STIMATION
+For each cached prompt y = nn(x), vCache fits the sigmoid model L(s(x), t, γ) to the meta-data
+O(y). Under the standard regularity assumptions for logistic regression, the MLE (t̂y , γ̂y ) converges
+18
+1.0
+42 observations
+0.8
+Probability of Correctness
+Probability of Correctness
+Published as a conference paper at ICLR 2026
+0.6
+0.4
+0.2
+0.0 0.0
+0.2
+0.4
+0.6
+Similarity (s)
+0.8
+1.0
+1.0
+0.8
+33 observations
+0.6
+0.4
+0.2
+0.0 0.0
+0.2
+0.4
+0.6
+Similarity (s)
+0.8
+1.0
+Figure 7: Empirical probability of correctness as a function of similarity s for the two cached
+embeddings with the largest numbers of labeled observations (42 and 33) in SemBenchmarkLmArena
+with text-embedding-3-small and GPT-4.1-nano. We estimate Pr(c = 1 | s, nn(x)) using a 1D
+k-NN smoother with k = 5. In both cases the curve is monotone and approximately sigmoidal in s,
+supporting the per-embedding sigmoid model L(s(x), t, γ) in Eq. 9.
+√
+to the true embedding-specific parameters (ty , γy ) at the usual parametric rate O(1/ ny ), where
+ny denotes the number of explored queries whose nearest neighbor is y. Any embedding-specific
+threshold derived from this model (e.g., the similarity at which Pr(c(x) = 1 | x, D) exceeds
+1 − δ, or the required exploration probability τnn(x) (s(x))) is a smooth function of (ty , γy ) and
+√
+therefore inherits the same O(1/ ny ) convergence rate via the delta method. Intuitively, as vCache
+collects more labels for a given neighbor, the decision boundary t and the corresponding policy
+PvCache (s(x), O(nn(x)), δ) stabilize at this standard parametric speed.
+E
+E MPIRICAL J USTIFICATION OF THE S IGMOID M ODEL
+We model, for each cached embedding nn(x), the probability Pr(c(x) = 1 | x, D) as a function
+of similarity s(x) using the logistic family. We require the following structural properties from
+L(s(x), t, γ): 1) monotonicity in similarity, 2) boundedness in [0, 1], and 3) a low-dimensional
+parameterization so that we can obtain tight confidence bands for (t, γ) from the relatively small
+observation sets Onn(x) . The logistic sigmoid is a canonical choice satisfying these properties and
+allows efficient MLE.
+To empirically validate this choice, we analyze the SemBenchmarkLmArena configuration with
+text-embedding-3-small and GPT-4.1-nano. We randomly select and evaluation run and for each
+cached embedding we collect all observed pairs (s(x), c(x)) ∈ Onn(x) , where s(x) is the similarity
+between x and nn(x) and c(x) ∈ {0, 1} indicates whether returning the cached response was correct.
+Figure 7 shows, for the two embeddings with the largest numbers of labeled observations (42 and
+33, respectively), a 1D k-NN estimate (k = 5) of Pr(c = 1 | s, nn(x)) as a function of similarity s.
+Both curves are monotone and exhibit a S-shaped transition from low to high correctness as similarity
+increases, which is the behavior that Eq. 9 is designed to capture for each nn(x) and then feed into
+τnn(x) (s(x)) and τ̂ in Eq. 9 and Eq. 11.
+Figure 8 shows an aggregate view across all cached embeddings in the same configuration. We bin all
+(s(x), c(x)) pairs by similarity and plot the empirical correctness probability Pr(c = 1 | s) per bin.
+The resulting curve is again monotone and clearly S-shaped, with low correctness at small similarity,
+a rapid increase in a mid-range similarity region, and saturation near one at high similarity.
+F
+A DDITIONAL ACCURACY, L ATENCY, AND BASELINE E VALUATIONS
+F.1
+S EM C ACHE S EARCH Q UERIES B ENCHMARK
+We discuss the SemCacheSearchQueries benchmark, focusing on understanding the limitations of
+static-threshold caching. We highlight why fixed thresholds fail to maintain reliable error guarantees
+at scale and how vCache addresses this issue through dynamic, embedding-specific thresholding.
+19
+Published as a conference paper at ICLR 2026
+Probability of correctness
+1.0
+0.8
+0.6
+0.4
+0.2
+0.0
+0.0
+0.2
+0.4
+Similarity (s)
+0.6
+0.8
+1.0
+Figure 8: Aggregate empirical correctness probability as a function of similarity s over all cached
+embeddings in SemBenchmarkLmArena with text-embedding-3-small and GPT-4.1-nano. We bin all
+(s(x), c(x)) pairs by similarity and plot the fraction of correct reuse decisions per bin. The resulting
+curve is monotone and clearly S-shaped, with low correctness at low similarity, a sharp increase in
+a mid-similarity region, and saturation at high similarity, which matches the qualitative behavior
+modeled by the sigmoid family in Eq. 9.
+vCache respects user-defined error-rate requirements We evaluate whether vCache satisfies the
+user-defined error rate δ while maintaining competitive performance. As shown in Figure 4, vCache
+consistently remains below the specified error bound across all tested δ values. Moreover, as the error
+rate stabilizes, vCache continues to improve its cache hit rate (Figure 4, right). In contrast, GPTCache
+exhibits increasing error rates as the sample size grows, despite improved hit rates. This trend reflects
+a fundamental limitation of static thresholds: maintaining a bounded error rate requires continuously
+increasing the threshold. Over time, no static threshold below 1.0 may suffice to satisfy a strict error
+constraint, making such systems difficult to tune and unreliable at scale.
+Dynamic and embedding-specific thresholds are superior to static thresholds We evaluate
+whether dynamic, embedding-specific thresholds yield better long-term performance than static
+thresholding. To this end, we compare vCache against GPTCache by varying static similarity
+thresholds and vCache’s maximum error rate bound δ. Each point in Figure 5 reflects a complete
+evaluation over the SemCacheSearchQueries benchmark, enabling a direct Pareto comparison. Staticthreshold configurations achieve lower cache hit rates and higher error rates than vCache under
+equivalent evaluation settings. As shown in Figure 4, GPTCache has an increasing error rate as
+the sample size grows because the threshold remains fixed (both cache hit rate and error rate rise
+together). As a result, the GPTCache curve in the middle plot (cache hit vs. error rate) is expected
+to shift up and to the right, while the curve in the right plot (error rate vs. latency) shifts up and to
+the left. This trend suggests that no static threshold below 1.0 can maintain a bounded error rate as
+prompt diversity increases (see the threshold of 0.99, which yields an error rate of 1.7% after 150k
+samples). In contrast, vCache learns its threshold online and per embedding, allowing it to enforce
+the error constraint while gradually improving cache hit rate.
+F.2
+S EM C ACHE C OMBO B ENCHMARK
+vCache respects user-defined error-rate requirements on SemCacheCombo Figure 4 evaluates
+whether vCache satisfies the user-defined error rate δ on the SemCacheCombo benchmark. Across
+all tested δ values, the realized error of vCache remains below the requested bound, confirming that
+the learned thresholds reliably enforce the target error rate. As more samples are processed, vCache
+maintains its empirical error while steadily increasing cache hit rate, indicating ongoing learning
+from additional data. In contrast, GPTCache with a fixed similarity threshold of 0.83 exhibits growth
+in both error rate and hit rate as the sample size increases.
+20
+Published as a conference paper at ICLR 2026
+Computation Latency in Seconds
+Regression Line (slope=5.5335e-10)
+Latency (sec)
+0.0035
+0.0030
+0.0025
+0.0020
+0.0015
+0
+5000
+10000
+15000
+20000
+Sample Size
+25000
+30000
+35000
+40000
+Figure 9: Empirical latency of computing τ in Algorithm 1 as a function of sample size. The fitted
+regression line (slope ≈ 5.5 × 10−10 ) shows that the cost is effectively constant, adding at most
+≈ 1.5 ms (< 0.0015 s) per update.
+Dynamic, embedding-specific thresholds yield better trade-offs than static thresholds on SemCacheCombo Figure 5 summarizes the resulting trade-offs by varying vCache’s error bound δ
+and GPTCache’s static similarity threshold. Each point corresponds to a full evaluation on SemCacheCombo, enabling a direct Pareto comparison. vCache traces a strictly better frontier: it achieves
+higher cache hit rates at the same error level, and lower error for comparable hit rates and latency. For
+example, vCache attains up to 12.5× higher cache hit rates than the best static-threshold configuration
+while still satisfying the user-defined error bound. At matched average latency, vCache consistently
+delivers lower error than GPTCache. These results show that dynamic, embedding-specific thresholds
+provide superior accuracy–efficiency trade-offs to static thresholds.
+F.3
+S EM C ACHE LMA RENA WITH O PENAI E MBEDDINGS
+vCache respects user-defined error-rate requirements on SemCacheLMArena Figure 4 evaluates whether vCache satisfies the user-defined error rate δ on the SemCacheLMArena benchmark.
+Across all tested δ values, the realized error rate of vCache remains below the user-defined target,
+confirming that the learned thresholds enforce the desired bound. As the sample size grows, vCache
+further reduces its empirical error while steadily increasing cache hit rate, indicating that it continues
+to learn from additional data. In contrast, GPTCache with a fixed similarity threshold of 0.98 exhibits
+growth in both error rate and hit rate as more prompts arrive. Figure 5 outlines a Pareto comparison
+across all feasible thresholds.
+Dynamic, embedding-specific thresholds yield better trade-offs than static thresholds Figure 5
+summarizes the overall accuracy–efficiency trade-offs on SemCacheLMArena by varying vCache’s
+error bound δ and GPTCache’s static similarity threshold. Each point represents a complete evaluation
+run, enabling a direct Pareto comparison. vCache traces out a strictly better frontier: it achieves
+substantially higher cache hit rates at the same error level and much lower error for comparable hit
+rates and latency. For example, vCache reaches a cache hit rate of 57% while keeping the error rate
+below 0.5%, whereas GPTCache requires an order-of-magnitude higher error to obtain similar hit
+rates. At matched latency, vCache achieves up to 26× lower error than the best static configuration.
+These outcomes demonstrate that dynamic, embedding-specific thresholds are better suited than static
+thresholds for maintaining strict error guarantees while exploiting semantic redundancy.
+F.4
+τ C OMPUTATION OVERHEAD
+Figure 9 reports the latency of computing τ (Algorithm 1) on the SemCacheLMArena benchmark
+as a function of the current sample size. Each point corresponds to one update step, and the solid
+red line is a linear regression fit. The points form a tight horizontal band and the regression slope is
+effectively zero (≈ 5.5 × 10−10 sec per sample), indicating that τ can be computed in constant time.
+Across all sample sizes, the latency remains below 1.5 ms, indicating that the overhead of computing
+τ is negligible.
+21
+Published as a conference paper at ICLR 2026
+Embedding Computation Latency Distribution
+B
+E5
+La
+Lla
+rge
+ma
+v2
+38
+FT
+v2
+rge
+E5
+La
+GT
+E
+GT
+E
+FT
+Latency (seconds)
+0.016
+0.014
+0.012
+0.010
+0.008
+0.006
+Figure 10: Embedding computation latency distributions across models, shown as 95th percentile
+whisker plots. GTE FT = GteLargeENv1-5 (Zhang et al., 2024) fine-tuned (Zhu et al., 2024). E5
+Large v2 FT = E5-large-v2 (Wang et al., 2022) fine-tuned (Zhu et al., 2024).
+F.5
+E MBEDDING G ENERATION OVERHEAD
+Semantic caches incur additional latency due to embedding computation, which must be evaluated
+in relation to the cost of LLM inference. To quantify this overhead, we compare the embedding
+latencies of four models to the inference latency of Llama3.1-8B.
+All experiments are conducted on a system with an Intel Xeon Platinum 8570 CPU and an NVIDIA
+Blackwell GPU with 192 GB of memory. The results show that embedding computation is significantly faster than model inference, confirming its applicability in caching pipelines.
+F.6
+L OGISTIC R EGRESSION L ATENCY OVERHEAD
+Since vCache performs threshold estimation online for every request, the efficiency of logistic
+regression directly impacts scalability. In our experiments, we use sklearn.linear model on CPU,
+yielding an average latency of 0.0017 seconds on the SemBenchmarkArena. Its negligible latency
+ensures that online modeling does not introduce noticeable overhead and can scale to large caches.
+F.7
+V C ACHE IN COMBINATION WITH V LLM
+vCache is orthogonal to inference optimization systems, as semantic prompt caching reuses responses
+for semantically similar prompts rather than accelerating inference itself. When a cache miss occurs,
+vCache directly benefits from systems such as vLLM (Kwon et al., 2023) or SGLang (Zheng et al.,
+2023b), which reduce model latency. To validate this, we hosted LLaMa 3.1 70B with vLLM on two
+NVIDIA Blackwell GPUs and compared inference latency with and without vCache. For vCache,
+we additionally ran the GteLargeENv1 5 embedding model on the same machine. Evaluation was
+conducted on 45k samples from the SemCacheClassification benchmark.
+Table 2: A comparison of overall runtime, latency, cache hit rate, and error rate with and without
+vCache under different error tolerances
+Baseline
+Config
+Overall
+Duration
+Avg. LLM
+Inference Latency
+Avg. Emb.
+Latency
+Cache
+Hit Rate
+Error
+Rate
+vLLM
+–
+240 min
+0.32 sec
+–
+0.0%
+0.0%
+vLLM
++ vCache
+δ = 0.01
+δ = 0.02
+δ = 0.03
+214 min
+170 min
+160 min
+0.32 sec
+0.32 sec
+0.32 sec
+0.018 sec
+0.018 sec
+0.018 sec
+18.1%
+35.5%
+40.2%
+0.4%
+1.2%
+1.4%
+22
+Published as a conference paper at ICLR 2026
+Despite the additional embedding overhead, vCache substantially reduces end-to-end latency by
+avoiding repeated LLM inferences. This demonstrates that vCache is complementary to inference
+optimization systems such as vLLM.
+F.8
+A DDITIONAL BASELINE E VALUATIONS
+vCache is the first adaptive, probabilistic, and Bayesian method for semantic caching. The most
+competitive alternatives are static threshold methods, which we extend with several additional
+baselines for completeness. The landscape of approaches can be ordered from naive to advanced as
+follows:
+GS: Global and Static threshold (i.e., GPTCache).
+GD: Global and Dynamic threshold (vCache with global threshold).
+LS:
+Per-embedding (Local) and Static threshold.
+LD: Per-embedding (Local) and Dynamic threshold:
+LD1: Logistic regression to compute the threshold (t̂).
+LD2: Logistic regression sigmoid fit to model correctness probability.
+LD3: Logistic regression sigmoid fit with confidence intervals and guarantees (vCache).
+We implement all baselines and perform ablations on the E5-large-v2 embedding model, OpenAI
+GPT-4o mini LLM, and the SemCacheLmArena benchmark. For non-adaptive baselines (LD1
+and LD2), we select the threshold or δ values that produced error rates closest to their observed
+performance. Results are shown in Table 3.
+Table 3: A comparison of error rate, cache hit rate, and qualitative observations across baselines
+Threshold/
+Delta
+Error
+Rate
+Cache hit
+Rate
+0.99
+0.98
+0.97
+2.5%
+4.1%
+5.2%
+37%
+53%
+67%
+No guarantee and worst trade-off.
+0.02
+1.3%
+14%
+Due to the large overlap between incorrect
+and correct samples at a given similarity
+(see 3), the optimal threshold converges to
+1.0, yielding low cache hits.
+0.03
+0.05
+2.5%
+4.3%
+26%
+45%
+LS
+–
+–
+–
+Impossible to compute a threshold for every
+embedding a priori.
+LD1
+–
+2.6%
+70%
+No guarantees and no error-rate fine-tuning.
+LD2
+–
+2.1%
+68%
+No guarantees and no error-rate fine-tuning.
+0.02
+0.5%
+41%
+Guarantees and beats both SOTA and GD
+baselines.
+0.03
+0.05
+1.1%
+2.0%
+46%
+54%
+Baseline
+GS
+GD
+LD3
+Comments and Observations
+This ablation underlines that (1) semantic caches benefit from embedding-specific thresholds, and
+(2) probabilistic modeling is required to satisfy user-defined error bounds and ensure predictability.
+Notably, only vCache provides guarantees. The importance of guarantees cannot be overstated, as in
+practice, the absence of correctness guarantees has been a primary reason for the failure of semantic
+caching deployments in industry.
+23
+Published as a conference paper at ICLR 2026
+F.9
+T HRESHOLD D ILEMMA
+To analyze the relationship between similarity scores s(x) and cache correctness c(x), we conduct an
+experiment on the 45,000 entries of the SemCacheClassification benchmark using an error tolerance
+of δ = 0.02 (2%). For each cached embedding xi , we record the observations O(xi ) and the
+empirically estimated optimal threshold t̂xi .
+In the top plot of Figure 3, we separate all observations into two sets: one where c(x) = 1 (correct
+cache hit) and another where c(x) = 0 (incorrect hit). We plot the kernel density functions (KDF),
+also known as kernel density estimations (KDE), to visualize the distribution of correct and incorrect
+observations. The result shows that correct and incorrect observations are nearly indistinguishable in
+similarity space, with substantial overlap and similar means (0.84 vs. 0.85). This illustrates that one
+single similarity threshold is not a reliable decision boundary.
+The bottom plot shows a histogram of the optimal threshold values t̂ computed per embedding. The
+thresholds span a range, from 0.71 to 1.0, indicating that no single similarity threshold can suffice
+across embeddings. A threshold set too low increases the risk of incorrect cache hits; a threshold
+set too high limits cache hits. Together, these results motivate the need for embedding-specific and
+dynamically learned thresholds to ensure interpretable and reliable performance.
+G
+H YPERPARAMETER G UIDANCE
+vCache is designed to be simple to configure, with the error rate bound δ as its primary hyperparameter.
+We recommend setting this bound based on the desired trade-off between accuracy and cost. For
+high-accuracy applications (e.g., customer support or safety-critical systems), a conservative value
+such as 0.5% can be appropriate. For use cases with higher tolerance for occasional errors and
+stronger cost or latency constraints (e.g., search or summarization), values around 2–3% may be
+reasonable. Ultimately, the choice depends on application-specific requirements.
+H
+B ENCHMARK C REATION
+To the best of our knowledge, no open-source benchmarks currently exist for evaluating the performance and applicability of semantic caching systems. To address this gap, we construct and release
+four diverse benchmarks5 , each designed to reflect a distinct real-world use case: classification tasks,
+conversational chatbots, and search engines. This section describes the motivation and construction
+process behind each benchmark.
+H.1
+S EM C ACHE C LASSIFICATION B ENCHMARK
+The SemCacheClassification benchmark is designed to evaluate semantic caching in structured
+classification settings, such as those found in modern database environments (Liu et al., 2024b).
+Several database systems, including Databricks, Snowflake, and AWS, have introduced LLM-based
+extensions to SQL via User-Defined Functions (UDFs), enabling capabilities beyond traditional
+SQL semantics (Liu et al., 2024b). However, LLM-based UDFs are inherently non-deterministic,
+execute row by row, and pose integration challenges for parallelization and query optimization (Franz
+et al., 2024). When table rows contain semantically similar values, semantic caching can reduce the
+frequency of LLM invocations, thereby improving both latency and cost. This benchmark captures
+such use cases, where slight variations in phrasing should not require repeated inference.
+The benchmark consists of 45,000 short-form prompts with a fixed output label space. Each example
+follows a prompt–response format, where the prompt expresses a classification query and the expected response is a one-word label. The benchmark combines three diverse classification datasets:
+CommonsenseQA (Talmor et al., 2018), Ecommerce Categorization (Saurabh Shahane, 2023), and
+Amazon Instant Video Review (Ni et al., 2019). This dataset composition models out-of-distribution
+data because the three sources differ significantly in domain, style, and vocabulary, forcing semantic
+caching methods to generalize beyond a single homogeneous dataset. Sample prompts and response
+5
+https://huggingface.co/vCache
+24
+Published as a conference paper at ICLR 2026
+formats from each dataset are shown below, and Table 4 summarizes label distributions across the
+benchmark.
+A sample entry from the Ecommerce Categorization (Saurabh Shahane, 2023) dataset:
+{
+"prompt": "Which category does the text belong to? Text: <text
+>",
+"output_format": "Answer with ’Books’, ’Electronics’, ’
+Household’, or ’Clothing & Accessories’ only"
+}
+A sample entry from the Commonsense QA Talmor et al. (2018) dataset:
+{
+"prompt": "What is the main subject of the following question?
+Question: <question>",
+"output_format": "Answer with only one of the words of this set
+: [’people’, ’potato’, ’competing’, , ’snake’, ’lizard’, ’food’
+, ’car’, ’water’, ’student’, ’crab’, ’children’, ’killing’, ’
+animals’, ’ficus’, ’horse’, ’fox’, ’cat’, ’weasel’, ’shark’, ’
+person’, ’human’]"
+}
+A sample entry from the Amazon Instant Video Review Ni et al. (2019) dataset:
+{
+"prompt": "Is this review friendly? Review: <review>",
+"output_format": "Answer with ’yes’ or ’no’ only"
+}
+The benchmark enables controlled evaluation of semantic caching strategies, especially in cases
+where small changes in input phrasing must still map to the same output class. Its fixed label format
+makes it particularly useful for evaluating systems like vCache, which rely on correctness guarantees
+under threshold uncertainty. Table 4 summarizes the label distributions for the three subtasks in the
+SemCacheClassification benchmark.
+25
+Number of Classes
+Published as a conference paper at ICLR 2026
+300
+200
+100
+00
+5
+10
+15
+20
+Number of Entries per Class
+25
+Figure 11: Distribution of class sizes in the SemCacheLMArena benchmark. Each class corresponds
+to a unique user prompt and contains 2–24 semantically similar variants.
+Response
+Count
+Response
+Count
+Response
+Count
+person
+people
+human
+competing
+animals
+food
+car
+water
+student
+children
+killing
+horse
+lizard
+potato
+fox
+cat
+ficus
+weasel
+shark
+crab
+snake
+2,806
+625
+400
+272
+225
+202
+125
+100
+79
+32
+27
+24
+13
+13
+11
+10
+10
+8
+8
+7
+3
+Books
+Clothing
+Electronics
+Household
+6,000
+6,000
+6,000
+2,000
+yes
+no
+10,000
+10,000
+(c) Amazon Instant Video.
+(b) Ecommerce.
+(a) Commonsense QA.
+Table 4: Response distribution across three datasets that form the SemCacheClassification benchmark.
+H.2
+S EM C ACHE LMA RENA B ENCHMARK
+The SemCacheLMArena benchmark is designed to evaluate semantic caching in chatbot environments,
+where users may issue semantically similar prompts with different phrasing. In such settings, caches
+must generalize across diverse surface forms while maintaining response correctness. This benchmark
+addresses these challenges by grouping semantically similar user inputs and testing whether caching
+systems can accurately reuse responses.
+To construct the benchmark, we use the LM-Arena human preference dataset (Zheng et al., 2023a),
+which contains 100,000 real-world user queries. We randomly sample 3,500 distinct prompts, each
+of which defines a class. For each class, we generate between 1 and 23 semantically similar variants
+using GPT-4.1-nano, resulting in a total of 60,000 prompts. A class ID is assigned to each prompt to
+evaluate caching correctness: a cache hit is considered correct if the retrieved response belongs to the
+same class as the query. Figure 11 shows the distribution of class sizes (number of prompts belonging
+to a class), confirming broad variability in prompt paraphrasing. To support model-agnostic evaluation,
+we generate responses for all prompts using GPT-4.1-nano and GPT-4o-mini. The corresponding
+response length distributions are shown in Figure 12.
+26
+Published as a conference paper at ICLR 2026
+GPT-4.1-nano
+3000
+4000
+Mean: 290.46
+Median: 237.50
+Frequency
+3000
+2000
+1000
+00
+Mean: 283.55
+Median: 228.00
+Frequency
+Count
+Count
+2000
+GPT-4o-mini
+1000
+200 400 600 800 1000
+Response Length (words)
+00
+200 400 600 800 1000
+Response Length (words)
+Figure 12: Response length histogram for GPT-4.1-nano and GPT-4o-mini on the SemCacheLMArena
+benchmark. Median and mean lengths are shown for each model.
+H.3
+S EM C ACHE S EARCH Q UERIES B ENCHMARK
+The SemCacheSearchQueries benchmark is designed to evaluate semantic caching in open-domain
+search applications. Large-scale search engines, such as Google, increasingly rely on LLMs to
+generate direct answers to natural language queries (Liu et al., 2024a; Wang et al., 2024). While
+this improves user experience, it introduces significant latency and cost, particularly at the scale of
+millions of daily queries. Many queries issued to search engines are paraphrased variations of earlier
+inputs, making semantic caching a natural fit for reducing redundant LLM inference in this setting.
+The benchmark is constructed from a filtered subset of the ORCAS dataset (Craswell et al., 2020),
+containing real-world search engine queries. We begin by sampling 500,000 queries and embedding
+each using the gte-large-en-v1.5 embedding model (Zhang et al., 2024). We then apply k-means
+clustering to group similar queries and retain the largest clusters, resulting in 150,000 entries. Within
+each cluster, we apply a union-find algorithm guided by an LLM-based judge (GPT-4.1-nano) to
+determine whether query pairs yield the same response. Sub-clusters identified in this step define the
+equivalence classes used for caching evaluation. Figure 13 summarizes the benchmark properties,
+including class size distribution, frequent query terms, and statistics on the number of queries per
+class.
+H.4
+S EM C ACHE C OMBO B ENCHMARK
+We introduce the SemCacheCombo benchmark to evaluate semantic caching in workloads that contain
+both reusable responses and unique, non-reusable responses. The dataset is constructed by combining
+two sources into a single sequence of 27,500 prompts. First, we take the SemCacheLMArena
+benchmark and select one representative prompt from each of its 3,500 semantic classes. Because each
+prompt represents a different cluster, these 3,500 queries are pairwise semantically distinct and should
+not share a reusable response. From the perspective of a semantic cache, every SemCacheLMArena
+prompt is therefore expected to result in a cache miss; any cache hit on this subset is, by definition,
+an incorrect reuse. Second, we append 24,000 prompts from the SemCacheClassification benchmark.
+Correct cache hits may only occur within this set of prompts. Next, we randomly shuffle all 27,500
+prompts.
+27
+Published as a conference paper at ICLR 2026
+Distribution of Class Sizes
+2000
+Frequency
+1500
+1000
+500
+0 2
+7 12 17 22 27 32 37 42 47
+Number of Queries in Class
+Top 20 Most Common Words in Queries
+Words
+Top 20 Largest Classes
+Min Set Size
+#Sets
+#Queries
+2
+11148
+106187 (70.8%)
+60
+4
+7808
+98639 (65.8%)
+8
+6040
+88954 (59.3%)
+40
+16
+1914
+42024 (28.0%)
+32
+170
+6803 (4.5%)
+80
+Number of Queries
+17500
+15000
+12500
+10000
+7500
+5000
+2500
+0
+w
+do indboest
+wn w
+l s
+boa
+onandk
+l
+nucreidne
+mb it
+co freeer
+u
+exnty
+c
+y el
+bluou
+c e
+naerd
+c ar
+co timity
+n
+ch vere
+a t
+be ncge
+tw ar
+ee
+n
+Number of Classes
+2500
+20
+0
+0
+5
+10
+Class Rank
+15
+20
+Total queries: 150000
+Total unique set_ids: 54961
+Set_ids with multiple queries: 11148 (20.3%)
+Largest class size: 90 queries
+Figure 13: Descriptive statistics for the SemCacheSearchQueries benchmark. Top left: Most classes
+contain exactly two queries. Top right: The word best appears in over 16,000 of the 150,000 queries.
+Bottom left: The largest class contains 90 semantically equivalent queries. Bottom right: 59.3% of
+all classes contain more than eight queries, indicating substantial intra-class variability.
+28
+

@@ -1,0 +1,495 @@
+                                 Congestion-Aware Serving of
+                                  Agentic LLM Applications
+          Mouheb Ben Nasr                                  Muhammad Bilal                      Alessandro Cornacchia
+                     KAUST                                           KAUST                                  KAUST
+
+                                      Boris Radovič                              Marco Canini
+                             KAUST, University of Ljubljana                            KAUST
+Abstract                                                                  1   Introduction
+Agentic LLM workflows issue many dependent calls with un-                 Large Language Model (LLM) workflows are rapidly tran-
+predictable resource demand, causing queue buildup and la-                sitioning from stateless request-response services into dy-
+tency degradation on shared serving backends when left un-                namic, agentic systems. In traditional single-turn queries or
+managed. In this paper, we propose CALM-MAS, a congestion-                multi-turn chats, each user message maps to one bounded
+aware serving framework for LLM applications that treats                  generation with a predictable compute profile. Recently, how-
+LLM test-time computation as an elastic resource, dynam-                  ever, the field has shifted toward test-time scaling, leverag-
+ically adjusting the compute profile of admitted tasks to                 ing iterative reasoning, multi-step planning, and multi-agent
+tame congestion. CALM-MAS detects early signals of back-                  systems (MAS) to solve complex tasks [19, 22, 33]. Agentic
+end saturation, and leverages the flexibility of LLM applica-             systems can dynamically expand thought trajectories [19, 33]
+tions to regulate load. During spikes of requests, the system             and scale the inference topology from a single agent to a
+downgrades agent topology and reasoning depth; during low-                network of specialist agents [10], substantially improving
+utilization periods, it allocates additional reasoning effort to          response quality at the cost of unpredictable per-request
+maximize task accuracy. Compared with a static serving base-              compute.
+line based on vLLM, CALM-MAS reduces shared-backend                          This evolution introduces complex resource management
+tail latency by 77% with the accuracy degradation remaining               challenges for backend infrastructure [8, 24, 44]. Modern
+confined to 6.1 pps relative to the native agent configuration.           inference clusters are now tasked with serving a bifurcated
+                                                                          workload on shared compute. At one extreme are traditional
+CCS Concepts                                                              non-agentic clients, which issue lightweight, single-turn re-
+• Software and its engineering → Software performance;                    quests. At the other extreme are agentic clients, which decom-
+• Computing methodologies → Multi-agent systems.                          pose tasks into dozens of dependent LLM calls, intermediate
+                                                                          coordination steps, and external tool invocations [8, 22]. A
+                                                                          single agentic task can consume millions of tokens and main-
+Keywords                                                                  tain large key-value (KV) cache entries for extended periods,
+LLM serving, LLM applications, multi-agent systems, con-                  injecting substantial compute overhead into the inference
+gestion control, test-time scaling, SLO management                        cluster.
+                                                                             When these diverse workloads compete for shared com-
+ACM Reference Format:
+Mouheb Ben Nasr, Muhammad Bilal, Alessandro Cornacchia, Boris
+                                                                          pute under highly variable traffic, the resulting resource
+Radovič, and Marco Canini. 2026. Congestion-Aware Serving of              contention is severe. Because agentic requests can vary sub-
+Agentic LLM Applications. In ACM SIGOPS Asia-Pacific Workshop             stantially in reasoning complexity, treating them as static
+on Systems (APSys ’26), September 17–18, 2026, Bangkok, Thailand.         workloads can cause request queues to grow uncontrollably
+ACM, New York, NY, USA, 8 pages. https://doi.org/10.1145/3838177.         [8, 22, 44] and increased contention for KV cache. This leads
+3841735                                                                   to congestion and tail latency degradation for all requests.
+                                                                             Existing approaches have significant limitations when
+                                                                          handling inference engine congestion. Rate-limiting quotas
+                                                                          and admission control throttle or drop requests but cannot
+This work is licensed under a Creative Commons Attribution 4.0 Interna-   regulate how much computation an admitted request con-
+tional License.                                                           sumes. Elastic scaling provisions additional GPUs to add
+APSys ’26, Bangkok, Thailand                                              model replicas [36], but it takes minutes to bring new ca-
+© 2026 Copyright held by the owner/author(s).                             pacity online, often slower than the timescale over which
+ACM ISBN 979-8-4007-2912-6/26/09
+https://doi.org/10.1145/3838177.3841735
+                                                                          congestion develops [6]. Scheduling policies [1, 28, 32, 40]
+APSys ’26, September 17–18, 2026, Bangkok, Thailand
+
+
+prioritize requests but cannot prevent queue buildup when         embedded within autonomous loops [38]. These workflows
+the offered load exceeds processing capacity. In a nutshell,      feature tool utilization [31], iterative self-correction [37], and
+a common thread runs through these limitations: existing          multi-agent orchestration [41] to accomplish complex, long-
+mechanisms control which requests are admitted, when they         running objectives. Multi-agent systems, in particular, are
+execute, or where they run, but treat each admitted request       capable of achieving better response quality while consum-
+as a fixed-cost unit. Yet, this is precisely the dimension that   ing more KV cache [3]. This operational shift introduces
+has exploded with test-time scaling.                              three core architectural challenges that break the assump-
+   We propose CALM-MAS, a congestion-aware serving frame-         tions of traditional, stateless serving infrastructure:
+work that closes this gap by dynamically adapting the test-       1) Dynamic and unpredictable lifecycles. Single-turn re-
+time computation performed per admitted request. The key          quests have predictable compute profiles bounded by a max-
+intuition behind CALM-MAS is to treat test-time computa-          imum token count. In contrast, an autonomous agent may
+tion as an elastic configuration that the system adjusts in       iterate for many rounds based on intermediate results and
+response to load, rather than a static, load-agnostic param-      environment feedback, introducing high variance in request
+eter fixed at request time. Specifically, CALM-MAS oper-          lifetimes and token generation volume [14].
+ates along two control dimensions: reasoning effort, i.e., the    2) Request amplification. A single user-facing MAS task
+number of thinking tokens allocated per request, and agent        decomposes into multiple dependent LLM calls (one per MAS
+architecture, i.e., the number of collaborating MAS stages        stage). The serving engine sees a burst of correlated requests
+that decompose a task. Both dimensions impact the com-            from one logical task, rather than a stream of independent
+putational cost of a request. At the same time, their effect      queries [24, 42].
+on response quality is task-dependent: not every problem          3) Stateful resource holding. Unlike single-turn requests,
+benefits from deeper reasoning or additional agents. This         agentic workflows (i) may hold multiple concurrent cache
+makes them attractive control knobs: by treating them as          slots due to parallel LLM calls within the same workflow, and
+elastic, dynamic configurations, CALM-MAS can gracefully          (ii) retain those slots for the workflow’s entire execution. This
+degrade the computational footprint of LLM requests during        persistent state amplifies memory pressure and contention
+congestion events and substantially reduce queue buildup,         on the serving backend.
+while restoring full quality when resources become available.
+   We evaluate CALM-MAS on a vLLM [16] backend serving
+concurrent MAS and non-MAS workloads under a uniform              2.2    Congestion in LLM serving
+latency SLO. CALM-MAS reduces P99 end-to-end latency by           LLM serving engines face two distinct pressure points un-
+1.18× relative to a static MAS baseline and by 1.97× relative     der load. On the prefill side, when the incoming token rate
+to per-client rate limiting with the accuracy degradation         exceeds prefill throughput, the waiting queue grows and
+remaining confined to 6.1 percentage points (pps) relative to     time-to-first-token (TTFT) degrades. On the decode side, con-
+the unconstrained multi-agent configuration.                      current generations compete for finite KV cache memory;
+                                                                  once capacity is saturated, the engine must preempt requests
+2 Background & Motivation                                         (e.g., via swap or recompute in vLLM [16]) or shrink the
+                                                                  running batch, inflating time-between-tokens (TBT). Past
+2.1 Serving Agentic LLM Workflows                                 a utilization threshold, both latencies degrade non-linearly
+The rapid deployment of LLMs in production has driven the         with load [15, 27], creating congestion.
+development of dedicated inference serving systems such              Congestion is not merely a transient response to overload:
+as vLLM [16], SGLang [46], and TGI [12]. These engines            it can be self-sustaining. Preempted requests re-enter the
+are workload-agnostic by design: they accept a prompt, dy-        queue carrying KV state that must be swapped back in or
+namically allocate Key-Value (KV) cache memory during             recomputed from scratch, paying a penalty proportional to
+autoregressive decoding, and evict entries as needed using        their already-generated context. A short input burst can
+policies such as LRU, with no awareness of the higher-level       thus elevate effective load well beyond the burst’s duration,
+task a request belongs to. This architecture was well matched     producing a metastable regime in which queue depth and
+to the traditional paradigm of single-turn, stateless requests,   tail latency remain high after the arrival rate has subsided
+where each prompt maps to one bounded generation with a           (quantified in § 4).
+predictable compute and memory footprint.                            Agentic workloads are uniquely prone to entering this
+   However, the paradigm is shifting toward multi-turn, state-    regime, with each property from § 2.1 contributing a distinct
+ful LLM workloads. Multi-turn chatbots maintain conver-           pathology. Stateful resource holding makes preemption dis-
+sation context across human interactions [20, 43]; agentic        proportionately expensive, as evicting a multi-turn request
+systems go further, using LLMs as central reasoning engines       discards or forces recomputation of accumulated context.
+Congestion-Aware Serving of Agentic LLM Applications                                              APSys ’26, September 17–18, 2026, Bangkok, Thailand
+
+                                                                                                      LLM Serving System
+Request amplification converts a single user-facing spike into                Agentic
+                                                                                                        Congestion            Waiting queue        LLM engine
+                                                                    Clients
+a burst of correlated, context-sharing calls that hit the en-                  Single
+                                                                                             RC          controller
+                                                                                 turn                                                                       1
+gine in lockstep. And unpredictable lifecycles prevent the                                        2                    3
+                                                                                                                                                 Capacity
+scheduler from sizing batches or admission decisions against              Rx      LLM Request
+
+any reliable estimate of remaining work. Together, these                  Rx
+                                                                                  Congestion-Aware
+                                                                                  LLM Request
+                                                                                                              Current TTFT & TBT              Metrics monitor
+properties make agentic serving not merely susceptible to
+congestion, but liable to persisting in a congestion-prone
+                                                                                                                 ○), CALM-
+                                                                    Figure 1: System overview. Upon congestion ( 1
+operating regime.
+                                                                    MAS controller adjusts the test-time computation
+                                                                                                 ○) to regulate the amount
+                                                                    knobs of incoming requests ( 2
+2.3    Limitations of current approaches                            of admitted computation ( 3 ○).
+We review previous work on handling overload in LLM serv-
+ing and discuss shortcomings under persistent congestion.           do not control how much computation a request performs on
+Current approaches operate on different levers—e.g., capac-         a given model.
+ity, admission, timing, or model choice—but none modulates
+the amount of test-time computation a workflow performs
+                                                                    3            CALM-MAS
+once admitted, which is precisely the knob that dominates
+cost in reasoning models and multi-agent systems.                   Building on the previous observations, we instead propose
+Elastic scaling. When compute demand exceeds the capac-             to explicitly reduce congestion by regulating the amount
+ity of the serving system, a natural response is to provision       of test-time computation per admitted request. Accordingly,
+additional GPUs. However, scaling cannot respond on the             we present CALM-MAS, a congestion-aware serving frame-
+timescale of congestion events. First, the requested GPU type       work that dynamically adapts the computational behavior of
+may be unavailable in the target cluster, in which case pro-        inference workloads based on backend congestion signals.
+visioning can take on the order of hours [35]. Second, even
+when hardware is available, several minutes elapse between          3.1             Overview
+the time a GPU is requested and the time it is ready to accept      Fig. 1 synthesizes the idea. A metrics monitor continuously
+traffic, owing to container startup, CUDA initialization, and       tracks congestion signals from the serving engine, and a
+model weight loading [6, 23]. Congestion events that resolve        congestion controller reacts to these signals by adjusting
+within tens of seconds to a few minutes are therefore over          two test-time scaling knobs—reasoning budget and agent
+before new capacity comes online.                                   fan-out—for the incoming request to dynamically modify
+Rate limiting and admission control. Rate-limiting quo-             its computational demands. During periods of low utiliza-
+tas (commonly used by all major LLM API providers [2, 9, 26])       tion, CALM-MAS prioritizes response quality by enabling
+and admission policies [28] regulate which requests enter           more computationally intensive inference configurations.
+the system or at what rate, but treat every admitted request        Under congestion, CALM-MAS progressively reduces the
+as a fixed-cost unit. The server has no mechanism to renego-        computational footprint of requests across the serving sys-
+tiate once the request is admitted. A heavy MAS workflow            tem, thereby lowering overall resource consumption. We
+consumes the same compute regardless of current load, po-           discuss the congestion signals and detail the reaction mech-
+tentially exacerbating congestion for all users. We demon-          anisms in the next sections.
+strate in § 4 that per-client rate-limiting leads to severe queue      Analogous to congestion-control mechanisms in computer
+buildup and latency degradation under congestion.                   networks, CALM-MAS does not eliminate SLO violations
+Scheduling and model routing. Recent agentic serving                during transient overload; rather, it bounds their duration
+frameworks expose workflow structure to the runtime and             by actively driving the system back toward a sustainable
+use it for scheduling and model selection. Scheduling poli-         operating point, while continuing to serve requests with the
+cies [1, 17, 24, 28, 32, 34, 36, 44] decide when a request is       best possible accuracy given the current load.
+served relative to others. However, during congestion, even         Congestion signals. CALM-MAS leverages readily-available
+the most efficient scheduling cannot prevent queue buildup          signals from the inference engine that reflect the current sys-
+if the offered load exceeds the backend’s processing capac-         tem load to detect backend saturation. Time To First Token
+ity. Alternatively, model routing policies [8, 25, 45] decide       (TTFT) measures the delay from the moment a request arrives
+which model configuration serves a request. For example, Ar-        at the serving engine, inclusive of any time spent waiting
+agog [8] routes each workflow stage to the cheapest accuracy-       in the request queue, to the emission of the first generated
+preserving model configuration based on live system load.           token. As requests accumulate faster than the engine can
+These systems control which resources serve a request but           process them, new arrivals wait longer before the prefill
+APSys ’26, September 17–18, 2026, Bangkok, Thailand
+
+
+                                                                   Soft congestion regime. TBT exceeds its threshold while
+                                                                   TTFT remains acceptable, indicating decoding-phase satu-
+    Congestion                     Soft                 Hard       ration. Mirroring multiplicative decrease in network con-
+      Free                      Congestion            Congestion   gestion control, the system reduces the reasoning budget
+                                                                   of subsequently admitted requests by a multiplicative factor
+                                                                   𝛽 (set to 0.1 in our experiments), reducing thinking tokens
+                                                                   to relieve generation-side pressure. A proportional cut is
+Figure 2: Congestion control state machine. The con-               task-agnostic and yields proportional fairness across users.
+troller transitions between three states based on ob-              Hard congestion regime. TTFT exceeds its threshold, sig-
+served TTFT and TBT relative to steady-state baselines             naling prefill phase overhead. The controller therefore ap-
+scaled by threshold 𝐾.                                             plies a workflow-specific collapse operator that maps the
+                                                                   multi-agent workflow to a registered single-agent fallback.
+                                                                   Depending on the workflow, this fallback may execute the
+                                                                   original task prompt, a merged prompt summarizing the in-
+phase begins. A rising TTFT is therefore an early indicator
+                                                                   tended stages, or a designated fallback role. Thus, collapse
+of backend overload. Time Between Tokens (TBT) measures
+                                                                   is not assumed to be universal: applications must define the
+inter-token latency during autoregressive generation. Ele-
+                                                                   degraded execution path for workflows such as debate or
+vated TBT indicates that the decoding pipeline is saturated,
+                                                                   critique pipelines that lack a natural single-agent form. The
+for instance because large KV caches from many concurrent
+                                                                   controller also disables reasoning tokens, removing their
+requests compete for GPU memory bandwidth.
+                                                                   computational cost and reducing decoding pressure.
+   Using both signals allows the controller to distinguish
+                                                                      These actions eliminate request amplification and stateful
+prefill-dominated congestion (high TTFT) from decoding-
+                                                                   resource holding while lowering per-request compute. The
+dominated congestion (high TBT) and to respond proportion-
+                                                                   asymmetry between the soft and hard regimes is deliber-
+ally with corresponding congestion reduction mechanisms.
+                                                                   ate, motivated by the self-reinforcing nature of congestion.
+We elaborate on this in the next section.
+                                                                   When both metrics violate the desired range, we take more
+                                                                   drastic measures to escape congestion. Finer gradations of
+3.2          Congestion reaction mechanisms                        intervention indexed to the extent of SLO violation are a
+The controller maps congestion signals to three operating          natural extension we leave to future work.
+states (Fig. 2), each enforcing progressively stricter adjust-     Remark #1: MAS scope. CALM-MAS targets the subclass
+ments to the compute requirements of new requests by acting        of MAS workloads where multi-agency primarily serves as
+on the two test-time scaling knobs introduced above.               a test-time scaling technique for accuracy (e.g., debate, en-
+   We note that these knobs are typically hard to define a         semble, multi-perspective review), rather than workloads
+priori for a given task by users. Moreover, the optimal con-       where agents play semantically distinct roles with special-
+figuration for a given task may vary with the current load         ized tool access or capabilities; for the latter, collapsing to a
+on the system: a large reasoning budget may be beneficial          single agent is not functionally equivalent and lies outside
+when the system is uncongested, but lead to severe latency         the scope of this work. Nevertheless, unlike early approaches
+degradation when the system is congested. We therefore             valid only for a limited subset of tasks (e.g., BeLLMan [29]),
+treat these knobs as dynamic configurations that the system        CALM-MAS generalizes across a broad class of tasks.
+adjusts on the fly based on current congestion levels, rather      Remark #2: Per-task contract and in-flight requests.
+than as static parameters that users must set at request time.     Congestion control decisions apply only to subsequently ad-
+   The provider defines a steady-state baseline value for each     mitted tasks and do not affect in-flight requests, e.g., requests
+signal, which represents the expected value of the metric          belonging to a previously admitted MAS task. We deliber-
+when the system is fully utilized but not yet congested (we        ately keep the execution configuration of in-flight tasks un-
+suggest a heuristic method in § 4). Thresholds for each signal     changed, since modifying the agent topology mid-task may
+are then set relative to these baselines and can depend on         invalidate accumulated workflow state or waste compute and
+the SLOs. In this paper, we use a simple multiplicative factor     memory already invested. We show in § 4 that this does not
+𝐾 to define the thresholds, and reserve more sophisticated         undermine the effectiveness of CALM-MAS: the bulk of con-
+mechanisms for future work.                                        gestion relief comes from the reduced specification applied
+Congestion-free regime. Both TTFT and TBT remain                   to the stream of newly arriving requests, which dominates
+below the congestion threshold. The system honors the full         aggregate load during sustained congestion episodes. Adapt-
+user-declared reasoning budget and the native multi-agent          ing ongoing workflows, e.g by modifying their reasoning
+architecture.
+Congestion-Aware Serving of Agentic LLM Applications                                                              APSys ’26, September 17–18, 2026, Bangkok, Thailand
+
+                                                                                                          Congestion Free                 Soft Congestion               Hard Congestion
+effort or execution topology while perserving accumulated                 Single Turn
+                                                                              Agentic
+state, is an interesting direction we leave to future work.                       500
+Use of Artifical Intelligence. AI-assisted tools were used                                K1    250
+                                                                                                  0
+during implementation to help identify and debug software                                       500
+errors. All resulting code changes were reviewed and vali-                                K5    250
+                                                                                                  0
+dated by the authors. AI tools were not used to design the                                      500
+experiments, select the evaluation methodology, or interpret                              K10   250
+the experimental results presented in this work.                                                  0
+                                                                                                   0             10            20       30       40           50            60
+                                                                                                                                      Time (min)
+
+
+4    Evaluation                                                           Figure 3: Evolution of the congestion states in CALM-
+We run all experiments using the Qwen3.5-35B-A3B model                    MAS and its impact on TTFT for varying 𝐾. The top bar
+in FP8 precision deployed on a single NVIDIA A100 GPU and                 indicates arrival times for the two types of requests.
+served by the vLLM [16] inference engine. We consider two
+                                                                                         100
+
+
+
+
+                                                                          Accuracy (%)
+heterogeneous workloads: single-turn tasks and agentic tasks.                             90                            85.7
+                                                                                                                               91.8
+
+                                                                                                                                                                            81.5   Cmax
+Single-turn tasks correspond to conventional single-request                               80              71.4
+                                                                                                                 77.5
+                                                                                                                                                       72.1   72.6   74.2          K=1
+                                                                                                                                                                                   K=5
+                                                                                          70                                                                                       K=10
+inference workloads derived from the GPQA [30], a bench-                                  60                                                    56.3
+                                                                                                                                                                                   Cmin
+                                                                                                   53.0
+mark comprising graduate-level science questions designed                                 50
+                                                                                                            Agentic                                    Single turn
+to test advanced reasoning. For agentic tasks we consider a
+benchmark consisting of 50 requests obtained by sampling
+25 requests from both BrowseComp+ [5] and PlanCraft [7].                                   Figure 4: CALM-MAS’s accuracy vs baselines.
+Task arrivals follow a non-stationary Poisson process with
+time-varying rates. During burst periods, agentic and single-             throughout the course of the experiment) values are 67.8,
+turn tasks arrive at 2 and 5 tasks/min, respectively; during              152.9, and 574.0 for 𝐾=1, 5, and 10, respectively. Running
+low-load periods, both rates are reduced by a factor of three.            the same workload without constraints on reasoning and
+Steady-state configuration. The steady state represents                   architecture, regardless of system load, yields a peak TTFT
+the operating point at which the system is fully utilized but             of 2524.8 (omitted from the figure for clarity), indicating
+not yet overloaded: all three key resources—prefill through-              that CALM-MAS reduces peak TTFT by up to 94% in this
+put, decode throughput, and KV-cache—are simultaneously                   scenario—a reduction that grows as 𝐾 decreases.
+saturated without any single bottleneck dominating. We                    Impact on accuracy. To isolate the impact of the congestion
+identify this point empirically by profiling the system un-               control mechanism on accuracy, we compare CALM-MAS
+der pure single-turn and pure agentic workloads to estab-                 against two baselines: 𝐶 min , which never applies constraints
+lish each workload’s saturation limit, then evaluating mixed              on reasoning budget or agent architecture; and 𝐶 max , which
+workloads near the combined saturation boundary. Each can-                enforces maximum constraints on all requests. These corre-
+didate mix is scored as 𝑆 = (𝑢 in 𝑢 out 𝑢 kv ) 1/3 − 𝜆 𝑖≠𝑗 |𝑢𝑖 − 𝑢 𝑗 |,
+                                                      Í
+                                                                          spond to the congestion-free and hard-congestion states of
+where 𝑢 in, 𝑢 out, 𝑢 kv ∈ [0, 1] are the input throughput, output         CALM-MAS, respectively.
+throughput, and KV-cache utilization, each normalized by                     Fig. 4 shows that, as expected, the 𝐶 min baseline consis-
+its observed maximum. The first term rewards high joint                   tently achieves the highest accuracy, while reducing test-
+utilization; the second is a regularization term, weighted by             time scaling as in 𝐶 max causes a marked drop. Thus, the pa-
+𝜆 (set to 0.15 in all experiments), that penalizes imbalance              rameter 𝐾 serves as an effective control knob mediating the
+across resource dimensions. The resulting values serve as                 latency-accuracy trade-off: as shown above, lower 𝐾 reduces
+the baseline thresholds for the congestion controller.                    peak TTFT, but at the cost of accuracy, since more requests
+Congestion control tames TTFT spikes. We examine                          are stripped of reasoning capabilities to keep the system load
+the effects of CALM-MAS’s congestion control mechanisms                   under control, increasing the number of inaccuracies. Con-
+on TTFT in Fig. 3. When considering the initial stages of                 versely, higher 𝐾 mitigates this effect; at 𝐾=10, the accuracy
+the experiments, 𝐾=1 causes the congestion controller to                  degradation remains confined to 6.1 and 7.3 pps for agentic
+enter the soft-congestion state after just 1.5s, whereas 𝐾=5              and single-turn requests, respectively.
+sustains the congestion-free state for approximately 5s. At               End-to-end performance. On top of the previous baselines
+𝐾=10, the system remains congestion-free for nearly 20s,                  (𝐶 max and 𝐶 min ), we compare CALM-MAS against per-client
+during which the request queue grows to the point that TTFT               rate limiting. Each client is associated with a dedicated rate
+spikes, forcing a transition to the hard-congestion state. As             limiter upstream of the inference engine. All rate limiters
+a result, the peak TTFT (i.e., the largest TTFT we register               have a pre-defined credit budget 𝑐. Each request 𝑟 deducts
+APSys ’26, September 17–18, 2026, Bangkok, Thailand
+
+          500                                             2500
+                                                                                                 open challenge is how to condition them on congestion sig-
+          400                                             2000
+                                                                                                 nals coming from the serving engine. Similarly, methods for
+p50 (s)                                         p99 (s)
+          300                                             1500
+
+          200
+                                                                                                 automatic MAS architecture discovery [11, 13] and meta-
+                                                          1000
+
+          100                                              500
+                                                                                                 harness optimization [18] can also be conditioned on a con-
+           0                                                 0
+                                                                                                 gestion signal to synthesize agent control loops tailored to
+                Cmax K=1 K=5 K=10   RL   Cmin                    Cmax K=1 K=5 K=10   RL   Cmin
+                                                                                                 different load conditions.
+                                                                                                 Service contract and quality degradation. CALM-MAS
+          Figure 5: E2E latency (50th and 99th percentile).
+                                                                                                 introduces a quality trade-off for requests admitted after
+                                                                                                 congestion is detected, while not modifying in-flight work-
+                                                                                                 flows (§ 3.2). The question of who bears the cost of quality
+credit from the budget as 𝑐 ← 𝑐 −𝑖𝑛(𝑟 )−2×max_out_tokens,
+                                                                                                 degradation deserves further attention. While this prelimi-
+where 𝑖𝑛(𝑟 ) is the prompt length in tokens, max_out_tokens
+                                                                                                 nary work contributes primarily to the technical feasibility
+is the maximum output length, and the factor 2 accounts
+                                                                                                 of congestion-aware serving, we envision that LLM service
+for the higher cost of the auto-regressive decoding phase
+                                                                                                 providers may explicitly expose the quality trade-off to users
+relative to prefill, similar to [32]. If credits are not available,
+                                                                                                 (similar to prior work in serverless computing on flexible
+the request is deferred until sufficient credits are replenished.
+                                                                                                 resource-allocation interfaces [4]). For example, a provider
+Credits are re-filled at a rate derived from the steady-state,
+                                                                                                 could offer cheaper APIs in exchange for accepting reduced
+and unused credits1 are refunded upon request completion.
+                                                                                                 test-time computation during congestion, while still giving
+We set max_out_tokens = 16,000 and initialize each client’s
+                                                                                                 users the option to wait longer and be served under the native
+budget to 2 × max_out_tokens.
+                                                                                                 configuration. The definition of the corresponding interfaces
+   We compare in Fig. 5 the baselines against varying values
+                                                                                                 for pricing, admission, and fallback strategies remains an
+of 𝐾 with respect to the end-to-end (E2E) latency, defined
+                                                                                                 open problem.
+as the wall-clock time elapsed from task submission to re-
+                                                                                                 LLM serving generality. We evaluated CALM-MAS in a
+sponse receipt. As expected, the 𝐶 max baseline achieves the
+                                                                                                 co-located prefill-decode configuration, and using a single
+lowest E2E latency, followed by CALM-MAS with increas-
+                                                                                                 inference serving engine. Extending CALM-MAS to multi-
+ing 𝐾. Rate limiting and 𝐶 min differ only in that the former
+                                                                                                 instance model serving or architectures with disaggregated
+may defer requests until sufficient credits are available; this
+                                                                                                 prefill and decode (PD disaggregation) may require coordi-
+deferral prevents agentic tasks from monopolizing system
+                                                                                                 nating congestion signals across serving components, and
+resources, improving median (p50) E2E latency over 𝐶 min .
+                                                                                                 represents a natural next step for our work. Lastly, our vision
+At the 99th percentile, however, the effect is reversed: agen-
+                                                                                                 for CALM-MAS is not as a standalone component, but as
+tic tasks inevitably appear in the tail, and deferring them
+                                                                                                 a general congestion-control layer that should coexist with
+increases E2E latency relative to 𝐶 min .
+                                                                                                 other LLM serving components, such as batching, scheduling,
+                                                                                                 routing, admission control, and load balancing. Understand-
+5           Open challenges                                                                      ing the interplay between CALM-MAS and these techniques,
+This work is a first step towards congestion-aware LLM                                           and integrating into a unified framework, is another key
+serving, but several challenges remain open.                                                     challenge ahead.
+Control policy design. In CALM-MAS, the relationship
+between computational budget and task accuracy depends
+on the workload. Systematically exploring the cost-accuracy
+Pareto front across diverse task distributions is needed to                                      6   Conclusion
+inform tighter control policies. Currently, the congestion                                       CALM-MAS is a congestion-aware serving framework that
+controller operates on three coarse-grained regimes (§ 3.2),                                     treats test-time computation as an elastic knob rather than
+where both the state transitions and the congestion reac-                                        a fixed parameter. Unlike previous work, CALM-MAS regu-
+tion policies are fixed. This design is simple and effective,                                    lates the amount of computation per admitted request based
+however, more sophisticated mechanisms could yield better                                        on real-time congestion signals. Under congestion, CALM-
+trade-offs. Future work will explore finer-grained methods                                       MAS can substantially reduce tail latency and queue buildup
+similar to self-adaptive [21] and budget-aware reasoning [39]                                    while preserving most of the accuracy of native task config-
+to regulate the reasoning effort. These methods are currently                                    urations. Realizing our vision fully will require addressing
+agnostic to the underlying serving infrastructure, and an                                        several challenges: generalizing the control policy, resolving
+                                                                                                 how load-dependent quality degradation should be exposed
+1 The actual output tokens 𝑜𝑢𝑡 (𝑟 ) for a request is known only at completion.                   through service contracts, and evaluating the system under
+We refund the unused credits as 𝑐 ← 𝑐 + 2 × (max_out_tokens − 𝑜𝑢𝑡 (𝑟 ) ).                        more realistic LLM serving architectures.
+Congestion-Aware Serving of Agentic LLM Applications                                             APSys ’26, September 17–18, 2026, Bangkok, Thailand
+
+
+References                                                                    [19] Junyan Li, Wenshuo Zhao, Yang Zhang, and Chuang Gan. 2025. Steer-
+ [1] Amey Agrawal, Nitin Kedia, Ashish Panwar, Jayashree Mohan, Nipun              ing LLM Thinking with Budget Guidance. arXiv:2506.13752 [cs.CL]
+     Kwatra, Bhargav S. Gulavani, Alexey Tumanov, and Ramachandran            [20] Yubo Li, Xiaobin Shen, Yidi Miao, Xinyu Yao, Xueying Ding, Ra-
+     Ramjee. 2024. Taming Throughput-Latency Tradeoff in LLM Inference             mayya Krishnan, and Rema Padman. 2026. Beyond Single-Turn:
+     with Sarathi-Serve. In OSDI.                                                  A Survey on Multi-Turn Interactions with Large Language Models.
+ [2] Anthropic. 2026. Rate Limits. https://docs.anthropic.com/en/api/rate-         arXiv:2504.04717 [cs.CL]
+     limits. Accessed: 2026-05-20.                                            [21] Zheng Li, Qingxiu Dong, Jingyuan Ma, Di Zhang, Kai Jia, and Zhifang
+ [3] Zhuohang Bian, Feiyang Wu, Chengrui Zhang, Hangcheng Dong, Yun                Sui. 2026. SelfBudgeter: Adaptive Token Allocation for Efficient LLM
+     Liang, and Youwei Zhuo. 2026. TokenDance: Scaling Multi-Agent LLM             Reasoning. arXiv:2505.11274 [cs.AI]
+     Serving via Collective KV Cache Sharing. arXiv:2604.03143 [cs.DC]        [22] Tengxiao Liu, Zifeng Wang, Jin Miao, I-Hung Hsu, Jun Yan, Jiefeng
+ [4] Muhammad Bilal, Marco Canini, Rodrigo Fonseca, and Rodrigo Ro-                Chen, Rujun Han, Fangyuan Xu, Yanfei Chen, Ke Jiang, Samira
+     drigues. 2023. With Great Freedom Comes Great Opportunity: Re-                Daruki, Yi Liang, William Yang Wang, Tomas Pfister, and Chen-Yu
+     thinking Resource Allocation for Serverless Functions. In EuroSys.            Lee. 2026. Budget-Aware Tool Use Enables Effective Agent Scaling.
+ [5] Zijian Chen, Xueguang Ma, Shengyao Zhuang, Ping Nie, Kai Zou,                 arXiv:2511.17006 [cs.AI]
+     Andrew Liu, Joshua Green, Kshama Patel, Ruoxi Meng, Mingyi Su,           [23] Chiheng Lou, Sheng Qi, Chao Jin, Dapeng Nie, Haoran Yang, Yu
+     Sahel Sharifymoghaddam, Yanxi Li, Haoran Hong, Xinyu Shi, Xuye Liu,           Ding, Xuanzhe Liu, and Xin Jin. 2025. HydraServe: Minimizing
+     Nandan Thakur, Crystina Zhang, Luyu Gao, Wenhu Chen, and Jimmy                Cold Start Latency for Serverless LLM Serving in Public Clouds.
+     Lin. 2025. BrowseComp-Plus: A More Fair and Transparent Evaluation            arXiv:2502.15524 [cs.DC]
+     Benchmark of Deep-Research Agent. arXiv:2508.06600 [cs.CL]               [24] Michael Luo, Xiaoxiang Shi, Colin Cai, Tianjun Zhang, Justin Wong,
+ [6] Rob Cronin. 2026. Dissecting LLM Container Cold-Start: Where the              Yichuan Wang, Chi Wang, Yanping Huang, Zhifeng Chen, Joseph E.
+     Time Actually Goes. https://techcommunity.microsoft.com/blog/                 Gonzalez, and Ion Stoica. 2026. Agentix: An Efficient Serving Engine
+     linuxandopensourceblog/dissecting-llm-container-cold-start-where-             for LLM Agents as General Programs. In NSDI.
+     the-time-actually-goes/4508831                                           [25] Isaac Ong, Amjad Almahairi, Vincent Wu, Wei-Lin Chiang, Tianhao
+ [7] Gautier Dagan, Frank Keller, and Alex Lascarides. 2025. Plan-                 Wu, Joseph E. Gonzalez, M Waleed Kadous, and Ion Stoica. 2025.
+     craft: an evaluation dataset for planning with LLM agents.                    RouteLLM: Learning to Route LLMs from Preference Data. In ICLR.
+     arXiv:2412.21033 [cs.CL]                                                 [26] OpenAI. 2026. Rate limits. https://platform.openai.com/docs/guides/
+ [8] Yinwei Dai, Zhuofu Chen, Anand Iyer, and Ravi Netravali. 2025. Ar-            rate-limits. Accessed 2026-05-20.
+     agog: Just-in-Time Model Routing for Scalable Serving of Agentic         [27] Pratyush Patel, Esha Choukse, Chaojie Zhang, Aashaka Shah, Í
+     Workflows. arXiv:2511.20975 [cs.DC]                                           textasciitilde nigo Goiri, Saeed Maleki, and Ricardo Bianchini. 2024.
+ [9] Google. 2026. Rate Limits. https://ai.google.dev/gemini-api/docs/rate-        Splitwise: Efficient Generative LLM Inference Using Phase Splitting.
+     limits. Accessed: 2026-05-20.                                                 In ISCA.
+[10] Sirui Hong, Mingchen Zhuge, Jonathan Chen, Xiawu Zheng, Yuheng           [28] Archit Patke, Dhemath Reddy, Saurabh Jha, Haoran Qiu, Christian
+     Cheng, Jinlin Wang, Ceyao Zhang, Zili Wang, Steven Ka Shing Yau,              Pinto, Chandra Narayanaswami, Zbigniew Kalbarczyk, and Ravis-
+     Zijuan Lin, Liyang Zhou, Chenyu Ran, Lingfeng Xiao, Chenglin Wu,              hankar K. Iyer. 2024. Queue Management for SLO-Oriented Large
+     and Jürgen Schmidhuber. 2024. MetaGPT: Meta Programming for A                 Language Model Serving. In SoCC.
+     Multi-Agent Collaborative Framework. In ICLR.                            [29] Tella Rajashekhar Reddy, Atharva Deshmukh, Karan Tandon, Rohan
+[11] Shengran Hu, Cong Lu, and Jeff Clune. 2025. Automated Design of               Gandhi, Anjaly Parayil, and Debopam Bhattacherjee. 2025. BeLLMan:
+     Agentic Systems. arXiv:2408.08435 [cs.AI]                                     Controlling LLM Congestion. arXiv:2510.15330 [cs.DC]
+[12] Hugging Face. 2025. Text Generation Inference. https://github.com/       [30] David Rein, Betty Li Hou, Asa Cooper Stickland, Jackson Petty,
+     huggingface/text-generation-inference Accessed: 2026-05-19.                   Richard Yuanzhe Pang, Julien Dirani, Julian Michael, and Samuel R.
+[13] Zixuan Ke, Austin Xu, Yifei Ming, Xuan-Phi Nguyen, Caiming Xiong,             Bowman. 2023. GPQA: A Graduate-Level Google-Proof Q&A Bench-
+     and Shafiq Joty. 2025. MAS-ZERO: Designing Multi-Agent Systems                mark. arXiv:2311.12022 [cs.AI]
+     with Zero Supervision. In Workshop on Scaling Environments for           [31] Timo Schick, Jane Dwivedi-Yu, Roberto Dessì, Roberta Raileanu, Maria
+     Agents.                                                                       Lomeli, Eric Hambro, Luke Zettlemoyer, Nicola Cancedda, and Thomas
+[14] Jiin Kim, Byeongjun Shin, Jinha Chung, and Minsoo Rhu. 2026. The              Scialom. 2023. Toolformer: Language Models Can Teach Themselves
+     cost of dynamic reasoning: Demystifying ai agents and test-time scal-         to Use Tools. In NeurIPS.
+     ing from an ai infrastructure perspective. In HPCA.                      [32] Ying Sheng, Shiyi Cao, Dacheng Li, Banghua Zhu, Zhuohan Li,
+[15] Abhishek Vijaya Kumar, Gianni Antichi, and Rachee Singh. 2025. Aqua:          Danyang Zhuo, Joseph E. Gonzalez, and Ion Stoica. 2024. Fairness in
+     Network-Accelerated Memory Offloading for LLMs in Scale-Up GPU                Serving Large Language Models. In OSDI.
+     Domains. In ASPLOS.                                                      [33] Charlie Victor Snell, Jaehoon Lee, Kelvin Xu, and Aviral Kumar. 2025.
+[16] Woosuk Kwon, Zhuohan Li, Siyuan Zhuang, Ying Sheng, Lianmin                   Scaling LLM Test-Time Compute Optimally Can be More Effective
+     Zheng, Cody Hao Yu, Joseph Gonzalez, Hao Zhang, and Ion Stoica. 2023.         than Scaling Parameters for Reasoning. In ICLR.
+     Efficient Memory Management for Large Language Model Serving             [34] Vikranth Srivatsa, Zijian He, Reyna Abhyankar, Dongming Li, and
+     with PagedAttention. In SOSP.                                                 Yiying Zhang. 2025. Preble: Efficient Distributed Prompt Scheduling
+[17] Marco Laju, Donghyun Son, Saurabh Agarwal, Nitin Kedia, Myungjin              for LLM Serving. In ICLR.
+     Lee, Jayanth Srinivasa, and Aditya Akella. 2026. Nalar: An agent         [35] Foteini Strati, Zhendong Zhang, George Manos, Ixeia Sánchez Périz,
+     serving framework. arXiv:2601.05109 [cs.DC]                                   Qinghao Hu, Tiancheng Chen, Berk Buzcu, Song Han, Pamela Delgado,
+[18] Yoonho Lee, Roshen Nair, Qizheng Zhang, Kangwook Lee, Omar Khat-              and Ana Klimovic. 2025. Sailor: Automating Distributed Training over
+     tab, and Chelsea Finn. 2026. Meta-Harness: End-to-End Optimization            Dynamic, Heterogeneous, and Geo-distributed Clusters. In SOSP.
+     of Model Harnesses. In COLM.                                             [36] Biao Sun, Ziming Huang, Hanyu Zhao, Wencong Xiao, Xinyi Zhang,
+                                                                                   Yong Li, and Wei Lin. 2024. Llumnix: Dynamic Scheduling for Large
+                                                                                   Language Model Serving. In OSDI.
+APSys ’26, September 17–18, 2026, Bangkok, Thailand
+
+
+[37] Guanzhi Wang, Yuqi Xie, Yunfan Jiang, Ajay Mandlekar, Chaowei               Autogen: Enabling next-gen LLM applications via multi-agent conver-
+     Xiao, Yuke Zhu, Linxi Fan, and Anima Anandkumar. 2024. Voyager:             sations. In COLM.
+     An Open-Ended Embodied Agent with Large Language Models. Trans.        [42] Yuxing Xiang, Xue Li, Kun Qian, Yan Zhang, Wenyuan Yu, Ennan Zhai,
+     Mach. Learn. Res. (2024).                                                   Xin Jin, and Jingren Zhou. 2026. ServeGen: Workload Characterization
+[38] Lei Wang, Chen Ma, Xueyang Feng, Zeyu Zhang, Hao Yang, Jingsen              and Generation of Large Language Model Serving in Production. In
+     Zhang, Zhiyuan Chen, Jiakai Tang, Xu Chen, Yankai Lin, Wayne Xin            NSDI.
+     Zhao, Zhewei Wei, and Jirong Wen. 2024. A survey on large language     [43] Chen Zhang, Xinyi Dai, Yaxiong Wu, Qu Yang, Yasheng Wang, Ruim-
+     model based autonomous agents. Frontiers Comput. Sci. (2024).               ing Tang, and Yong Liu. 2025. A Survey on Multi-Turn Interaction
+[39] Hao Wen, Xinrui Wu, Yi Sun, Feifei Zhang, Liye Chen, Jie Wang,              Capabilities of Large Language Models. arXiv:2501.09959 [cs.CL]
+     Yunxin Liu, Yunhao Liu, Ya-Qin Zhang, and Yuanchun Li. 2025. Bud-      [44] Wei Zhang, Zhiyu Wu, Yi Mu, Rui Ning, Banruo Liu, Nikhil Sarda,
+     getThinker: Empowering Budget-aware LLM Reasoning with Control              Myungjin Lee, and Fan Lai. 2026. JITServe: SLO-aware LLM Serving
+     Tokens. arXiv:2508.17196 [cs.LG]                                            with Imprecise Request Information. In NSDI.
+[40] Bingyang Wu, Yinmin Zhong, Zili Zhang, Shengyu Liu, Fangyue Liu,       [45] Yunxuan Zhang, Hao Wang, Han Tian, Liu Yang, Xudong Liao, Wenxue
+     Yuanhang Sun, Gang Huang, Xuanzhe Liu, and Xin Jin. 2026. FastServe:        Li, Ping Yin, Bowen Liu, and Kai Chen. 2026. MFS: An Efficient Model
+     Iteration-Level Preemptive Scheduling for Large Language Model In-          Family Serving System for LLMs. In EuroSys.
+     ference. In NSDI.                                                      [46] Lianmin Zheng, Liangsheng Yin, Zhiqiang Xie, Chuyue Sun, Jeff
+[41] Qingyun Wu, Gagan Bansal, Jieyu Zhang, Yiran Wu, Beibin Li, Erkang          Huang, Cody Hao Yu, Shiyi Cao, Christos Kozyrakis, Ion Stoica,
+     Zhu, Li Jiang, Xiaoyun Zhang, Shaokun Zhang, Jiale Liu, et al. 2024.        Joseph E. Gonzalez, Clark W. Barrett, and Ying Sheng. 2024. SGLang: Ef-
+                                                                                 ficient Execution of Structured Language Model Programs. In NeurIPS.
+

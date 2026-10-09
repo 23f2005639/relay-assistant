@@ -1,0 +1,434 @@
+                                                                 beLLMan: Controlling LLM Congestion
+                                             Tella Rajashekhar Reddy∗ , Atharva Deshmukh∗ , Karan Tandon, Rohan Gandhi, Anjaly Parayil, Debopam Bhattacherjee
+                                                                                                                    Microsoft
+                                         ABSTRACT                                                                                While one could think of multiple avenues to reduce LLM
+                                         Large language model (LLM) applications are blindfolded                              system load – using quantized models [54], fewer parameter
+                                         to the infrastructure underneath and generate tokens au-                             models [43], etc., in this work we explore congestion control
+                                         toregressively, indifferent to the system load, thus risking                         using LLM output length reduction. Our idea is backed by
+                                         inferencing latency inflation and poor user experience. Our                          the key observations (𝑂) and first-cut evaluations (𝐸) below:
+                                         first-cut controller, named beLLMan1 , enables the LLM in-                           (𝑂1) LLMs could be concise without noticeably compromis-
+                                         frastructure to actively and progressively signal the first-                         ing response quality. If not all the time, this interesting prop-
+
+
+
+
+arXiv:2510.15330v1 [cs.DC] 17 Oct 2025
+                                         party LLM application to adjust the output length in response                        erty could be leveraged during periods of high system load
+                                         to changing system load. On a real testbed with H100 GPUs,                           that increase the response latency.
+                                         beLLMan helps keep inferencing latency under control (up                             (𝑂2) We observe that LLMs, especially the larger ones, have
+                                         to 8× lower end-to-end latency) and reduces energy con-                              an interesting emerging capability – they closely follow in-
+                                         sumption by ∼25% (while serving 19% more requests) during                            structions like ‘write in 𝑋 words’. Our proposed system,
+                                         periods of congestion for a summarization workload.                                  beLLMan, leverages this capability to open a congestion
+                                                                                                                              control interface between the system and the application.
+                                         1    INTRODUCTION                                                                    (𝐸1) On a real testbed comprising of a DGX box with 8
+                                         The last few years have seen a tremendous adoption of gen-                           NVIDIA H100 GPUs connected via NVLink and having 80 GB
+                                         erative AI, with major infrastructure expansion announce-                            RAM each, we profile a technical paper summarization work-
+                                         ments [44, 45, 47–49, 60] from all large AI players. Given                           load (we pick at random 100 ACM IMC papers [16] published
+                                         that a significant fraction (∼90% [6, 39]) of AI compute today                       between 2022 & 2024) with and without our first-cut beLL-
+                                         runs AI inferencing, it is imperative that the right interfaces                      Man congestion controller. Our preliminary experiments
+                                         are established between the AI infrastructure and key ap-                            show how LLM congestion control could effectively keep
+                                         plications such as large language models (LLMs) so as not                            inferencing latency under control during periods of high
+                                         to overload the finite resources. Sam Altman, the CEO of                             load without noticeably affecting output quality.
+                                         OpenAI, had to request users to “calm down” and not “melt”                           (𝐸2) beLLMan’s congestion control also reduces the energy
+                                         the GPUs with Ghibli meme generation requests [2, 46] re-                            consumption by ∼25% and serve 19% more requests for the
+                                         minding us of the congestion collapses [33, 55] in the early                         workload during congestion – also demonstrating a sustain-
+                                         days of the Internet. As LLMs grow from a few billion [25]                           ability opportunity at scale as a second order effect.
+                                         to trillion [35] parameters and cater to a global user base,
+                                         AI providers should have strategies in place that help sys-
+                                         tems gracefully cope with periods of high load and avoid                             2   BACKGROUND AND MOTIVATION
+                                         congestion collapse.                                                                 In Internet congestion control, endpoints (hosts) react to
+                                            Currently the LLMs are unaware of the system load and                             network load to achieve a better transport experience. The
+                                         generate tokens auto-regressively to respond to user queries2 .                      network is considered a black box and the endpoints indi-
+                                         Often, LLM responses are verbose, pushing users to rerun                             rectly measure the network (infrastructure) load by mon-
+                                         queries with additional instructions to shorten the response                         itoring packet loss [51] and/or end-to-end latency [8]. On
+                                         text. Users also use LLM as a handy tool to summarize long                           perceiving high load, the endpoints slow down their sending
+                                         text. This LLM capability to compress text without losing                            rates (bits/second), and ramp up otherwise. Fig. 1 shows how
+                                         useful information could be leveraged systematically in times                        we could draw parallels with emerging LLM inferencing sys-
+                                         of need (high system load). Note that Claude [3] offers system                       tems. Although the first-party (1P) LLM is still a black-box
+                                         prompts that help users set the response style to normal,                            with the infrastructure being not aware of specific LLM in-
+                                         concise, explanatory, etc.                                                           ternals, it could still spill out useful signals of load, higher
+                                                                                                                              latency or latency SLO (service-level objective) violations
+                                         1 A tribute to Richard E. Bellman[59] for his contributions to control theory.       for user requests. The LLM system can leverage this load
+                                         2We use the terms LLM query/request/prompt interchangeably in this paper.
+                                                                                                                              signal to instruct the LLM to tone down output generation.
+                                                                                                                              In this work, we propose to open a new interface between
+                                         ∗ Equal contribution.                                                                the system and the LLM that allows the system to implicitly
+                                                                                                                          1
+                                                                                                                                     Reddy et al.
+
+
+                                                                               prompt to “summarize in 𝑁 words”. For each model and value
+                                                                               of 𝑁 , we have 100×10 data points (generated output length)
+                                                                               and we fit second degree polynomials to the median lengths
+                                                                               of the generated outputs (Fig. 2a). As we can see, in general,
+                                                                               the larger models are closer to the diagonal (𝑦 = 𝑥, 𝑥 being
+                                                                               the target length in the prompt and 𝑦 being the generated
+                                                                               output length) for the same family, and across models GPT-
+                                                                               4o [35] (projected 1.7T parameters [14]) is closest to the
+                                                                               diagonal, followed by Llama-3.3 (70B) [30] and Gemma-3
+                                                                               (27B) [25]. This demonstrates an emerging capability – the
+                                                                               larger models are able to stick to word limits better. Although
+Figure 1: Internet (top) versus LLM congestion control.                        there is still scope for perfect alignment with the diagonal,
+control the volume of tokens (words) generated by the LLM                      the strong trends validate our hypothesis.
+per request in a way that does not compromise on the re-                       Scope for prompt engineering Next, we pick a specific
+sponse quality noticeably while improving query response                       model, Gemma-3 (27B), with an aim to bring the bounded
+time during periods of congestion.                                             generations closer to the diagonal (𝑦 = 𝑥) simply by improv-
+Black-box with implicit signals In today’s real world de-                      ing the prompt. We see in Fig. 2b that out of the 3 prompts
+ployments, the LLM serving systems are unaware of the LLM                      that we tried, “summarize in exactly 𝑁 words” works best. It
+internals and how they treat individual requests. But sched-                   is quite interesting to see how adding the keyword “exactly”
+ulers like vLLM [1] have online access to various latency                      significantly improves the model’s alignment to the prompt
+metrics per query – the queueing latency, the time to first                    instructions. The shaded region in Fig. 2b shows that most
+token (TTFT), the time between tokens (TBT), and the E2E                       of the generations are close to the diagonal. For the rest of
+(end-to-end) latency. As the load on the LLM serving system                    this work, we use Gemma-3 (27B) as our test LLM and the
+increases, all these latencies increase, as we discuss in §3.                  best prompt here as the interface between the system and
+                                                                               the application.
+The control knobs During periods of high load, it is
+                                                                                  We are optimistic that this emerging capability could im-
+plausible to forward the user request to quantized [54] or
+                                                                               prove further, as is evident from the trends. GPT-4o is already
+smaller [43] (fewer parameters) models of the same family.
+                                                                               very close to the diagonal as seen in Fig. 2a.
+Here, we take a different stance and keep using the same
+model so as not to compromise on the emerging LLM ca-                          2.2    Taming the LLM uncertainty
+pabilities. Rather, we make an informed choice to reduce                       Uncertainty by default LLMs are uncertain in generating
+the output volume during periods of high load. Our work is                     output due to their probabilistic and auto-regressive nature.
+completely orthogonal to past works [23, 50] that fine-tune                    Even with temperature [31] set to 0 and top_p [18] set to 1,
+models to make them understand output length specifica-                        there is still some residual uncertainty left [4]. During conver-
+tions. Previous work [38] has addressed the challenge of                       sations with LLM experts we learned that the temperature
+low GPU utilization in early-exit DNNs by splitting models                     is often set to 0.3 to avoid hallucinations and generate con-
+across multiple GPUs and optimizing batching strategies.                       sistent output [40] , and for chatbot or creative writing, the
+In contrast, we propose a congestion control system that                       values are often higher. For our work, we stick to the value of
+can instruct (by prompt appending) such models to generate                     0.3 and quantify the default uncertainty in LLM generation.
+the query response in 𝑋 tokens or words instead of the de-                     We generate 100 summaries for each of the 100 IMC papers
+fault, predicted 𝑌 (>𝑋 ). In our experiments, we noticed that                  with Gemma-3 (27B), and for each paper pick the summary
+LLMs from different families (Llama, Gemma, GPT), while                        with the median (out of 100) output length as the reference
+internally working with tokens, can follow prompt appended                     point. Fig. 2c shows (in red, labeled as ‘unbounded’) the vari-
+instructions significantly better when written in terms of                     ations in output lengths (percentage differences with respect
+number of words as opposed to tokens.                                          to the reference points) for all papers and all summaries. On
+2.1     Models listen to us                                                    the 𝑥-axis, this default variation mostly lies between ∼−38%
+To test this hypothesis, we pick models of different sizes and                 (inflation in size) and ∼25% (the dashed border devoid of the
+families, and ask to summarize the 100 IMC papers3 , 10 time                   0.1% tail) showing how the output length could vary signifi-
+each, in 𝑁 words, with 𝑁 varying between 100 and 1,000 in                      cantly between multiple runs of the same query. So, a simple
+multiples of 50. We append a request to each summarization                     intuition we have is that LLM users might not even perceive
+                                                                               a calculated reduction in output length (well within a safe
+3 Citations were removed. Both long (12 page) and short (6 page) papers.       bound of 20%) if the output quality is on par. However, we
+                                                                           2
+beLLMan: Controlling LLM Congestion
+
+
+
+
+          (a) Different Models                         (b) Different Prompts                               (c) Information Loss
+                                  Figure 2: LLM behavior under different configurations.
+should use this knob with caution, as we discuss below, to              the output length reductions could be significant. One might
+not affect user experience to a noticeable degree.                      think this is a great choice, but here is a word of caution: this
+Understanding output quality It is crucial to identify an               knob is pretty rigid, and we cannot force it to operate close
+output quality check metric to not noticeably compromise                to the top left corner of Fig. 2c even during a mild system
+the default user experience even during times of high system            load. In such scenarios, since we lose control over the output
+load. Lexical metrics such as ROUGE score [29], entropy [5],            length, the similarity scores could be affected for no reason.
+and the matching of named entities [32] do not work well                Output length versus quality As models listen to prompt
+due to the lack of understanding of the semantics of text, the          instructions to “summarize in exactly 𝑁 words”, we gener-
+nuances of natural language and context. Hence, we use LLM              ated summaries with 𝑥% reduction in output length (blue
+as a judge [11, 17, 27, 57] to measure the similarity scores, in-       region in Fig. 2c) for 𝑥 = 2, 4, ..., 8, 10, 15, 20, ..., 40 with re-
+formation loss percentage, between pieces of text (2 different          spect to the reference unbounded generation (median length).
+summaries – reference and test). In our exhaustive unit tests           This bounded region gives us an operational window of <20%
+(selectively removing units of information and sentences                (we deliberately keep it well below the 24% opportunity for
+from the test text), we observed that OpenAI o3 (reason-                safety) output length reduction, with similarity scores on
+ing model) [36] is consistent and reasonable in assigning               par with unbounded generation. Note that during periods of
+similarity scores to pairs of text and performs significantly           mild load, the requested output length reductions could be
+better than GPT-4o. We made sure that the content similarity            kept low. This is part of the ‘minimally invasive’ strategy we
+scores (prompt in Appendix A) reflect the loss of informa-              intend to pursue to avoid unintended user experience issues.
+tion content and the loss of entropy but do not get skewed              Leveraging output length predictors Output length pre-
+by the core theme which is expected to be similar in this               dictors are widely adopted for scheduling [13, 34, 41, 52, 61],
+context. In Fig. 2c, we see that even in the unbounded case,            routing [21, 24], and energy-aware routing [42]. When an
+the similarity scores vary significantly with respect to the            LLM request arrives online at the queue, it is important to
+reference point (median length, as discussed above). While              predict (best effort) the unbounded output length to be able
+toward the left of the unbounded denoised region (larger                to right-size the bounded output depending on system load.
+sizes) the scores are higher, toward the right the similarity           Toward this, we can leverage the output of any existing pre-
+scores are relatively low. The takeaway is that, even without           diction pipeline for scheduling and routing. In our setup, it
+any restrictions, the similarity scores could be as low as 65%,         consists of a Longformer4 encoder model [7] that produces
+offering us a window of opportunity to reduce LLM output                embeddings from the prompt text, which are then passed
+lengths during high system load while still meeting this bar.           through a two-layer feedforward neural network followed
+The rigid ‘concise’ Before we quantify this opportunity                 by a final layer that gives the predicted output length in num-
+window more systematically, we explore a quick hack – can               ber of words. The predictor was trained and tested (80:20
+beLLMan controller use a boolean knob and ask the LLM                   split) on ∼11,000 technical papers from ICLR (2020-23) [19]
+to be ‘concise’ by appending to the prompt during periods               downloaded with OpenReview API [37]. For the training set,
+of load? The green region in Fig. 2c represents such genera-            5 summaries were generated per paper with Gemma-3 (27B).
+tions for the same workload, and similarity scores and output           The predictor achieved an MAE (Mean Absolute Error) of
+length differences measured with respect to the unbounded               36 and an inference latency of 50 milliseconds on a single
+generation with median output length. While the lowest sim-             H100 GPU. Note that this prediction is not on the critical
+ilarity scores are still on par with the unbounded generations,         4Works best in comparison to ModernBERT [56], Jina [53], and BGE-m3 [10].
+
+                                                                    3
+                                                                                                                            Reddy et al.
+
+
+                                                                      with tensor parallelism of degree 8 (TP8). We use the vLLM
+                                                                      scheduler (with the only modification to stream latency sig-
+                                                                      nals to beLLMan) and disable prefix-caching to avoid con-
+                                                                      taminating our observations. For trace generation, first we
+                                                                      run the paper summary workload (papers picked uniformly
+                                                                      at random from the 100 IMC papers with duplicates allowed)
+                                                                      on the above setup. We test for different requests per second
+                                                                      (RPS) values starting at 1, for 10 min each, and observe queue-
+                                                                      ing latency linearly increasing over time (for a particular run)
+                                                                      starting at an RPS value of 2.4 indicating significant overload.
+       Figure 3: beLLMan architecture diagram.
+                                                                      With this observation in mind, we generate a synthetic trace
+path and is triggered only during periods of high load while
+                                                                      using the Poisson process, where inter-arrival times follow
+the requests are still in the queue.
+                                                                      an exponential distribution – similar to prior works [22, 28].
+3   OUR IDEA & INITIAL RESULTS                                        The trace spans a duration of 22 minutes with 2 peaks of 2.5
+                                                                      RPS (high load) and 1.5 RPS (parameters still under check;
+Our key proposal is beLLMan – a 1P LLM serving system                 no need to trigger congestion control), as shown in Fig. 4a.
+component, as in Fig. 3, that (1) works with real-time latency        The trace has distinct phases when the request arrivals ramp
+signals from the LLM request scheduler, (2) manipulates LLM           up, stay put, and ramp down, and the target RPS values are
+requests in the arrival queue, and (3) thus instructs the LLM         achieved with Poisson arrivals.
+application to generate shorter output during high system
+                                                                      Default unbounded run During the unbounded run with
+load. In an LLM serving system, the request scheduler (we
+                                                                      no congestion control in place, all latency signals spike, as
+use vLLM scheduler) picks requests from the arrival queue
+                                                                      observed in Fig. 4b, during the first RPS peak of 2.5 that lasts
+and assigns to GPU servers. The scheduler keeps track of
+                                                                      for ∼90 seconds. The queueing latency shoots up quickly
+request-level metrics like queueing latency, TTFT, TBT, and
+                                                                      as compute saturates and incoming requests have to wait.
+end-to-end latency (latency components discussed in §2).
+                                                                      This high queueing latency also reflects in the E2E latency
+beLLMan consumes these latency signals from the sched-
+                                                                      inflation. As GPUs go full-throttle to consume and spill out
+uler. When beLLMan senses congestion (latency inflating
+                                                                      more tokens (words) in aggregate, the TTFT latencies also
+over time), it triggers its congestion control algorithm to
+                                                                      increase. Note that TBT latency inflation occurs sooner as
+decide the word reduction rate (𝑟 ) between 5% and 20% (so
+                                                                      incoming RPS values go up over time, and hence could offer
+as not to significantly affect the LLM response quality). As
+                                                                      early signals of an impending congestion. Based on this key
+individual LLM requests are queued, beLLMan predicts the
+                                                                      observation, we use TBT as the congestion signal for the
+unbounded output length (𝐿), calculates the reduced length
+                                                                      rest of this work. We pick the median TBT (𝑇 1) during the
+(𝑁 = 𝐿×(1 − 𝑟 )), and appends an instruction to the prompt
+                                                                      unbounded run as the threshold for triggering congestion
+to generate summary ‘in exactly 𝑁 words’. This way, the out-
+                                                                      control (𝑟 = 5%) in the bounded run with beLLMan and the
+put length prediction overhead is hidden behind the request
+                                                                      75𝑡ℎ percentile TBT (𝑇 2) as the (soft) maximum acceptable
+queueing latency. beLLMan complements existing mitiga-
+                                                                      TBT threshold that corresponds to 𝑟 = 20% in the bounded
+tion techniques (quantized or smaller models) while avoiding
+                                                                      run (dashed horizontal lines in Fig. 4b and 4c). The second
+model swapping. Note that the word reduction is enforced
+                                                                      shorter peak of 1.5 RPS in the trace does not see any major
+only when latency inflates due to congestion.
+                                                                      congestion with slight inflation in TBT and E2E latency.
+Placeholder for congestion control beLLMan currently
+                                                                      beLLMan in action beLLMan consumes the average TBT
+runs a simple, first-cut linear congestion control while offer-
+                                                                      each second from the vLLM scheduler and computes a mov-
+ing quick and easy integration of more complex schemes in
+                                                                      ing average over the last 5 seconds. If the moving average
+the future. When congestion is sensed (TBT starts to inflate),
+                                                                      (to avoid unnecessary triggers in haste) exceeds 𝑇 1 (from the
+it triggers a reduction in output length with 𝑟 = 5%. The 𝑟
+                                                                      unbounded run), it triggers congestion control with 𝑟 = 5%.
+values increase linearly until 20% if the maximum latency
+                                                                      It linearly increases 𝑟 until the threshold 𝑇 2 is reached (if at
+threshold is reached. Also, 𝑟 is reset when the TBT latencies
+                                                                      all) when 𝑟 = 20%. For the specific trace, beLLMan triggers
+are low. We discuss these thresholds below in the context of
+                                                                      congestion control at 131s and stops at 351s (based on the
+the specific trace on which we test beLLMan.
+                                                                      TBT moving average) significantly sooner than when con-
+Setup and trace For all experiments below, including trace            gestion ends in the unbounded (default) case as things are
+generation, we use the same LLM and setup: Gemma-3 (27B)              under control. When congestion control is active, the me-
+LLM hosted on a DGX box with 8 NVIDIA H100 GPUs con-                  dian 𝑟 across all requests is 8%. TBT remains roughly within
+nected via NVLink and having 80 GB RAM each, configured
+                                                                  4
+beLLMan: Controlling LLM Congestion
+
+
+
+
+        (a) Paper summary trace                  (b) Unbounded run (default)                 (c) Bounded run with beLLMan
+                    Figure 4: Synthetic trace and the corresponding unbounded and bounded runs.
+bounds, queueing latency and TTFT are kept low, and E2E             current reactive linear controller. It should be able to use
+latency is reduced by up to 8×. beLLMan could not only              cost functions that include latency, output quality, and en-
+improve the latency components but also the duration of             ergy efficiency over a moving time horizon and help avoid
+congestion at the cost of very modest drop in quality during        oscillations in 𝑟 . A BBR [9] style controller could proactively
+congestion. We compared the similarity scores for individ-          operate at the equivalent of Kleinrock’s point [26], keeping
+ual LLM requests during the bounded run (with respect to            TBT low while maximizing the token generation (tokens/s)
+the unbounded run) while congestion control is active and           of the serving system. A PCC [15] controller could run micro-
+inactive (same as unbounded). The median similarity scores          experiments with different values of 𝑟 and measure a utility
+with respect to the unbounded run are 87% when congestion           function that combines both latency and response quality.
+control is active and 88% when inactive. This observation           Nuanced fairness issues Fairness across flows [12, 20] is
+confirms that the drop in output quality with our controlled        key in Internet congestion control and applies to LLMs too –
+output length reduction during congestion is minor.                 both per-request and per-class (priority). For requests, using
+beLLMan energy savings During the congestion period                 the same 𝑟 -value within a batch ensures equal treatment. For
+(130-500s) in the unbounded run, beLLMan helps consume              classes, 𝑟 can vary; e.g., coding tasks might use 𝑟 = 0 to avoid
+25% less energy (as reported by the vLLM scheduler) and             errors, and very short outputs can bypass size reduction. A
+drives 19% more LLM requests to completion thanks to out-           logically centralized beLLMan system could help experiment
+put length reduction. This observation also opens up another        with different aspects of fairness with tractable insights.
+possibility of using beLLMan to reduce the energy consump-          Broad use across applications In this work, we focus on
+tion of AI/LLM systems at scale. Note that the energy savings       a document summarization workload. This is just one of
+are due to shorter outputs and not improved GPU efficiency.         many AI/LLM inferencing use cases. Although in certain
+Additional observations We tested beLLMan on a trace                cases, such as coding, it is not practical to even try such com-
+with the 2.5 RPS peak lasting 2× longer. We still did not           pression, a large fraction of LLM use cases like conversation,
+observe any major queueing latency. On increasing the peak          synthesis, etc. can benefit from integrating beLLMan.
+from 2.5 to 3.5 RPS in the trace, beLLMan experiences some          Prediction-less design While output length prediction is a
+queueing latency (tipping point for finite hardware capabil-        low overhead task with inferencing latency hidden behind
+ity) but all latency components are significantly lower than        request queueing, some operators might not want this com-
+in the unbounded case.                                              ponent in their design. In such cases, different prompts could
+                                                                    be potentially used as proxies for different degrees of reduc-
+4   DISCUSSIONS AND FUTURE WORK
+                                                                    tion (Fig. 2b) based on the system load. There is scope for
+LLM congestion signals While we focus on TBT as a sig-              more fine-grained prompt engineering.
+nal for congestion, other latency components could also be
+relevant. While E2E latency signals are delayed, TTFT could         5   CONCLUSION
+offer early insights. An even earlier signal could be the in-       In this work, we propose beLLMan, which offers a frame-
+put tokens per unit time to the LLM serving system. GPU             work to plug in congestion control to LLM serving systems.
+utilization metrics can also serve as useful signals.               Our first-cut experiments show that an interface between
+Toward novel LLM congestion control An MPC (model                   the system and the LLM application actually works, keeping
+predictive control) controller [58] might be able to predict        serving latencies under check during periods of increased
+the system load and preemptively adjust 𝑟 better than the           load at the cost of modest drop in output quality.
+                                                                5
+                                                                                                                                                  Reddy et al.
+
+
+REFERENCES                                                                        [19] International Conference on Learning Representations (ICLR). 2025.
+ [1] 2025. vLLM. https://docs.vllm.ai/en/latest/.                                      About ICLR. https://iclr.cc/About.
+ [2] Sam Altman. 2025. “it’s super fun seeing people love images in               [20] Van Jacobson. 1988. Congestion avoidance and control. ACM SIG-
+     chatgpt. but our GPUs are melting”. https://x.com/sama/status/                    COMM computer communication review 18, 4 (1988), 314–329.
+     1905296867145154688. Accessed: 2025-06-15.                                   [21] Kunal Jain, Anjaly Parayil, Ankur Mallick, Esha Choukse, Xiaoting
+ [3] Anthropic. 2024. Tailor Claude’s responses to your personal style.                Qin, Jue Zhang, Íñigo Goiri, Rujia Wang, Chetan Bansal, Victor Rühle,
+     https://www.anthropic.com/news/styles. accessed 15 Jun 2025.                      Anoop Kulkarni, Steve Kofsky, and Saravan Rajmohan. 2025. Intel-
+ [4] Berk Atil, Sarp Aykent, Alexa Chittams, Lisheng Fu, Rebecca J. Pas-               ligent Router for LLM Workloads: Improving Performance Through
+     sonneau, Evan Radcliffe, Guru Rajan Rajagopal, Adam Sloan, Tomasz                 Workload-Aware Load Balancing. arXiv:2408.13510
+     Tudrej, Ferhan Ture, Zhe Wu, Lixinyu Xu, and Breck Baldwin. 2025.            [22] Youhe Jiang, Ran Yan, Xiaozhe Yao, Yang Zhou, Beidi Chen, and Bin-
+     Non-Determinism of "Deterministic" LLM Settings. arXiv:2408.04667                 hang Yuan. 2024. HexGen: Generative Inference of Large Language
+     (2025). https://arxiv.org/abs/2408.04667                                          Model over Heterogeneous Environment. arXiv:2311.11514 [cs.DC]
+ [5] John C. Baez, Tobias Fritz, and Tom Leinster. 2011. A Characterization            https://arxiv.org/abs/2311.11514
+     of Entropy in Terms of Information Loss. Entropy 13, 11 (Nov. 2011),         [23] Renlong Jie, Xiaojun Meng, Lifeng Shang, Xin Jiang, and Qun Liu. 2024.
+     1945–1957. https://doi.org/10.3390/e13111945                                      Prompt-Based Length Controlled Generation with Multiple Control
+ [6] Jeff Barr. 2019. Amazon EC2 Update – Inf1 Instances with AWS                      Types. In Findings of the Association for Computational Linguistics:
+     Inferentia Chips for High Performance Cost-Effective Inferenc-                    ACL 2024, Lun-Wei Ku, Andre Martins, and Vivek Srikumar (Eds.).
+     ing. https://aws.amazon.com/blogs/aws/amazon-ec2-update-inf1-                     Association for Computational Linguistics, Bangkok, Thailand, 1067–
+     instances-with-aws-inferentia-chips-for-high-performance-cost-                    1085. https://doi.org/10.18653/v1/2024.findings-acl.63
+     effective-inferencing/.                                                      [24] Yunho Jin, Chun-Feng Wu, David Brooks, and Gu-Yeon Wei. 2023. S3 :
+ [7] Iz Beltagy, Matthew E. Peters, and Arman Cohan. 2020. Longformer:                 Increasing GPU Utilization during Generative Inference for Higher
+     The Long-Document Transformer. arXiv:2004.05150 [cs.CL] https:                    Throughput. arXiv:2306.06000
+     //arxiv.org/abs/2004.05150                                                   [25] Aishwarya Kamath, Johan Ferret, Shreya Pathak, and et al. 2025.
+ [8] Lawrence S. Brakmo and Larry L. Peterson. 1995. TCP Vegas: End                    Gemma 3 Technical Report. Technical Report. Google DeepMind.
+     to end congestion avoidance on a global Internet. IEEE Journal on                 https://arxiv.org/abs/2503.19786
+     selected Areas in communications 13, 8 (1995), 1465–1480.                    [26] Leonard Kleinrock. 1979. Power and deterministic rules of thumb
+ [9] Neal Cardwell, Yuchung Cheng, C Stephen Gunn, Soheil Hassas                       for probabilistic problems in computer communications. In ICC 1979;
+     Yeganeh, and Van Jacobson. 2016. Bbr: Congestion-based congestion                 International Conference on Communications, Volume 3, Vol. 3. 43–1.
+     control: Measuring bottleneck bandwidth and round-trip propagation           [27] Dawei Li, Bohan Jiang, Liangjie Huang, Alimohammad Beigi, Cheng-
+     time. Queue 14, 5 (2016), 20–53.                                                  shuai Zhao, Zhen Tan, Amrita Bhattacharjee, Yuxuan Jiang, Canyu
+[10] Jianlv Chen, Shitao Xiao, Peitian Zhang, Kun Luo, Defu Lian,                      Chen, Tianhao Wu, et al. 2024. From generation to judgment: Opportu-
+     and Zheng Liu. 2024. BGE M3-Embedding: Multi-Lingual, Multi-                      nities and challenges of llm-as-a-judge. arXiv preprint arXiv:2411.16594
+     Functionality, Multi-Granularity Text Embeddings Through Self-                    (2024).
+     Knowledge Distillation. arXiv:2402.03216 (2024).                             [28] Zhuohan Li, Lianmin Zheng, Yinmin Zhong, Vincent Liu, Ying Sheng,
+[11] Cheng-Han Chiang and Hung yi Lee. 2023. Can Large Language Mod-                   Xin Jin, Yanping Huang, Zhifeng Chen, Hao Zhang, Joseph E. Gonzalez,
+     els Be an Alternative to Human Evaluations? (2023). arXiv:2305.01937              and Ion Stoica. 2023. AlpaServe: Statistical Multiplexing with Model
+[12] Dah-Ming Chiu and Raj Jain. 1989. Analysis of the increase and                    Parallelism for Deep Learning Serving. arXiv:2302.11665 [cs.LG]
+     decrease algorithms for congestion avoidance in computer networks.                https://arxiv.org/abs/2302.11665
+     Computer Networks and ISDN Systems 17, 1 (1989), 1–14. https://doi.          [29] Chin-Yew Lin. 2004. Rouge: A package for automatic evaluation of
+     org/10.1016/0169-7552(89)90019-6                                                  summaries. In Text summarization branches out. 74–81.
+[13] Seungbeom Choi, Jeonghoe Goo, Eunjoo Jeon, Mingyu Yang, and                  [30] Meta AI. 2024. Llama 3.3 70B Instruct. https://huggingface.co/meta-
+     Minsung Jang. 2025. ELIS: Efficient LLM Iterative Scheduling System               llama/Llama-3.3-70B-Instruct. Initial release: December 6, 2024;.
+     with Response Length Predictor. arXiv:2505.09142                             [31] Jacob Murel and Joshua Noble. 2024. What is LLM Temperature?
+[14] CognitiveTech. 2025.        Number of Parameters in GPT-4 (Lat-                   https://www.ibm.com/think/topics/llm-temperature.
+     est Data).            https://github.com/cognitivetech/llm-research-         [32] Zara Nasar, Syed Waqar Jaffry, and Muhammad Kamran Malik. 2021.
+     summaries/blob/main/models-review/Number-Parameters-in-                           Named entity recognition and relation extraction: State-of-the-art.
+     GPT-4-Latest-Data.md.                                                             ACM Computing Surveys (CSUR) 54, 1 (2021), 1–39.
+[15] Mo Dong, Qingxi Li, Doron Zarchy, P Brighten Godfrey, and Michael            [33] Chaintech Network. n.d.. 1980: The Year Of ARPANET Crash. https:
+     Schapira. 2015. {PCC}: Re-architecting congestion control for consis-             //www.chaintech.network/blog/1980-the-year-of-arpanet-crash/. Ac-
+     tent high performance. In 12th USENIX NSDI). 395–408.                             cessed: 2025-06-16.
+[16] Association for Computing Machinery. 2001–present. Internet Mea-             [34] Chengyi Nie, Rodrigo Fonseca, and Zhenhua Liu. 2024. Aladdin: Joint
+     surement Conference (IMC). https://www.sigcomm.org/events/imc-                    Placement and Scaling for SLO-Aware LLM Serving. arXiv:2405.06856
+     conference.                                                                  [35] OpenAI. 2024. GPT-4o: OpenAI’s Most Advanced Multimodal Model.
+[17] Jiawei Gu, Xuhui Jiang, Zhichao Shi, Hexiang Tan, Xuehao Zhai,                    https://openai.com/index/hello-gpt-4o/.
+     Chengjin Xu, Wei Li, Yinghan Shen, Shengjie Ma, Honghao Liu, et al.          [36] OpenAI. 2024. OpenAI o3: Advanced Reasoning Model. https://openai.
+     2024. A survey on llm-as-a-judge. arXiv preprint arXiv:2411.15594                 com/index/introducing-o3-and-o4-mini/.
+     (2024).                                                                      [37] OpenReview.net. 2022.         openreview-py.        https://github.com/
+[18] IBM. 2024. Prompting and Model Parameters – IBM watsonx SaaS                      openreview/openreview-py. Version v1.49.1,Accessed: 2025-06-10.
+     Documentation. https://www.ibm.com/docs/en/watsonx/saas?topic=               [38] Anand Padmanabha Iyer, Mingyu Guan, Yinwei Dai, Rui Pan, Swapnil
+     prompts-model-parameters-prompting.                                               Gandhi, and Ravi Netravali. 2024. Improving DNN Inference Through-
+                                                                                       put Using Practical, Per-Input Compute Adaptation. In Proceedings
+                                                                                       of the ACM SIGOPS 30th Symposium on Operating Systems Principles
+                                                                              6
+beLLMan: Controlling LLM Congestion
+
+
+     (Austin, TX, USA) (SOSP ’24). Association for Computing Machin-               [56] Benjamin Warner, Antoine Chaffin, Benjamin Clavié, Orion Weller,
+     ery, New York, NY, USA, 624–639. https://doi.org/10.1145/3694715.                  Oskar Hallström, Said Taghadouini, Alexis Gallagher, Raja Biswas,
+     3695978                                                                            Faisal Ladhak, Tom Aarsen, Nathan Cooper, Griffin Adams, Jeremy
+[39] Pratyush Patel, Esha Choukse, Chaojie Zhang, Íñigo Goiri, Brijesh                  Howard, and Iacopo Poli. 2024. Smarter, Better, Faster, Longer: A
+     Warrier, Nithish Mahalingam, and Ricardo Bianchini. 2024. Charac-                  Modern Bidirectional Encoder for Fast, Memory Efficient, and Long
+     terizing Power Management Opportunities for LLMs in the Cloud. In                  Context Finetuning and Inference. arXiv:2412.13663 (2024).
+     ACM ASPLOS.                                                                   [57] Hui Wei, Shenghua He, Tian Xia, Fei Liu, Andy Wong, Jingyang Lin,
+[40] Prompt Engineering. 2023. Prompt Engineering with Temperature                      and Mei Han. 2024. Systematic evaluation of llm-as-a-judge in llm
+     and Top-p. https://promptengineering.org/prompt-engineering-with-                  alignment tasks: Explainable metrics and diverse prompt templates.
+     temperature-and-top-p/ Accessed: 2025-06-16.                                       arXiv:2408.13006 (2024).
+[41] Haoran Qiu, Weichao Mao, Archit Patke, Shengkun Cui, Saurabh Jha,             [58] Wikipedia. 2025. Model Predictive Control — Wikipedia, the free en-
+     Chen Wang, Hubertus Franke, Zbigniew Kalbarczyk, Tamer Başar, and                  cyclopedia. https://en.wikipedia.org/wiki/Model_predictive_control.
+     Ravishankar K. Iyer. 2024. Power-aware Deep Learning Model Serving                 Accessed June 16, 2025.
+     with µ-Serve. In USENIX ATC 24. USENIX Association, Santa Clara, CA,          [59] Wikipedia. 2025. Richard E. Bellman — Wikipedia, the free encyclope-
+     75–93. https://www.usenix.org/conference/atc24/presentation/qiu                    dia. https://en.wikipedia.org/wiki/Richard_E._Bellman.
+[42] Tella Rajashekhar Reddy, Palak, Rohan Gandhi, Anjaly Parayil, Chaojie         [60] Yahoo Finance. 2025. Alphabet Inc. (GOOGL) Boosts AI Investment
+     Zhang, Mike Shepperd, Liangcheng Yu, Jayashree Mohan, Srinivasan                   to $75B, Expands Gemini AI Leadership. https://finance.yahoo.com/
+     Iyengar, Shivkumar Kalyanaraman, and Debopam Bhattacherjee. 2025.                  news/alphabet-inc-googl-boosts-ai-193628418.html.
+     AI Greenferencing: Routing AI Inferencing to Green Modular Data               [61] Zangwei Zheng, Xiaozhe Ren, Fuzhao Xue, Yang Luo, Xin Jiang, and
+     Centers with Heron. arXiv:2505.09989 [cs.DC] https://arxiv.org/abs/                Yang You. 2023. Response Length Perception and Sequence Scheduling:
+     2505.09989                                                                         An LLM-Empowered LLM Inference Pipeline. arXiv:2305.13144
+[43] Microsoft Research. 2024. Phi-3: A family of open models from Mi-
+     crosoft. https://azure.microsoft.com/en-us/blog/introducing-phi-3-
+     redefining-whats-possible-with-slms/. Accessed: 2025-06-10.
+                                                                                   A     EVALUATION PROMPT
+[44] Reuters. 2024. Alibaba to invest more than $52 billion in AI over             In our experiments, we tried various OpenAI o3 (reasoning
+     next three years. https://www.reuters.com/technology/artificial-              model) [36] prompt formulations to evaluate the similarity
+     intelligence/alibaba-invest-more-than-52-billion-ai-over-next-3-              between texts and picked the following that is the most
+     years-2025-02-24/.
+[45] Reuters. 2025. Amazon CEO sets out AI investment mission in annual
+                                                                                   consistent.
+     shareholder letter. https://rb.gy/emuya0 Accessed: 2025-06-16.
+[46] Reuters. 2025. Ghibli effect: ChatGPT usage hits record after rollout             Evaluation Prompt
+     of viral feature. https://rb.gy/vx2m0n Accessed: 2025-06-16.
+[47] Reuters. 2025. Microsoft plans to invest $80 billion on AI-enabled data           Give me a similarity score between 0 (no similarity)
+     centers in fiscal 2025. https://rb.gy/zs0tga Accessed: 2025-06-16.                and 100 (exactly similar) for the test text compared
+[48] Reuters. 2025. Nvidia, Elon Musk’s xAI to join Microsoft, BlackRock to            to the reference text below. The score should reflect
+     develop AI infrastructure. https://rb.gy/wue1g6. Accessed: 2025-06-16.
+                                                                                       the information content loss and entropy loss in the
+[49] Paul Smith-Goodson. 2025. The Stargate Project: Trump Touts $500
+     Billion Bid For AI Dominance. Forbes. https://rb.gy/rlhilr Accessed:              test text compared to the reference text. The score
+     2025-06-15.                                                                       should not reflect the core theme or the main idea
+[50] Seoha Song, Junhyun Lee, and Hyeonmok Ko. 2025. Hansel: output                    of the text which is same anyway. Think and then
+     length controlling framework for large language models. In Proceed-               arrive at a single score.
+     ings of the Thirty-Ninth AAAI Conference on Artificial Intelligence and
+                                                                                       Reference text: <text>
+     Thirty-Seventh Conference on Innovative Applications of Artificial In-
+     telligence and Fifteenth Symposium on Educational Advances in Artifi-             Test text: <text>
+     cial Intelligence (AAAI’25/IAAI’25/EAAI’25). AAAI Press, Article 2802,
+     9 pages. https://doi.org/10.1609/aaai.v39i23.34700
+[51] W. Stevens. 1997. RFC2001: TCP Slow Start, Congestion Avoidance,
+     Fast Retransmit, and Fast Recovery Algorithms.
+[52] Jovan Stojkovic, Chaojie Zhang, Íñigo Goiri, Josep Torrellas, and Esha
+     Choukse. 2025. DynamoLLM: Designing LLM Inference Clusters for
+     Performance and Energy Efficiency. In 2025 IEEE HPCA. 1348–1362.
+     https://doi.org/10.1109/HPCA61900.2025.00102
+[53] Saba Sturua, Isabelle Mohr, Mohammad Kalim Akram, Michael Gün-
+     ther, Bo Wang, Markus Krimmel, Feng Wang, Georgios Mastrapas, An-
+     dreas Koukounas, Nan Wang, and Han Xiao. 2024. jina-embeddings-v3:
+     Multilingual Embeddings With Task LoRA. arXiv:2409.10173 (2024).
+[54] SweatyCrayfish. 2024. LLaMA 3 8B - Quantized. https://huggingface.
+     co/SweatyCrayfish/llama-3-8b-quantized.
+[55] Department of Computer Science & Engineering University of Wash-
+     ington. 2017. Congestion Control. Course lecture notes, CSE 461,
+     Autumn 2017. https://courses.cs.washington.edu/courses/cse461/
+     17au/lectures/04-2-congestionControl.pdf
+                                                                               7
+
