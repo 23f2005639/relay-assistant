@@ -1,0 +1,34 @@
+latency[0] http=200 ttft=891.0ms total=892.0ms in=79 out=20 cached=0 rem_tok=7901 rem_req=995 
+latency[1] http=0 ttft=Nonems total=5007.9ms in=0 out=0 cached=0 rem_tok=None rem_req=None CallTimeout
+   body: ConnectTimeout
+latency[2] http=200 ttft=1283.2ms total=1283.8ms in=79 out=20 cached=0 rem_tok=7901 rem_req=994 
+latency[3] http=200 ttft=940.4ms total=941.7ms in=79 out=20 cached=0 rem_tok=7901 rem_req=993 
+latency[4] http=200 ttft=1227.4ms total=1228.6ms in=79 out=20 cached=0 rem_tok=7901 rem_req=992 
+latency[5] http=200 ttft=155.7ms total=160.4ms in=79 out=20 cached=0 rem_tok=7901 rem_req=991 
+latency[6] http=200 ttft=877.3ms total=878.3ms in=79 out=20 cached=0 rem_tok=7901 rem_req=990 
+latency[7] http=200 ttft=1214.0ms total=1215.0ms in=79 out=20 cached=0 rem_tok=7901 rem_req=989 
+latency[8] http=200 ttft=1089.3ms total=1090.3ms in=79 out=20 cached=0 rem_tok=7901 rem_req=988 
+latency[9] http=200 ttft=164.0ms total=167.9ms in=79 out=20 cached=0 rem_tok=7901 rem_req=987 
+latency[10] http=200 ttft=990.8ms total=992.0ms in=79 out=20 cached=0 rem_tok=7901 rem_req=986 
+latency[11] http=200 ttft=729.5ms total=730.6ms in=79 out=20 cached=0 rem_tok=7901 rem_req=985 
+latency[12] http=200 ttft=425.9ms total=426.9ms in=79 out=20 cached=0 rem_tok=7901 rem_req=984 
+latency[13] http=200 ttft=1093.3ms total=1094.4ms in=79 out=20 cached=0 rem_tok=7901 rem_req=983 
+latency[14] http=200 ttft=707.6ms total=708.6ms in=79 out=20 cached=0 rem_tok=7901 rem_req=982 
+latency[15] http=200 ttft=512.0ms total=513.1ms in=79 out=20 cached=0 rem_tok=7901 rem_req=981 
+latency[16] http=200 ttft=1090.6ms total=1091.5ms in=79 out=20 cached=0 rem_tok=7901 rem_req=980 
+latency[17] http=200 ttft=676.1ms total=677.4ms in=79 out=20 cached=0 rem_tok=7901 rem_req=979 
+latency[18] http=200 ttft=480.8ms total=481.7ms in=79 out=20 cached=0 rem_tok=7901 rem_req=978 
+latency[19] http=200 ttft=516.5ms total=517.3ms in=79 out=20 cached=0 rem_tok=7901 rem_req=977 
+cache[0] http=200 ttft=Nonems total=571.1ms in=1346 out=30 cached=0 rem_tok=6634 rem_req=976 
+cache[1] http=200 ttft=Nonems total=1032.0ms in=1346 out=30 cached=0 rem_tok=5718 rem_req=975 
+cache[2] http=200 ttft=Nonems total=1088.3ms in=1346 out=30 cached=0 rem_tok=4891 rem_req=974 
+limit[0] http=200 ttft=Nonems total=581.4ms in=1276 out=10 cached=0 rem_tok=6714 rem_req=973 
+limit[1] http=200 ttft=Nonems total=472.3ms in=1276 out=10 cached=0 rem_tok=5498 rem_req=972 
+limit[2] http=200 ttft=Nonems total=546.7ms in=1276 out=10 cached=0 rem_tok=4276 rem_req=971 
+limit[3] http=200 ttft=Nonems total=1025.0ms in=1276 out=10 cached=0 rem_tok=3061 rem_req=970 
+limit[4] http=200 ttft=Nonems total=1023.0ms in=1276 out=10 cached=0 rem_tok=1913 rem_req=969 
+limit[5] http=200 ttft=Nonems total=764.9ms in=1276 out=10 cached=0 rem_tok=761 rem_req=968 
+limit[6] http=429 ttft=Nonems total=82.4ms in=0 out=0 cached=0 rem_tok=863 rem_req=968 429 tokens_per_minute retry_after=4.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on tokens per minute (TPM): Limit 8000, Used 7137, Requested 1286. Please try again in 3.1725s. Need more tokens? Upgrade to Dev Tier today at https://cons
+   refused; retry-after=4. Waiting that long, then one more call to time the recovery.
+limit-recovery[7] http=200 ttft=Nonems total=790.5ms in=75 out=10 cached=0 rem_tok=1384 rem_req=967 

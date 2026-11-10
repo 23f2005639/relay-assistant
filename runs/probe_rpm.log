@@ -1,0 +1,66 @@
+rpm[0] http=200 ttft=Nonems total=469.0ms in=75 out=8 cached=0 rem_tok=7917 rem_req=988 
+rpm[1] http=200 ttft=Nonems total=427.6ms in=75 out=8 cached=0 rem_tok=7868 rem_req=987 
+rpm[2] http=200 ttft=Nonems total=698.3ms in=75 out=8 cached=0 rem_tok=7826 rem_req=986 
+rpm[3] http=200 ttft=Nonems total=610.7ms in=75 out=8 cached=0 rem_tok=7782 rem_req=985 
+rpm[5] http=200 ttft=Nonems total=516.6ms in=75 out=8 cached=0 rem_tok=7696 rem_req=983 
+rpm[6] http=200 ttft=Nonems total=296.7ms in=75 out=8 cached=0 rem_tok=7651 rem_req=982 
+rpm[8] http=200 ttft=Nonems total=308.4ms in=75 out=8 cached=0 rem_tok=7562 rem_req=980 
+rpm[9] http=200 ttft=Nonems total=440.7ms in=75 out=8 cached=0 rem_tok=7522 rem_req=979 
+rpm[4] http=200 ttft=Nonems total=2005.1ms in=75 out=8 cached=0 rem_tok=7740 rem_req=984 
+rpm[7] http=200 ttft=Nonems total=1430.3ms in=75 out=8 cached=0 rem_tok=7605 rem_req=981 
+rpm[11] http=200 ttft=Nonems total=290.0ms in=75 out=8 cached=0 rem_tok=7432 rem_req=977 
+rpm[10] http=200 ttft=Nonems total=791.1ms in=75 out=8 cached=0 rem_tok=7477 rem_req=978 
+rpm[12] http=200 ttft=Nonems total=450.4ms in=75 out=8 cached=0 rem_tok=7390 rem_req=976 
+rpm[13] http=200 ttft=Nonems total=502.9ms in=75 out=8 cached=0 rem_tok=7346 rem_req=975 
+rpm[14] http=200 ttft=Nonems total=500.9ms in=75 out=8 cached=0 rem_tok=7302 rem_req=974 
+rpm[15] http=200 ttft=Nonems total=704.3ms in=75 out=8 cached=0 rem_tok=7259 rem_req=973 
+rpm[16] http=200 ttft=Nonems total=519.5ms in=75 out=8 cached=0 rem_tok=7216 rem_req=972 
+rpm[17] http=200 ttft=Nonems total=394.5ms in=75 out=8 cached=0 rem_tok=7172 rem_req=971 
+rpm[18] http=200 ttft=Nonems total=448.8ms in=75 out=8 cached=0 rem_tok=7126 rem_req=970 
+rpm[19] http=200 ttft=Nonems total=389.7ms in=75 out=8 cached=0 rem_tok=7085 rem_req=969 
+rpm[20] http=200 ttft=Nonems total=428.4ms in=75 out=8 cached=0 rem_tok=7043 rem_req=968 
+rpm[21] http=200 ttft=Nonems total=308.7ms in=75 out=8 cached=0 rem_tok=6999 rem_req=967 
+rpm[22] http=200 ttft=Nonems total=451.9ms in=75 out=8 cached=0 rem_tok=6955 rem_req=966 
+rpm[24] http=429 ttft=Nonems total=116.3ms in=0 out=0 cached=0 rem_tok=None rem_req=965 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[23] http=200 ttft=Nonems total=606.8ms in=75 out=8 cached=0 rem_tok=6912 rem_req=965 
+rpm[25] http=429 ttft=Nonems total=49.0ms in=0 out=0 cached=0 rem_tok=None rem_req=965 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[26] http=429 ttft=Nonems total=54.2ms in=0 out=0 cached=0 rem_tok=None rem_req=965 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[27] http=429 ttft=Nonems total=52.0ms in=0 out=0 cached=0 rem_tok=None rem_req=965 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[28] http=429 ttft=Nonems total=52.3ms in=0 out=0 cached=0 rem_tok=None rem_req=965 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[29] http=429 ttft=Nonems total=59.9ms in=0 out=0 cached=0 rem_tok=None rem_req=965 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[31] http=429 ttft=Nonems total=125.2ms in=0 out=0 cached=0 rem_tok=None rem_req=964 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[30] http=200 ttft=Nonems total=440.1ms in=75 out=8 cached=0 rem_tok=7100 rem_req=964 
+rpm[32] http=429 ttft=Nonems total=61.9ms in=0 out=0 cached=0 rem_tok=None rem_req=964 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[33] http=429 ttft=Nonems total=54.7ms in=0 out=0 cached=0 rem_tok=None rem_req=964 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[34] http=429 ttft=Nonems total=53.9ms in=0 out=0 cached=0 rem_tok=None rem_req=964 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[35] http=429 ttft=Nonems total=52.8ms in=0 out=0 cached=0 rem_tok=None rem_req=964 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[36] http=429 ttft=Nonems total=59.6ms in=0 out=0 cached=0 rem_tok=None rem_req=964 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[38] http=429 ttft=Nonems total=125.0ms in=0 out=0 cached=0 rem_tok=None rem_req=963 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[37] http=200 ttft=Nonems total=568.8ms in=75 out=8 cached=0 rem_tok=7297 rem_req=963 
+rpm[39] http=429 ttft=Nonems total=56.4ms in=0 out=0 cached=0 rem_tok=None rem_req=963 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[40] http=429 ttft=Nonems total=58.7ms in=0 out=0 cached=0 rem_tok=None rem_req=963 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[41] http=429 ttft=Nonems total=53.4ms in=0 out=0 cached=0 rem_tok=None rem_req=963 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[42] http=429 ttft=Nonems total=55.8ms in=0 out=0 cached=0 rem_tok=None rem_req=963 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[43] http=429 ttft=Nonems total=54.2ms in=0 out=0 cached=0 rem_tok=None rem_req=963 429 tokens_per_minute retry_after=2.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on requests per minute (RPM): Limit 30, Used 30, Requested 1. Please try again in 2s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billin
+rpm[44] http=200 ttft=Nonems total=529.9ms in=75 out=8 cached=0 rem_tok=7493 rem_req=962 
+   45 calls in 13.7s: 27 accepted, 18 refused
+   first refusal: call 25, sent at t=7.2s, retry-after=2
+rpm-recovery[45] http=200 ttft=Nonems total=536.1ms in=75 out=8 cached=0 rem_tok=7823 rem_req=961 
