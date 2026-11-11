@@ -1,0 +1,43 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+retry-naive-0000,retry-naive,stand-in,2026-11-11T11:45:22.331+05:30,903.3,918.7,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,912.7,0.0,889.6,1,0,q05,
+retry-naive-0001,retry-naive,stand-in,2026-11-11T11:45:24.293+05:30,2196.8,2211.4,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,2208.8,0.0,2190.2,1,0,q02,
+retry-naive-0002,retry-naive,stand-in,2026-11-11T11:45:36.923+05:30,1799.4,1819.6,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1806.2,0.0,1784.8,1,0,q05,
+retry-naive-0003,retry-naive,stand-in,2026-11-11T11:45:37.825+05:30,917.4,917.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,917.4,0,1,q05,shared an identical question's answer
+retry-naive-0004,retry-naive,stand-in,2026-11-11T11:45:47.037+05:30,10.3,10.3,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,10.3,0,1,q05,shared an identical question's answer
+retry-naive-0005,retry-naive,stand-in,2026-11-11T11:45:52.499+05:30,2357.7,2381.0,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,2373.7,0.0,2336.1,1,0,q01,
+retry-naive-0006,retry-naive,stand-in,2026-11-11T11:45:53.216+05:30,232.9,232.9,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,8.2,222.9,,1,0,q03,rate limit
+retry-naive-0007,retry-naive,stand-in,2026-11-11T11:46:01.714+05:30,8.4,8.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,8.4,0,1,q05,shared an identical question's answer
+retry-naive-0008,retry-naive,stand-in,2026-11-11T11:46:02.172+05:30,831.7,853.3,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,851.0,0.0,823.1,1,0,q19,
+retry-naive-0009,retry-naive,stand-in,2026-11-11T11:46:08.995+05:30,230.9,230.9,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.8,217.5,,1,0,q02,rate limit
+retry-naive-0010,retry-naive,stand-in,2026-11-11T11:46:09.864+05:30,226.0,226.0,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.8,218.1,,1,0,q19,rate limit
+retry-naive-0011,retry-naive,stand-in,2026-11-11T11:46:11.005+05:30,223.1,223.1,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,4.8,215.6,,1,0,q19,rate limit
+retry-naive-0012,retry-naive,stand-in,2026-11-11T11:46:17.636+05:30,817.0,833.8,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,825.8,0.0,809.8,1,0,q02,
+retry-naive-0013,retry-naive,stand-in,2026-11-11T11:46:38.679+05:30,10244.5,10244.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,10013.4,221.2,,1,0,q02,rate limit
+retry-naive-0014,retry-naive,stand-in,2026-11-11T11:46:40.265+05:30,223.2,223.2,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.1,6.1,214.1,,1,0,q05,rate limit
+retry-naive-0015,retry-naive,stand-in,2026-11-11T11:46:43.296+05:30,216.7,216.8,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,4.6,207.6,,1,0,q02,rate limit
+retry-naive-0016,retry-naive,stand-in,2026-11-11T11:46:55.144+05:30,780.8,793.6,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,787.1,0.0,774.7,1,0,q19,
+retry-naive-0017,retry-naive,stand-in,2026-11-11T11:47:30.556+05:30,826.1,841.7,ok,0,2074,182,medium-300w-k4-rerank,,full,0.0,839.6,0.0,816.9,1,0,u02,
+retry-naive-0018,retry-naive,stand-in,2026-11-11T11:47:40.883+05:30,10.1,10.1,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,10.1,0,1,q05,shared an identical question's answer
+retry-naive-0019,retry-naive,stand-in,2026-11-11T11:47:46.947+05:30,11083.9,11096.5,ok,1,1620,184,medium-300w-k4-rerank,,full,0.0,10015.1,1073.8,11076.5,1,0,q07,"retried once after CallTimeout, waited 0.1s"
+retry-naive-0020,retry-naive,stand-in,2026-11-11T11:48:31.831+05:30,1130.1,1143.6,ok,0,2444,187,medium-300w-k4-rerank,,full,0.0,1114.2,0.0,1122.2,1,0,q18,
+retry-naive-0021,retry-naive,stand-in,2026-11-11T11:48:32.404+05:30,11215.9,11230.3,ok,1,2252,188,medium-300w-k4-rerank,,full,0.0,10017.2,1210.7,11208.4,1,0,q19,"retried once after CallTimeout, waited 0.1s"
+retry-naive-0022,retry-naive,stand-in,2026-11-11T11:48:55.867+05:30,1674.1,1686.0,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,1676.9,0.0,1666.3,1,0,q02,
+retry-naive-0023,retry-naive,stand-in,2026-11-11T11:48:59.970+05:30,231.8,231.8,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,6.1,220.8,,1,0,q18,rate limit
+retry-naive-0024,retry-naive,stand-in,2026-11-11T11:49:01.839+05:30,230.3,230.3,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.6,220.6,,1,0,q11,rate limit
+retry-naive-0025,retry-naive,stand-in,2026-11-11T11:49:03.343+05:30,230.3,230.3,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.1,4.7,222.2,,1,0,q15,rate limit
+retry-naive-0026,retry-naive,stand-in,2026-11-11T11:49:07.770+05:30,1327.1,1343.9,ok,0,1808,168,medium-300w-k4-rerank,,full,0.0,1338.8,0.0,1319.9,1,0,q08,
+retry-naive-0027,retry-naive,stand-in,2026-11-11T11:49:28.092+05:30,3685.9,3699.2,ok,0,1868,190,medium-300w-k4-rerank,,full,0.0,3679.4,0.0,3678.3,1,0,u03,
+retry-naive-0028,retry-naive,stand-in,2026-11-11T11:49:30.484+05:30,224.9,224.9,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.3,216.0,,1,0,q03,rate limit
+retry-naive-0029,retry-naive,stand-in,2026-11-11T11:49:40.940+05:30,1219.4,1232.7,ok,0,1664,188,medium-300w-k4-rerank,,full,0.0,1223.9,0.0,1214.3,1,0,q17,
+retry-naive-0030,retry-naive,stand-in,2026-11-11T11:49:53.163+05:30,230.0,230.0,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.7,211.7,,1,0,q11,rate limit
+retry-naive-0031,retry-naive,stand-in,2026-11-11T11:49:58.753+05:30,875.8,891.5,ok,0,1842,200,medium-300w-k4-rerank,,full,0.0,884.3,0.0,870.1,1,0,q10,
+retry-naive-0032,retry-naive,stand-in,2026-11-11T11:50:08.276+05:30,637.5,649.9,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,639.8,0.0,630.0,1,0,q03,
+retry-naive-0033,retry-naive,stand-in,2026-11-11T11:50:09.054+05:30,227.0,227.0,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.9,219.3,,1,0,q04,rate limit
+retry-naive-0034,retry-naive,stand-in,2026-11-11T11:50:09.791+05:30,225.3,225.3,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,3.7,219.3,,1,0,q03,rate limit
+retry-naive-0035,retry-naive,stand-in,2026-11-11T11:50:12.559+05:30,229.5,229.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,221.9,,1,0,q04,rate limit
+retry-naive-0036,retry-naive,stand-in,2026-11-11T11:50:26.247+05:30,1818.2,1829.0,ok,0,2074,182,medium-300w-k4-rerank,,full,0.0,1822.5,0.0,1811.0,1,0,u02,
+retry-naive-0037,retry-naive,stand-in,2026-11-11T11:50:32.942+05:30,5.9,5.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,5.9,0,1,q05,shared an identical question's answer
+retry-naive-0038,retry-naive,stand-in,2026-11-11T11:50:37.467+05:30,228.8,228.8,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,6.1,216.1,,1,0,q11,rate limit
+retry-naive-0039,retry-naive,stand-in,2026-11-11T11:50:48.037+05:30,10242.0,10242.0,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,10010.8,218.5,,1,0,q12,rate limit
+retry-naive-0040,retry-naive,stand-in,2026-11-11T11:50:55.280+05:30,234.1,234.1,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,6.0,222.4,,1,0,q19,rate limit
+retry-naive-0041,retry-naive,stand-in,2026-11-11T11:50:59.557+05:30,232.5,232.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.1,6.1,223.4,,1,0,q03,rate limit

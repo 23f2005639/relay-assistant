@@ -1,0 +1,67 @@
+[q01] full/ok 812ms in=1401 out=130
+Evidence: "establishing a new state-of-the-art BLEU score of 28.4." [ATT §6.1 Machine Translation, p.8]
+The big Transformer reaches a BLEU score of 28.4 on English‑to‑German . [ATT §6.1 Machine Translation, p.8]
+
+
+[q02] full/ok 16505ms in=1431 out=137
+Evidence: "we settle on a theoretical latency of 160ms by pretraining Moshi with an acoustic delay of 2 and finetuning it with an acoustic delay of 1." [MOSHI §5.3 Ablations on generative modeling, p.26]
+The theoretical latency of Moshi is 160 ms . [MOSHI §5.3 Ablations on generative modeling, p.26]
+
+
+[q03] full/ok 17127ms in=2620 out=258
+H‑Net decides chunk boundaries by computing a boundary probability for each token based only on the current and previous representations, ensuring causality. [HNET §2.4 Autoregressive Training and Inference, p.9]
+
+
+[q04] full/ok 7437ms in=615 out=216
+Evidence: "We used the Adam optimizer [20] with β1 = 0.9, β2 = 0.98 and ϵ = 10−9 . We varied the learning rate over the course of training, according to the formula: −0.5 lrate = d−0.5 , step_num · warmup_steps−1.5 ) model · min(step_num (3) This corresponds to increasing the learning rate linearly for the first warmup_steps training steps, and decreasing it thereafter proportionally to the inverse square root of the step number. We used warmup_steps = 4000." [ATT §5.3 Optimizer, p.7]
+The original Transformer was trained with the Adam optimizer  and used a linear warmup for the first 4000 steps, after which the learning rate decayed proportionally to the inverse square root of the step number . [ATT §5.3 Optimizer, p.7]
+
+
+[q05] full/ok 13300ms in=1892 out=133
+Evidence: "Mimi, adv. loss only  |  24kHz  |  12.5Hz  |  1.1kbps" [MOSHI Table 4, p.23]
+The Mimi codec operates at a frame rate of 12.5 Hz and a bitrate of 1.1 kbps . [MOSHI Table 4, p.23]
+
+
+[q06] full/ok 16966ms in=1663 out=253
+Evidence: "Without explicit regularization, the model may converge to trivial solutions: either retaining nearly all vectors (negating computational benefits) or compressing excessively (losing critical information)." [HNET §2.2.3 Ratio Loss, p.8]
+Evidence: "we introduce a ratio loss to guide compression: 𝐿 Lratio = 𝑁 ((𝑁 − 1)𝐹𝐺 + (1 − 𝐹 ) (1 − 𝐺))" [HNET §2.2.3 Ratio Loss, p.8]
+Evidence: "When 𝐹 = 𝐺, the loss attains a minimum of Lratio = 1 when 𝐹 = 𝐺 = 𝑁1 ." [HNET §2.2.3 Ratio Loss, p.8]
+This prevents trivial solutions where the model either keeps almost everything or compresses too much, ensuring content‑adaptive compression . [HNET §2.2.3 Ratio Loss, p.8]
+
+
+[q08] full/ok 11307ms in=1281 out=216
+Evidence: "We chose this function because we hypothesized it would allow the model to easily learn to attend by relative positions, since for any fixed offset k, P Epos+k can be represented as a linear function of P Epos ." [ATT §3.5 O(n2 · d), p.6]
+Evidence: "We also experimented with using learned positional embeddings [9] instead, and found that the two versions produced nearly identical results (see Table 3 row (E))." [ATT §3.5 O(n2 · d), p.6]
+Evidence: "We chose the sinusoidal version because it may allow the model to extrapolate to sequence lengths longer than the ones encountered during training." [ATT §3.5 O(n2 · d), p.6]
+The authors chose sinusoidal encodings because they hypothesize it lets the model learn relative positions via a linear relationship between offsets, and because it may extrapolate to longer sequences . [ATT §3.5 O(n2 · d), p.6]
+They also tested learned embeddings and found similar performance, so the choice was mainly for extrapolation and relative‑position convenience . [ATT §3.5 O(n2 · d), p.6]
+
+
+[q11] full/ok 16748ms in=1787 out=109
+Evidence: "speech-to-speech generation can be drastically improved by Inner Monologue, a new method that generates text tokens as a prefix to audio tokens, while remaining compatible with streaming inference." [MOSHI §7 Conclusion, p.41]
+The Inner Monologue method generates text tokens as a prefix to audio tokens, improving speech‑to‑speech generation while staying compatible with streaming inference . [MOSHI §7 Conclusion, p.41]
+
+
+[q13] full/ok 10822ms in=1347 out=170
+Evidence: "semantic tokens extracted from self-supervised speech models (Baevski et al., 2020; Hsu et al., 2021; Chung et al., 2021)" [MOSHI §3.3 Audio Tokenization, p.9]
+Mimi distills semantic information from the self‑supervised speech models of Baevski et al. 2020, Hsu et al. 2021, and Chung et al. 2021 . [MOSHI §3.3 Audio Tokenization, p.9]
+
+
+[q16] refused/ok 17895ms in=2603 out=147
+The papers in this library do not say, so I will not guess.
+
+[q19] refused/ok 21005ms in=2169 out=50
+The papers in this library do not say, so I will not guess.
+
+[u01] refused/ok 7590ms in=1403 out=31
+The papers in this library do not say, so I will not guess.
+
+[u02] refused/ok 14778ms in=1736 out=34
+The papers in this library do not say, so I will not guess.
+
+[u04] refused/ok 9799ms in=1164 out=32
+The papers in this library do not say, so I will not guess.
+
+[u05] refused/ok 10376ms in=1527 out=37
+The papers in this library do not say, so I will not guess.
+

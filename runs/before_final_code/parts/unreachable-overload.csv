@@ -1,0 +1,21 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+overload-unreachable-0000,overload-provider-unreachable,real,2026-11-11T11:56:18.479+05:30,565.9,565.9,error,1,0,0,medium-300w-k4-rerank,,extractive,0.1,17.0,543.8,,1,0,q05,connection cut
+overload-unreachable-0001,overload-provider-unreachable,real,2026-11-11T11:56:19.706+05:30,650.7,650.7,error,1,0,0,medium-300w-k4-rerank,,extractive,0.1,7.2,640.7,,1,0,q02,connection cut
+overload-unreachable-0002,overload-provider-unreachable,real,2026-11-11T11:56:27.599+05:30,649.3,649.3,error,1,0,0,medium-300w-k4-rerank,,extractive,0.1,6.1,633.6,,1,0,q05,connection cut
+overload-unreachable-0003,overload-provider-unreachable,real,2026-11-11T11:56:28.163+05:30,85.4,85.4,error,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.0,0.0,85.4,0,1,q05,shared an identical question's answer
+overload-unreachable-0004,overload-provider-unreachable,real,2026-11-11T11:56:33.921+05:30,539.9,539.9,error,1,0,0,medium-300w-k4-rerank,,extractive,0.1,8.4,524.2,,1,0,q05,connection cut
+overload-unreachable-0005,overload-provider-unreachable,real,2026-11-11T11:56:37.335+05:30,724.9,724.9,error,1,0,0,medium-300w-k4-rerank,,extractive,0.0,6.8,712.9,,1,0,q01,connection cut
+overload-unreachable-0006,overload-provider-unreachable,real,2026-11-11T11:56:37.783+05:30,572.0,572.0,error,1,0,0,medium-300w-k4-rerank,,extractive,0.1,6.8,562.8,,1,0,q03,connection cut
+overload-unreachable-0007,overload-provider-unreachable,real,2026-11-11T11:56:43.094+05:30,9.0,9.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q05,self-throttled: provider is rejecting
+overload-unreachable-0008,overload-provider-unreachable,real,2026-11-11T11:56:43.380+05:30,5.1,5.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.3,0.0,,0,0,q19,self-throttled: provider is rejecting
+overload-unreachable-0009,overload-provider-unreachable,real,2026-11-11T11:56:47.644+05:30,530.5,530.5,error,1,0,0,medium-300w-k4-rerank,,extractive,0.0,7.1,516.5,,1,0,q02,connection cut
+overload-unreachable-0010,overload-provider-unreachable,real,2026-11-11T11:56:48.188+05:30,5.6,5.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.3,0.0,,0,0,q19,self-throttled: provider is rejecting
+overload-unreachable-0011,overload-provider-unreachable,real,2026-11-11T11:56:48.901+05:30,3.2,3.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.4,0.0,,0,0,q19,self-throttled: provider is rejecting
+overload-unreachable-0012,overload-provider-unreachable,real,2026-11-11T11:56:53.045+05:30,2.8,2.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.7,0.0,,0,0,q02,self-throttled: provider is rejecting
+overload-unreachable-0013,overload-provider-unreachable,real,2026-11-11T11:57:06.197+05:30,16.8,16.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q02,self-throttled: provider is rejecting
+overload-unreachable-0014,overload-provider-unreachable,real,2026-11-11T11:57:07.188+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q05,self-throttled: provider is rejecting
+overload-unreachable-0015,overload-provider-unreachable,real,2026-11-11T11:57:09.083+05:30,7.0,7.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q02,self-throttled: provider is rejecting
+overload-unreachable-0016,overload-provider-unreachable,real,2026-11-11T11:57:16.488+05:30,12.1,12.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q19,self-throttled: provider is rejecting
+overload-unreachable-0017,overload-provider-unreachable,real,2026-11-11T11:57:38.620+05:30,26.2,26.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,u02,self-throttled: provider is rejecting
+overload-unreachable-0018,overload-provider-unreachable,real,2026-11-11T11:57:45.075+05:30,7.9,7.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.2,0.0,,0,0,q05,self-throttled: provider is rejecting
+overload-unreachable-0019,overload-provider-unreachable,real,2026-11-11T11:57:48.864+05:30,7.5,7.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q07,self-throttled: provider is rejecting

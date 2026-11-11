@@ -1,0 +1,21 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+overload-0000,overload,real,2026-11-11T12:53:45.437+05:30,762.2,845.8,ok,0,2849,166,medium-300w-k4-rerank,,full,0.1,840.0,0.0,717.1,1,0,q05,
+overload-0001,overload,real,2026-11-11T12:53:46.664+05:30,888.1,1052.0,ok,0,1962,213,medium-300w-k4-rerank,,full,0.1,1049.5,0.0,813.7,1,0,q02,
+overload-0002,overload,real,2026-11-11T12:53:54.557+05:30,746.9,912.0,ok,0,2849,166,medium-300w-k4-rerank,,full,0.0,905.5,0.0,702.0,1,0,q05,
+overload-0003,overload,real,2026-11-11T12:53:55.121+05:30,348.2,348.2,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,348.2,0,1,q05,shared an identical question's answer
+overload-0004,overload,real,2026-11-11T12:54:00.878+05:30,6.8,6.8,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,6.8,0,1,q05,shared an identical question's answer
+overload-0005,overload,real,2026-11-11T12:54:04.293+05:30,513.9,514.0,ok,0,1377,102,medium-300w-k4-rerank,,lean,0.0,509.6,0.0,442.2,1,0,q01,
+overload-0006,overload,real,2026-11-11T12:54:04.741+05:30,15773.8,15773.8,rate_limited,1,0,0,medium-300w-k4-rerank,,extractive,4606.6,129.6,11036.4,,2,0,q03,rate limit
+overload-0007,overload,real,2026-11-11T12:54:10.052+05:30,2.2,2.2,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,2.2,0,1,q05,shared an identical question's answer
+overload-0008,overload,real,2026-11-11T12:54:10.338+05:30,4860.5,4860.5,ok,0,1353,120,medium-300w-k4-rerank,,refused,4133.6,723.8,0.0,4748.9,1,0,q19,nothing in the draft survived checking
+overload-0009,overload,real,2026-11-11T12:54:14.602+05:30,8217.1,8298.7,ok,0,1035,124,medium-300w-k4-rerank,,lean,7908.5,388.2,0.0,8184.8,1,0,q02,
+overload-0010,overload,real,2026-11-11T12:54:15.145+05:30,3.5,3.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q19,predicted wait 18.5s exceeds patience
+overload-0011,overload,real,2026-11-11T12:54:15.859+05:30,3.1,3.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.7,0.0,,0,0,q19,predicted wait 27.5s exceeds patience
+overload-0012,overload,real,2026-11-11T12:54:20.003+05:30,3.0,3.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.2,0.0,,0,0,q02,predicted wait 21.0s exceeds patience
+overload-0013,overload,real,2026-11-11T12:54:33.155+05:30,401.8,484.4,ok,0,1035,124,medium-300w-k4-rerank,,lean,0.0,472.6,0.0,371.3,1,0,q02,
+overload-0014,overload,real,2026-11-11T12:54:34.146+05:30,4847.0,4847.0,ok,0,1389,139,medium-300w-k4-rerank,,lean,4217.6,628.0,0.0,4770.1,1,0,q05,
+overload-0015,overload,real,2026-11-11T12:54:36.041+05:30,0.7,0.7,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,0.7,0,1,q02,shared an identical question's answer
+overload-0016,overload,real,2026-11-11T12:54:43.446+05:30,7644.8,7644.8,ok,0,1353,120,medium-300w-k4-rerank,,refused,7167.2,471.4,0.0,7540.3,1,0,q19,nothing in the draft survived checking
+overload-0017,overload,real,2026-11-11T12:55:05.578+05:30,567.7,567.8,ok,0,1304,33,medium-300w-k4-rerank,,refused,0.0,552.0,0.0,559.0,1,0,u02,model judged the pieces insufficient
+overload-0018,overload,real,2026-11-11T12:55:12.032+05:30,7.2,7.2,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,7.2,0,1,q05,shared an identical question's answer
+overload-0019,overload,real,2026-11-11T12:55:15.822+05:30,634.4,655.6,ok,0,1155,103,medium-300w-k4-rerank,,lean,0.0,653.5,0.0,586.8,1,0,q07,

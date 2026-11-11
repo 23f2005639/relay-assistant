@@ -1,0 +1,84 @@
+[q01] full/ok 22984ms in=3560 out=134
+Evidence: "establishing a new state-of-the-art BLEU score of 28.4" [ATT §6.1 Machine Translation, p.8]
+Evidence: "Our model achieves 28.4 BLEU on the WMT 2014 Englishto-German translation task" [ATT p.1]
+The big Transformer reaches a BLEU score of 28.4 on English‑to‑German translation . [ATT §6.1 Machine Translation, p.8; ATT p.1]
+
+
+[q02] full/ok 17011ms in=2334 out=117
+Evidence: "with a theoretical latency of 160 ms—lower than the 230 ms average in natural conversations measured" [MOSHI §1 Introduction, p.2]
+Evidence: "theoretical latency of 160ms, 200ms in practice" [MOSHI p.1]
+Moshi’s theoretical latency is 160 ms . [MOSHI §1 Introduction, p.2; MOSHI p.1]
+
+
+[q03] full/ok 20669ms in=2899 out=185
+Evidence: "H-Net (1-stage) predominantly places boundaries at whitespace characters, closely mirroring the delimiters used by SpaceByte." [HNET §3.1 Language Modeling, p.14]
+H‑Net decides chunk boundaries by learning to place them at whitespace or the start of words in the first stage, and then refining these positions to merge content‑dependent units such as whole words or semantic groups in the second stage . [HNET §3.1 Language Modeling, p.14]
+
+
+[q04] full/ok 20977ms in=2481 out=233
+Evidence: "We used the Adam optimizer [20] with β1 = 0.9, β2 = 0.98 and ϵ = 10−9 . We varied the learning rate over the course of training, according to the formula: −0.5 lrate = d−0.5 , step_num · warmup_steps−1.5 ) model · min(step_num (3) This corresponds to increasing the learning rate linearly for the first warmup_steps training steps, and decreasing it thereafter proportionally to the inverse square root of the step number. We used warmup_steps = 4000." [ATT §5.3 Optimizer, p.7]
+The original Transformer was trained with the Adam optimizer with β1 = 0.9, β2 = 0.98 and ϵ = 10−9, and a learning‑rate schedule that linearly increases for the first 4000 steps and then decays proportionally to the inverse square root of the step number . [ATT §5.3 Optimizer, p.7]
+
+
+[q05] full/ok 26380ms in=3174 out=162
+Evidence: "Mimi, adv. loss only  |  24kHz  |  12.5Hz  |  1.1kbps" [MOSHI Table 4, p.23]
+Evidence: "At 12.5Hz, this represents a bitrate of 1.1kbps." [MOSHI §3.3.1 Architecture, p.11]
+The Mimi codec operates at a frame rate of 12.5 Hz and a bitrate of 1.1 kbps. [MOSHI Table 4, p.23]
+
+
+[q06] full/ok 19505ms in=2850 out=342
+Evidence: "Without explicit regularization, the model may converge to trivial solutions: either retaining nearly all vectors (negating computational benefits) or compressing excessively (losing critical information)." [HNET §2.2.3 Ratio Loss, p.8]
+Evidence: "we introduce a ratio loss to guide compression: 𝐿 Lratio = 𝑁 ((𝑁 − 1)𝐹𝐺 + (1 − 𝐹 ) (1 − 𝐺))" [HNET §2.2.3 Ratio Loss, p.8]
+Evidence: "attains a minimum of Lratio = 1 when 𝐹 = 𝐺 = 𝑁1 . Interestingly, the loss can theoretically fall below 1 when 𝐹 ≠ 𝐺 (e.g., 𝐹 = 𝑁1 + 𝜖 and 𝐺 = 𝑁1 − 𝜖), which we indeed observe during training." [HNET §2.2.3 Ratio Loss, p.8]
+The ratio loss is an auxiliary loss that encourages the model to keep a target fraction of vectors, preventing trivial solutions that keep all or too few vectors . [HNET §2.2.3 Ratio Loss, p.8]
+It is needed to guide the routing module toward a desired compression ratio, ensuring content‑adaptive downsampling rather than fixed patterns . [HNET §2.2.3 Ratio Loss, p.8]
+The loss reaches its minimum when the selected fraction 𝐹 equals the average boundary probability 𝐺, matching the target ratio 𝑁1, and it can even drop below 1 when 𝐹 and 𝐺 differ, which helps the model converge to the intended ratio during training . [HNET §2.2.3 Ratio Loss, p.8]
+
+
+[q08] full/ok 25502ms in=2967 out=208
+Evidence: "We chose this function because we hypothesized it would allow the model to easily learn to attend by relative positions, since for any fixed offset k, P Epos+k can be represented as a linear function of P Epos ." [ATT §3.5 O(n2 · d), p.6]
+Evidence: "We also experimented with using learned positional embeddings [9] instead, and found that the two versions produced nearly identical results (see Table 3 row (E))." [ATT §3.5 O(n2 · d), p.6]
+Evidence: "We chose the sinusoidal version because it may allow the model to extrapolate to sequence lengths longer than the ones encountered during training." [ATT §3.5 O(n2 · d), p.6]
+The authors selected sinusoidal encodings because they hypothesize it lets the model learn relative positions via a linear relationship between offsets . [ATT §3.5 O(n2 · d), p.6]
+They also tested learned embeddings and saw almost identical performance , but preferred sinusoids for their potential to extrapolate to longer sequences . [ATT §3.5 O(n2 · d), p.6]
+
+
+[q11] full/ok 27038ms in=2884 out=206
+Evidence: "Inner Monologue decomposes speech into a chain of text, semantic and acoustic tokens, and predicts this structured sequence in a hierarchical manner." [MOSHI §2 Related Work, p.5]
+Evidence: "Not only this “Inner Monologue” method significantly improves the linguistic quality of generated speech, but we also illustrate how it can provide streaming speech recognition and text-to-speech." [MOSHI p.1]
+Evidence: "We moreover show that speech-to-speech generation can be drastically improved by Inner Monologue, a new method that generates text tokens as a prefix to audio tokens, while remaining compatible with streaming inference." [MOSHI §7 Conclusion, p.41]
+Inner Monologue is a hierarchical method that decomposes speech into text, semantic and acoustic tokens and predicts them in a structured sequence . [MOSHI §2 Related Work, p.5]
+It improves linguistic quality and enables streaming ASR and TTS by generating text tokens as a prefix to audio tokens . [MOSHI p.1; MOSHI §7 Conclusion, p.41]
+
+
+[q13] full/ok 22504ms in=2431 out=112
+Evidence: "we distill semantic information from a self-supervised model (WavLM8 (Chen et al., 2022) in our case) into the first level of the RVQ." [MOSHI §3.3.2 Learning semantic-acoustic tokens with a split RVQ, p.11]
+Mimi’s semantic tokens are distilled from the self‑supervised model WavLM8. [MOSHI §3.3.2 Learning semantic-acoustic tokens with a split RVQ, p.11]
+
+
+[q16] full/ok 26087ms in=3954 out=267
+Evidence: "H-Net’s improvements are even more pronounced on languages without obvious segmentation cues, including Chinese and code (59.9 → 66.3 on XWinograd-zh compared to tokenized Transformer)" [HNET §1 Introduction, p.4]
+Evidence: "H-Net (2-stage) performs better than both H-Net (space) and BPE Transformer on Chinese, which is reflected in the downstreams" [HNET Table 4, p.17]
+Evidence: "H-Net (space) and H-Net (2-stage) are byte-level, while the Transformers use the Llama-3 tokenizer ... H-Net clearly outperforms both Transformer and H-Net (space) on Chinese language modeling" [HNET §3.2 Alternate Language Datasets, p.16]
+H‑Net outperforms a tokenized Transformer on Chinese, achieving higher accuracy on XWinograd‑zh (59.9 → 66.3) and better downstream performance . [HNET §1 Introduction, p.4]
+In particular, the 2‑stage H‑Net beats both the space‑based H‑Net and the BPE Transformer on Chinese . [HNET Table 4, p.17]
+Training curves show H‑Net’s byte‑level models maintain lower bits‑per‑byte than the tokenized Transformer throughout training, confirming its superior performance on Chinese . [HNET §3.2 Alternate Language Datasets, p.16]
+
+
+[q19] full/ok 27624ms in=3181 out=214
+Evidence: "The main network functions as a standard language model and can employ any sequence mixing architecture. We default to Transformer layers for two reasons: compressed representations align well with Transformers’ strengths in processing discrete, semantically‑rich tokens" [HNET §2.1.2 Design Principles, p.5]
+In Moshi, the Transformer is used as the default sequence‑mixing architecture in the main network, providing the ability to process compressed, token‑like representations effectively . [HNET §2.1.2 Design Principles, p.5]
+
+
+[u01] refused/ok 25577ms in=3915 out=45
+The papers in this library do not say, so I will not guess.
+
+[u02] refused/ok 26110ms in=3327 out=35
+The papers in this library do not say, so I will not guess.
+
+[u04] refused/ok 8699ms in=835 out=31
+The papers in this library do not say, so I will not guess.
+
+[u05] refused/ok 15356ms in=1810 out=34
+The papers in this library do not say, so I will not guess.
+

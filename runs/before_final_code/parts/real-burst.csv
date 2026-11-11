@@ -1,0 +1,45 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+burst-0000,burst,real,2026-11-11T12:50:58.207+05:30,793.9,858.9,ok,0,2849,166,medium-300w-k4-rerank,,full,0.1,851.1,0.0,747.7,1,0,q05,
+burst-0001,burst,real,2026-11-11T12:51:08.018+05:30,837.1,943.5,ok,0,1962,205,medium-300w-k4-rerank,,full,0.1,933.3,0.0,783.3,1,0,q02,
+burst-0002,burst,real,2026-11-11T12:51:35.478+05:30,795.5,866.4,ok,0,2849,166,medium-300w-k4-rerank,,full,0.0,858.3,0.0,746.8,1,0,q05,
+burst-0003,burst,real,2026-11-11T12:51:35.660+05:30,684.8,684.8,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,684.8,0,1,q05,shared an identical question's answer
+burst-0004,burst,real,2026-11-11T12:51:35.888+05:30,456.5,456.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,456.5,0,1,q05,shared an identical question's answer
+burst-0005,burst,real,2026-11-11T12:51:35.920+05:30,671.3,700.8,ok,0,2242,81,medium-300w-k4-rerank,,full,0.0,699.6,0.0,643.2,1,0,q01,
+burst-0006,burst,real,2026-11-11T12:51:35.984+05:30,473.7,558.2,ok,0,1826,129,medium-300w-k4-rerank,,lean,0.0,556.7,0.0,439.4,1,0,q03,
+burst-0007,burst,real,2026-11-11T12:51:36.125+05:30,219.4,219.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,219.4,0,1,q05,shared an identical question's answer
+burst-0008,burst,real,2026-11-11T12:51:36.542+05:30,8707.9,8707.9,ok,0,1353,120,medium-300w-k4-rerank,,refused,7890.9,816.8,0.0,8637.8,1,0,q19,nothing in the draft survived checking
+burst-0009,burst,real,2026-11-11T12:51:37.084+05:30,17971.4,18051.1,ok,0,1035,124,medium-300w-k4-rerank,,lean,17567.8,481.6,0.0,17930.4,2,0,q02,
+burst-0010,burst,real,2026-11-11T12:51:37.204+05:30,5.4,5.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.4,0.0,,0,0,q19,predicted wait 30.2s exceeds patience
+burst-0011,burst,real,2026-11-11T12:51:37.613+05:30,1.3,1.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.7,0.0,,0,0,q19,predicted wait 29.8s exceeds patience
+burst-0012,burst,real,2026-11-11T12:51:38.343+05:30,3.2,3.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q02,predicted wait 26.7s exceeds patience
+burst-0013,burst,real,2026-11-11T12:51:38.847+05:30,2.1,2.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.1,0.0,,0,0,q02,predicted wait 26.1s exceeds patience
+burst-0014,burst,real,2026-11-11T12:51:39.193+05:30,4.4,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q05,predicted wait 27.4s exceeds patience
+burst-0015,burst,real,2026-11-11T12:51:39.610+05:30,15525.3,15525.3,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,15525.3,0,1,q02,shared an identical question's answer
+burst-0016,burst,real,2026-11-11T12:51:40.520+05:30,2.7,2.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.8,0.0,,0,0,q19,predicted wait 26.8s exceeds patience
+burst-0017,burst,real,2026-11-11T12:51:40.724+05:30,4.9,5.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.5,0.0,,0,0,u02,predicted wait 26.2s exceeds patience
+burst-0018,burst,real,2026-11-11T12:51:40.898+05:30,2.2,2.2,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,2.2,0,1,q05,shared an identical question's answer
+burst-0019,burst,real,2026-11-11T12:51:41.011+05:30,2.1,2.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.6,0.0,,0,0,q07,predicted wait 23.0s exceeds patience
+burst-0020,burst,real,2026-11-11T12:51:42.042+05:30,2.9,2.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.4,0.0,,0,0,q18,predicted wait 24.3s exceeds patience
+burst-0021,burst,real,2026-11-11T12:51:42.176+05:30,2.4,2.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.7,0.0,,0,0,q19,predicted wait 25.2s exceeds patience
+burst-0022,burst,real,2026-11-11T12:51:42.662+05:30,12473.7,12473.7,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,12473.7,0,1,q02,shared an identical question's answer
+burst-0023,burst,real,2026-11-11T12:51:43.219+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q18,predicted wait 23.2s exceeds patience
+burst-0024,burst,real,2026-11-11T12:51:43.280+05:30,3.1,3.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q11,predicted wait 24.3s exceeds patience
+burst-0025,burst,real,2026-11-11T12:51:43.401+05:30,4.6,4.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.4,0.0,,0,0,q15,predicted wait 24.5s exceeds patience
+burst-0026,burst,real,2026-11-11T12:51:43.792+05:30,20122.9,20169.0,ok,0,1020,168,medium-300w-k4-rerank,,lean,19404.4,763.8,0.0,19997.0,3,0,q08,
+burst-0027,burst,real,2026-11-11T12:51:44.877+05:30,6.5,6.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,5.7,0.0,,0,0,u03,predicted wait 30.3s exceeds patience
+burst-0028,burst,real,2026-11-11T12:51:45.683+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q03,predicted wait 30.4s exceeds patience
+burst-0029,burst,real,2026-11-11T12:51:46.270+05:30,4.6,4.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.5,0.0,,0,0,q17,predicted wait 28.5s exceeds patience
+burst-0030,burst,real,2026-11-11T12:51:46.360+05:30,3.5,3.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q11,predicted wait 31.3s exceeds patience
+burst-0031,burst,real,2026-11-11T12:51:46.439+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q10,predicted wait 28.5s exceeds patience
+burst-0032,burst,real,2026-11-11T12:51:47.277+05:30,4.8,4.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.3,0.0,,0,0,q03,predicted wait 28.8s exceeds patience
+burst-0033,burst,real,2026-11-11T12:51:47.506+05:30,5.1,5.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q04,predicted wait 26.5s exceeds patience
+burst-0034,burst,real,2026-11-11T12:51:48.336+05:30,3.3,3.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q03,predicted wait 27.7s exceeds patience
+burst-0035,burst,real,2026-11-11T12:51:48.708+05:30,2.1,2.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.6,0.0,,0,0,q04,predicted wait 25.3s exceeds patience
+burst-0036,burst,real,2026-11-11T12:51:50.616+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.6,0.0,,0,0,u02,predicted wait 26.3s exceeds patience
+burst-0037,burst,real,2026-11-11T12:51:51.051+05:30,2.1,2.1,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,2.1,0,1,q05,shared an identical question's answer
+burst-0038,burst,real,2026-11-11T12:51:51.265+05:30,4.1,4.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q11,predicted wait 26.4s exceeds patience
+burst-0039,burst,real,2026-11-11T12:51:51.898+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.3,0.0,,0,0,q12,predicted wait 25.8s exceeds patience
+burst-0040,burst,real,2026-11-11T12:51:53.682+05:30,3.5,3.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q19,predicted wait 23.8s exceeds patience
+burst-0041,burst,real,2026-11-11T12:51:54.253+05:30,3.9,3.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q03,predicted wait 21.8s exceeds patience
+burst-0042,burst,real,2026-11-11T12:52:11.168+05:30,554.8,599.9,ok,0,837,111,medium-300w-k4-rerank,,lean,0.0,591.9,0.0,502.5,1,0,q09,
+burst-0043,burst,real,2026-11-11T12:52:15.680+05:30,6124.6,6124.6,ok,0,1304,33,medium-300w-k4-rerank,,refused,5566.8,553.5,0.0,6121.7,1,0,u02,model judged the pieces insufficient

@@ -1,0 +1,14 @@
+daily: 42 arrivals over 10 min, source=stand-in, dup=0.3, coalesce=True
+  controller: daily limit hit (tokens_per_day), retry after 3359s
+### Table 2a
+| Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (per min) | First token p50 / p95 / p99 (ms) | Total time p50 / p95 / p99 (ms) |
+|---|---|---:|---:|---:|---|---|
+| daily | stand-in | 42 | 562 | 4.5 | 18 / 2349 / 17123 | 18 / 2367 / 17136 |
+
+### Table 2b
+| Scenario | Succeeded (%) | Rate-limited (%) | Timed out or given up (%) | Retries per request | Peak queue length | Tokens per answer | Cost per 1,000 answers |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| daily | 47.6 | 52.4 | 0.0 | 0.00 | 2 | 2249 | $0.21 |
+
+What people received (not a required table):
+- daily: extractive 22, full 17, lean 3

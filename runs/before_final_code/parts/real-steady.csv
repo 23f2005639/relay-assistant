@@ -1,0 +1,17 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+steady-0000,steady,real,2026-11-11T11:49:20.877+05:30,493.6,558.1,ok,0,2849,160,medium-300w-k4-rerank,,full,0.0,547.7,0.0,439.2,1,0,q05,
+steady-0001,steady,real,2026-11-11T11:49:24.802+05:30,1287.0,1402.6,ok,0,1962,205,medium-300w-k4-rerank,,full,0.1,1398.1,0.0,1241.2,1,0,q02,
+steady-0002,steady,real,2026-11-11T11:49:50.061+05:30,430.0,502.4,ok,0,2849,166,medium-300w-k4-rerank,,full,0.0,498.7,0.0,405.7,1,0,q05,
+steady-0003,steady,real,2026-11-11T11:49:51.866+05:30,2.5,2.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,2.5,0,1,q05,shared an identical question's answer
+steady-0004,steady,real,2026-11-11T11:50:10.289+05:30,19.4,19.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,19.4,0,1,q05,shared an identical question's answer
+steady-0005,steady,real,2026-11-11T11:50:21.214+05:30,6271.5,6305.0,ok,1,2242,76,medium-300w-k4-rerank,,full,0.0,5008.8,1283.5,6246.7,1,0,q01,"retried once after CallTimeout, waited 0.6s"
+steady-0006,steady,real,2026-11-11T11:50:22.648+05:30,4319.8,4488.6,ok,0,2666,177,medium-300w-k4-rerank,,full,0.1,4486.2,0.0,4262.3,1,0,q03,
+steady-0007,steady,real,2026-11-11T11:50:39.643+05:30,5.5,5.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,5.5,0,1,q05,shared an identical question's answer
+steady-0008,steady,real,2026-11-11T11:50:40.560+05:30,565.1,565.1,ok,0,2029,38,medium-300w-k4-rerank,,refused,0.0,563.7,0.0,559.2,1,0,q19,model judged the pieces insufficient
+steady-0009,steady,real,2026-11-11T11:50:54.205+05:30,682.3,790.5,ok,0,1962,199,medium-300w-k4-rerank,,full,0.0,776.0,0.0,626.7,1,0,q02,
+steady-0010,steady,real,2026-11-11T11:50:55.943+05:30,708.6,708.7,ok,0,1353,120,medium-300w-k4-rerank,,refused,0.0,706.2,0.0,601.6,1,0,q19,nothing in the draft survived checking
+steady-0011,steady,real,2026-11-11T11:50:58.226+05:30,5064.4,5064.4,ok,0,1353,120,medium-300w-k4-rerank,,refused,3917.1,1144.2,0.0,4863.0,1,0,q19,nothing in the draft survived checking
+steady-0012,steady,real,2026-11-11T11:51:11.487+05:30,489.4,551.1,ok,0,1035,124,medium-300w-k4-rerank,,lean,0.0,540.3,0.0,486.9,1,0,q02,
+steady-0013,steady,real,2026-11-11T11:51:53.573+05:30,826.6,868.2,ok,0,1962,88,medium-300w-k4-rerank,,full,0.0,825.1,0.0,803.6,1,0,q02,
+steady-0014,steady,real,2026-11-11T11:51:56.745+05:30,369.6,444.1,ok,0,2849,160,medium-300w-k4-rerank,,full,0.0,439.3,0.0,290.4,1,0,q05,
+steady-0015,steady,real,2026-11-11T11:52:02.808+05:30,6.4,6.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,6.4,0,1,q02,shared an identical question's answer

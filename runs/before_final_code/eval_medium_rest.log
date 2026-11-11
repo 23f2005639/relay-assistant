@@ -1,0 +1,53 @@
+[q07] full/ok 678ms in=1729 out=138
+Evidence: "base N dmodel dff h dk dv Pdrop ϵls 6 512 2048 8 1 4 16 32 64 512 128 32 16 16 32 64 512 128 32 16" [ATT §6.2 Model Variations, p.8]
+The base Transformer uses 6 encoder layers and 8 attention heads . [ATT §6.2 Model Variations, p.8]
+
+
+[q09] full/ok 617ms in=1895 out=114
+Evidence: "The big models were trained for 300,000 steps (3.5 days)." [ATT §5.2 Hardware and Schedule, p.7]
+Evidence: "Training took 3.5 days on 8 P100 GPUs." [ATT §6.1 Machine Translation, p.8]
+The big Transformer was trained for 3.5 days on eight NVIDIA P100 GPUs. [ATT §5.2 Hardware and Schedule, p.7; ATT §6.1 Machine Translation, p.8]
+
+
+[q10] full/ok 694ms in=2091 out=128
+Evidence: "During training, we employed label smoothing of value ϵls = 0.1 [36]." [ATT §5.4 Regularization, p.7]
+Evidence: "This hurts perplexity, as the model learns to be more unsure, but improves accuracy and BLEU score." [ATT §5.4 Regularization, p.7]
+The Transformer used a label‑smoothing value of 0.1, which made the model less confident and increased perplexity, yet it improved accuracy and BLEU scores . [ATT §5.4 Regularization, p.7]
+
+
+[q12] full/ok 682ms in=2383 out=94
+Evidence: "We use Q = 8 quantizers, each with a codebook size of NA = 2048." [MOSHI §3.3.1 Architecture, p.11]
+Mimi uses 8 quantizers, each with a codebook size of 2048. [MOSHI §3.3.1 Architecture, p.11]
+
+
+[q14] full/ok 610ms in=2389 out=151
+Evidence: "7B-parameter Helium language model" [MOSHI §3.2.2 Pre-training data filtering, p.7]
+The Helium language model contains 7 B parameters . [MOSHI §3.2.2 Pre-training data filtering, p.7]
+
+
+[q15] full/ok 568ms in=2849 out=139
+Evidence: "we employ Mamba-2 layers (Dao and Gu 2024) as the primary building blocks for the encoder and decoder networks." [HNET §2.1.2 Design Principles, p.5]
+H‑Net’s encoder and decoder networks are built from Mamba‑2 layers, a type of state‑space model . [HNET §2.1.2 Design Principles, p.5]
+
+
+[q17] full/ok 679ms in=1393 out=99
+Evidence: "nearly 4× improvement in data efficiency over baselines" [HNET p.1]
+H‑Net shows nearly a 4× improvement in data efficiency for DNA language modeling . [HNET p.1]
+
+
+[q18] full/ok 983ms in=2477 out=244
+Evidence: "The smoothing module applies an exponential moving average (EMA) with the following definition: 𝑧¯𝑡 = 𝑃𝑡 𝑧ˆ𝑡 + (1 − 𝑃𝑡 )𝑧¯𝑡 −1 ." [HNET §2.2.2 Dechunking, p.7]
+Evidence: "By smoothly interpolating between discrete choices based on confidence scores, a smoothing module prevents the model from overfitting to suboptimal chunking patterns early in training." [HNET §2.2.2 Dechunking, p.7]
+Evidence: "The dechunking layer (Dechunk in equation (3)) consists of a smoothing module and upsampler, as illustrated in Figure 1( top-right )." [HNET §2.2.2 Dechunking, p.6]
+The smoothing module converts discrete chunk boundaries into a continuous representation by applying an exponential moving average of the upsampled vectors weighted by boundary confidence, enabling differentiable back‑propagation through chunk boundaries. [HNET §2.2.2 Dechunking, p.7]
+It also smooths low‑confidence chunks with previous context, correcting misalignments and improving training stability . [HNET §2.2.2 Dechunking, p.6; HNET §2.2.2 Dechunking, p.7]
+
+
+[q20] full/ok 775ms in=2241 out=167
+Evidence: "On the WMT 2014 English-to-French translation task, our big model achieves a BLEU score of 41.0" [ATT §6.1 Machine Translation, p.8]
+The Transformer (big) model scores 41.0 BLEU on English‑to‑French . [ATT §6.1 Machine Translation, p.8]
+
+
+[u03] refused/ok 298ms in=1638 out=19
+The papers in this library do not say, so I will not guess.
+

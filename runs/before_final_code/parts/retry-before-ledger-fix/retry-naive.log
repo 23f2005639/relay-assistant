@@ -1,0 +1,13 @@
+steady: 42 arrivals over 6 min, source=stand-in, dup=0.3, coalesce=True
+### Table 2a
+| Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (per min) | First token p50 / p95 / p99 (ms) | Total time p50 / p95 / p99 (ms) |
+|---|---|---:|---:|---:|---|---|
+| retry-naive | stand-in | 42 | 337 | 7.5 | 234 / 10244 / 11216 | 234 / 10244 / 11230 |
+
+### Table 2b
+| Scenario | Succeeded (%) | Rate-limited (%) | Timed out or given up (%) | Retries per request | Peak queue length | Tokens per answer | Cost per 1,000 answers |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| retry-naive | 54.8 | 45.2 | 0.0 | 1.86 | 1 | 2313 | $0.22 |
+
+What people received (not a required table):
+- retry-naive: extractive 19, full 23

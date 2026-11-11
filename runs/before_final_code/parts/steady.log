@@ -1,0 +1,13 @@
+steady: 36 arrivals over 10 min, source=stand-in, dup=0.3, coalesce=True
+### Table 2a
+| Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (per min) | First token p50 / p95 / p99 (ms) | Total time p50 / p95 / p99 (ms) |
+|---|---|---:|---:|---:|---|---|
+| steady | stand-in | 36 | 580 | 3.7 | 1132 / 4003 / 7264 | 1145 / 4018 / 7279 |
+
+### Table 2b
+| Scenario | Succeeded (%) | Rate-limited (%) | Timed out or given up (%) | Retries per request | Peak queue length | Tokens per answer | Cost per 1,000 answers |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| steady | 100.0 | 0.0 | 0.0 | 0.00 | 1 | 2259 | $0.21 |
+
+What people received (not a required table):
+- steady: full 32, lean 4

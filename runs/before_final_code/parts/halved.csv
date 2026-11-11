@@ -1,0 +1,28 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+halved-0000,halved,stand-in,2026-11-11T11:45:27.024+05:30,920.1,937.2,ok,0,2558,191,medium-300w-k4-rerank,,full,0.1,927.3,0.0,910.0,1,0,q05,
+halved-0001,halved,stand-in,2026-11-11T11:45:30.948+05:30,2200.5,2212.6,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,2208.9,0.0,2192.2,1,0,q02,
+halved-0002,halved,stand-in,2026-11-11T11:45:56.208+05:30,1801.2,1814.2,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1793.9,0.0,1793.4,1,0,q05,
+halved-0003,halved,stand-in,2026-11-11T11:45:58.013+05:30,9.7,9.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,9.7,0,1,q05,shared an identical question's answer
+halved-0004,halved,stand-in,2026-11-11T11:46:16.435+05:30,19.0,19.0,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,19.0,0,1,q05,shared an identical question's answer
+halved-0005,halved,stand-in,2026-11-11T11:46:27.361+05:30,2352.8,2368.7,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,2360.1,0.0,2335.3,1,0,q01,
+halved-0006,halved,stand-in,2026-11-11T11:46:28.795+05:30,809.3,824.1,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,822.0,0.0,801.6,1,0,q03,
+halved-0007,halved,stand-in,2026-11-11T11:46:45.790+05:30,16.7,16.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,16.7,0,1,q05,shared an identical question's answer
+halved-0008,halved,stand-in,2026-11-11T11:46:46.707+05:30,809.3,822.3,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,820.6,0.0,802.4,1,0,q19,
+halved-0009,halved,stand-in,2026-11-11T11:47:00.352+05:30,1497.4,1509.8,ok,0,2256,185,medium-300w-k4-rerank,,full,0.1,1500.0,0.0,1488.2,1,0,q02,
+halved-0010,halved,stand-in,2026-11-11T11:47:02.090+05:30,773.4,785.7,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,784.3,0.0,768.9,1,0,q19,
+halved-0011,halved,stand-in,2026-11-11T11:47:04.372+05:30,7272.9,7285.9,ok,0,1403,188,medium-300w-k4-rerank,,lean,6572.2,711.4,0.0,7264.5,1,0,q19,
+halved-0012,halved,stand-in,2026-11-11T11:47:17.633+05:30,3850.6,3865.7,ok,0,1097,185,medium-300w-k4-rerank,,lean,2865.0,992.2,0.0,3839.9,1,0,q02,
+halved-0013,halved,stand-in,2026-11-11T11:47:59.720+05:30,1185.8,1200.9,ok,0,2256,185,medium-300w-k4-rerank,,full,0.1,1190.9,0.0,1180.3,1,0,q02,
+halved-0014,halved,stand-in,2026-11-11T11:48:02.892+05:30,1127.2,1142.5,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1139.8,0.0,1119.6,1,0,q05,
+halved-0015,halved,stand-in,2026-11-11T11:48:08.955+05:30,5.2,5.2,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,5.2,0,1,q02,shared an identical question's answer
+halved-0016,halved,stand-in,2026-11-11T11:48:32.651+05:30,1083.6,1099.4,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,1082.4,0.0,1078.4,1,0,q19,
+halved-0017,halved,stand-in,2026-11-11T11:49:43.473+05:30,1182.4,1195.9,ok,0,2074,182,medium-300w-k4-rerank,,full,0.0,1124.9,0.0,1165.7,1,0,u02,
+halved-0018,halved,stand-in,2026-11-11T11:50:04.128+05:30,1.4,1.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.4,0,1,q05,shared an identical question's answer
+halved-0019,halved,stand-in,2026-11-11T11:50:16.256+05:30,1442.1,1454.5,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,1441.3,0.0,1436.5,1,0,q07,
+halved-0020,halved,stand-in,2026-11-11T11:51:46.025+05:30,1575.5,1587.7,ok,0,2444,187,medium-300w-k4-rerank,,full,0.0,1539.8,0.0,1567.4,1,0,q18,
+halved-0021,halved,stand-in,2026-11-11T11:51:47.170+05:30,6924.6,6941.6,ok,0,1403,188,medium-300w-k4-rerank,,lean,3674.2,3265.8,0.0,6919.7,1,0,q19,
+halved-0022,halved,stand-in,2026-11-11T11:52:34.095+05:30,39.8,39.8,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,39.8,0,1,q02,shared an identical question's answer
+halved-0023,halved,stand-in,2026-11-11T11:52:42.302+05:30,1465.2,1479.8,ok,0,2444,187,medium-300w-k4-rerank,,full,0.0,1470.4,0.0,1455.4,1,0,q18,
+halved-0024,halved,stand-in,2026-11-11T11:52:46.041+05:30,12577.3,12591.1,ok,0,1427,192,medium-300w-k4-rerank,,lean,11791.3,796.4,0.0,12570.5,1,0,q11,
+halved-0025,halved,stand-in,2026-11-11T11:52:49.049+05:30,3.1,3.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q15,predicted wait 35.2s exceeds patience
+halved-0026,halved,stand-in,2026-11-11T11:52:57.901+05:30,3.4,3.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q08,predicted wait 20.2s exceeds patience

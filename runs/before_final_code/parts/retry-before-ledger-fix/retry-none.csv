@@ -1,0 +1,43 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+retry-none-0000,retry-none,stand-in,2026-11-11T11:45:22.361+05:30,901.8,917.5,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,911.4,0.0,890.2,1,0,q05,
+retry-none-0001,retry-none,stand-in,2026-11-11T11:45:24.324+05:30,2198.2,2212.5,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,2209.6,0.0,2191.7,1,0,q02,
+retry-none-0002,retry-none,stand-in,2026-11-11T11:45:36.953+05:30,1793.4,1808.9,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1797.5,0.0,1781.8,1,0,q05,
+retry-none-0003,retry-none,stand-in,2026-11-11T11:45:37.856+05:30,906.7,906.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,906.7,0,1,q05,shared an identical question's answer
+retry-none-0004,retry-none,stand-in,2026-11-11T11:45:47.067+05:30,5.5,5.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,5.5,0,1,q05,shared an identical question's answer
+retry-none-0005,retry-none,stand-in,2026-11-11T11:45:52.530+05:30,2352.5,2374.7,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,2368.6,0.0,2332.9,1,0,q01,
+retry-none-0006,retry-none,stand-in,2026-11-11T11:45:53.247+05:30,2088.4,2104.8,ok,0,1225,200,medium-300w-k4-rerank,,lean,1439.9,662.6,0.0,2077.2,1,0,q03,
+retry-none-0007,retry-none,stand-in,2026-11-11T11:46:01.744+05:30,3.2,3.2,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,3.2,0,1,q05,shared an identical question's answer
+retry-none-0008,retry-none,stand-in,2026-11-11T11:46:02.203+05:30,2940.1,2953.5,ok,0,1403,188,medium-300w-k4-rerank,,lean,2280.3,671.3,0.0,2933.5,1,0,q19,
+retry-none-0009,retry-none,stand-in,2026-11-11T11:46:09.025+05:30,15031.6,15031.6,error,0,0,0,medium-300w-k4-rerank,,extractive,5017.4,10009.7,0.0,,1,0,q02,provider too slow
+retry-none-0010,retry-none,stand-in,2026-11-11T11:46:09.894+05:30,14847.9,14861.8,ok,0,1403,188,medium-300w-k4-rerank,,lean,14212.7,647.8,0.0,14839.8,2,0,q19,
+retry-none-0011,retry-none,stand-in,2026-11-11T11:46:11.036+05:30,5.8,5.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.7,0.0,,0,0,q19,predicted wait 28.3s exceeds patience
+retry-none-0012,retry-none,stand-in,2026-11-11T11:46:17.666+05:30,5.3,5.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q02,predicted wait 19.3s exceeds patience
+retry-none-0013,retry-none,stand-in,2026-11-11T11:46:38.709+05:30,649.4,662.4,ok,0,1097,185,medium-300w-k4-rerank,,lean,0.0,652.1,0.0,640.8,1,0,q02,
+retry-none-0014,retry-none,stand-in,2026-11-11T11:46:40.295+05:30,14937.5,14937.5,error,0,0,0,medium-300w-k4-rerank,,extractive,4924.1,10010.4,0.0,,1,0,q05,provider too slow
+retry-none-0015,retry-none,stand-in,2026-11-11T11:46:43.327+05:30,12818.2,12829.0,ok,0,1097,185,medium-300w-k4-rerank,,lean,11942.8,885.7,0.0,12810.1,2,0,q02,
+retry-none-0016,retry-none,stand-in,2026-11-11T11:46:55.175+05:30,12745.1,12760.3,ok,0,1403,188,medium-300w-k4-rerank,,lean,11881.3,877.0,0.0,12735.8,2,0,q19,
+retry-none-0017,retry-none,stand-in,2026-11-11T11:47:30.586+05:30,10042.6,10042.7,error,0,0,0,medium-300w-k4-rerank,,extractive,0.0,10018.1,0.0,,1,0,u02,provider too slow
+retry-none-0018,retry-none,stand-in,2026-11-11T11:47:40.914+05:30,2.2,2.2,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,2.2,0,1,q05,shared an identical question's answer
+retry-none-0019,retry-none,stand-in,2026-11-11T11:47:46.977+05:30,989.7,1002.3,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,1001.2,0.0,981.4,1,0,q07,
+retry-none-0020,retry-none,stand-in,2026-11-11T11:48:31.862+05:30,1783.0,1800.9,ok,0,2444,187,medium-300w-k4-rerank,,full,0.1,1756.3,0.0,1766.9,1,0,q18,
+retry-none-0021,retry-none,stand-in,2026-11-11T11:48:32.434+05:30,1470.0,1483.6,ok,0,2252,188,medium-300w-k4-rerank,,full,0.1,1481.4,0.0,1460.5,1,0,q19,
+retry-none-0022,retry-none,stand-in,2026-11-11T11:48:55.897+05:30,22.7,22.7,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,22.7,0,1,q02,shared an identical question's answer
+retry-none-0023,retry-none,stand-in,2026-11-11T11:49:00.000+05:30,4176.7,4192.6,ok,0,2444,187,medium-300w-k4-rerank,,full,0.0,4186.9,0.0,4170.9,1,0,q18,
+retry-none-0024,retry-none,stand-in,2026-11-11T11:49:01.870+05:30,1485.5,1500.1,ok,0,2534,192,medium-300w-k4-rerank,,full,0.0,1497.2,0.0,1476.4,1,0,q11,
+retry-none-0025,retry-none,stand-in,2026-11-11T11:49:03.374+05:30,5744.5,5758.7,ok,0,1474,192,medium-300w-k4-rerank,,lean,4943.5,814.3,0.0,5729.6,1,0,q15,
+retry-none-0026,retry-none,stand-in,2026-11-11T11:49:07.800+05:30,10417.5,10431.9,ok,0,1079,168,medium-300w-k4-rerank,,lean,9935.9,494.4,0.0,10411.0,2,0,q08,
+retry-none-0027,retry-none,stand-in,2026-11-11T11:49:28.122+05:30,1419.5,1441.4,ok,0,1099,190,medium-300w-k4-rerank,,lean,0.0,1430.3,0.0,1410.0,1,0,u03,
+retry-none-0028,retry-none,stand-in,2026-11-11T11:49:30.514+05:30,,17342.5,timeout,0,0,0,medium-300w-k4-rerank,,none,,,,,,0,q03,gave up after 17.3s with nothing shown
+retry-none-0029,retry-none,stand-in,2026-11-11T11:49:40.970+05:30,7880.9,7892.0,ok,0,1057,188,medium-300w-k4-rerank,,lean,6898.8,988.3,0.0,7874.7,1,0,q17,
+retry-none-0030,retry-none,stand-in,2026-11-11T11:49:53.194+05:30,16897.1,16897.1,error,0,0,0,medium-300w-k4-rerank,,extractive,6883.9,10007.1,0.0,,1,0,q11,provider too slow
+retry-none-0031,retry-none,stand-in,2026-11-11T11:49:58.784+05:30,12045.9,12065.6,ok,0,1084,200,medium-300w-k4-rerank,,lean,11342.7,721.0,0.0,12038.5,2,0,q10,
+retry-none-0032,retry-none,stand-in,2026-11-11T11:50:08.306+05:30,1883.4,1883.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,1871.0,11.1,0.0,,2,0,q03,rate limit
+retry-none-0033,retry-none,stand-in,2026-11-11T11:50:09.084+05:30,4.4,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q04,predicted wait 21.7s exceeds patience
+retry-none-0034,retry-none,stand-in,2026-11-11T11:50:09.822+05:30,4.4,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q03,predicted wait 23.0s exceeds patience
+retry-none-0035,retry-none,stand-in,2026-11-11T11:50:12.589+05:30,15607.6,15607.6,error,0,0,0,medium-300w-k4-rerank,,extractive,5596.5,10008.8,0.0,,1,0,q04,provider too slow
+retry-none-0036,retry-none,stand-in,2026-11-11T11:50:26.277+05:30,3294.0,3309.0,ok,0,1340,182,medium-300w-k4-rerank,,lean,1984.1,1315.9,0.0,3284.9,1,0,u02,
+retry-none-0037,retry-none,stand-in,2026-11-11T11:50:32.972+05:30,4.4,4.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,4.4,0,1,q05,shared an identical question's answer
+retry-none-0038,retry-none,stand-in,2026-11-11T11:50:37.497+05:30,5793.2,5805.6,ok,0,1427,192,medium-300w-k4-rerank,,lean,3954.3,1845.6,0.0,5786.8,1,0,q11,
+retry-none-0039,retry-none,stand-in,2026-11-11T11:50:48.067+05:30,6755.0,6766.1,ok,0,1434,186,medium-300w-k4-rerank,,lean,5580.5,1180.1,0.0,6746.5,1,0,q12,
+retry-none-0040,retry-none,stand-in,2026-11-11T11:50:55.311+05:30,10559.6,10574.8,ok,0,1403,188,medium-300w-k4-rerank,,lean,10243.0,329.5,0.0,10551.0,1,0,q19,
+retry-none-0041,retry-none,stand-in,2026-11-11T11:50:59.587+05:30,,19030.3,timeout,0,0,0,medium-300w-k4-rerank,,none,,,,,,0,q03,gave up after 19.0s with nothing shown

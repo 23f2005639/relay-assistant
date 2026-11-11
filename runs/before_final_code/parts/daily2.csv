@@ -1,0 +1,43 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+daily-0000,daily,stand-in,2026-11-11T12:56:51.250+05:30,902.5,919.2,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,909.7,0.0,895.9,1,0,q05,
+daily-0001,daily,stand-in,2026-11-11T12:56:54.520+05:30,2202.0,2217.1,ok,0,2256,185,medium-300w-k4-rerank,,full,0.1,2213.7,0.0,2193.9,1,0,q02,
+daily-0002,daily,stand-in,2026-11-11T12:57:15.570+05:30,1803.9,1817.2,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1795.6,0.0,1793.7,1,0,q05,
+daily-0003,daily,stand-in,2026-11-11T12:57:17.074+05:30,313.5,313.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,313.5,0,1,q05,shared an identical question's answer
+daily-0004,daily,stand-in,2026-11-11T12:57:32.426+05:30,15.9,15.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,15.9,0,1,q05,shared an identical question's answer
+daily-0005,daily,stand-in,2026-11-11T12:57:41.531+05:30,2343.3,2360.1,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,2351.0,0.0,2334.1,1,0,q01,
+daily-0006,daily,stand-in,2026-11-11T12:57:42.726+05:30,809.0,827.7,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,826.4,0.0,800.5,1,0,q03,
+daily-0007,daily,stand-in,2026-11-11T12:57:56.888+05:30,4.9,4.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,4.9,0,1,q05,shared an identical question's answer
+daily-0008,daily,stand-in,2026-11-11T12:57:57.653+05:30,812.7,825.2,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,823.0,0.0,804.1,1,0,q19,
+daily-0009,daily,stand-in,2026-11-11T12:58:09.023+05:30,1498.6,1511.4,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,1499.6,0.0,1488.6,1,0,q02,
+daily-0010,daily,stand-in,2026-11-11T12:58:10.472+05:30,7021.9,7036.0,ok,0,1403,188,medium-300w-k4-rerank,,lean,6383.1,649.7,0.0,7013.8,1,0,q19,
+daily-0011,daily,stand-in,2026-11-11T12:58:12.374+05:30,17128.1,17156.5,ok,0,1403,188,medium-300w-k4-rerank,,lean,16417.1,738.5,0.0,17106.5,2,0,q19,
+daily-0012,daily,stand-in,2026-11-11T12:58:23.425+05:30,5.5,5.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q02,predicted wait 15.6s exceeds patience
+daily-0013,daily,stand-in,2026-11-11T12:58:58.497+05:30,1326.6,1341.6,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,1320.0,0.0,1318.7,1,0,q02,
+daily-0014,daily,stand-in,2026-11-11T12:59:01.140+05:30,927.9,941.9,ok,0,1300,191,medium-300w-k4-rerank,,lean,0.0,939.8,0.0,921.5,1,0,q05,
+daily-0015,daily,stand-in,2026-11-11T12:59:06.192+05:30,5.6,5.6,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,5.6,0,1,q02,shared an identical question's answer
+daily-0016,daily,stand-in,2026-11-11T12:59:25.939+05:30,1074.7,1086.6,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,1065.7,0.0,1067.2,1,0,q19,
+daily-0017,daily,stand-in,2026-11-11T13:00:24.958+05:30,1052.2,1068.6,ok,0,2074,182,medium-300w-k4-rerank,,full,0.0,1045.9,0.0,1043.6,1,0,u02,
+daily-0018,daily,stand-in,2026-11-11T13:00:42.170+05:30,3.7,3.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,3.7,0,1,q05,shared an identical question's answer
+daily-0019,daily,stand-in,2026-11-11T13:00:52.277+05:30,9.6,9.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,6.2,0.0,,1,0,q07,rate limit
+daily-0020,daily,stand-in,2026-11-11T13:02:07.084+05:30,22.4,22.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q18,daily budget exhausted
+daily-0021,daily,stand-in,2026-11-11T13:02:08.038+05:30,5.6,5.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q19,daily budget exhausted
+daily-0022,daily,stand-in,2026-11-11T13:02:47.143+05:30,9.9,9.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,9.9,0,1,q02,shared an identical question's answer
+daily-0023,daily,stand-in,2026-11-11T13:02:53.982+05:30,7.6,7.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.5,0.0,,0,0,q18,daily budget exhausted
+daily-0024,daily,stand-in,2026-11-11T13:02:57.097+05:30,6.7,6.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q11,daily budget exhausted
+daily-0025,daily,stand-in,2026-11-11T13:02:59.604+05:30,5.3,5.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.2,0.0,,0,0,q15,daily budget exhausted
+daily-0026,daily,stand-in,2026-11-11T13:03:06.981+05:30,11.5,11.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q08,daily budget exhausted
+daily-0027,daily,stand-in,2026-11-11T13:03:40.851+05:30,21.0,21.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,5.1,0.0,,0,0,u03,daily budget exhausted
+daily-0028,daily,stand-in,2026-11-11T13:03:44.838+05:30,7.1,7.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q03,daily budget exhausted
+daily-0029,daily,stand-in,2026-11-11T13:04:02.265+05:30,20.8,20.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.4,0.0,,0,0,q17,daily budget exhausted
+daily-0030,daily,stand-in,2026-11-11T13:04:22.637+05:30,5.9,5.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q11,daily budget exhausted
+daily-0031,daily,stand-in,2026-11-11T13:04:31.954+05:30,13.4,13.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q10,daily budget exhausted
+daily-0032,daily,stand-in,2026-11-11T13:04:47.824+05:30,20.7,20.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,q03,daily budget exhausted
+daily-0033,daily,stand-in,2026-11-11T13:04:49.121+05:30,6.9,6.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q04,daily budget exhausted
+daily-0034,daily,stand-in,2026-11-11T13:04:50.350+05:30,3.2,3.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.6,0.0,,0,0,q03,daily budget exhausted
+daily-0035,daily,stand-in,2026-11-11T13:04:54.963+05:30,7.2,7.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q04,daily budget exhausted
+daily-0036,daily,stand-in,2026-11-11T13:05:17.777+05:30,28.5,28.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,u02,daily budget exhausted
+daily-0037,daily,stand-in,2026-11-11T13:05:28.935+05:30,3.8,3.8,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,3.8,0,1,q05,shared an identical question's answer
+daily-0038,daily,stand-in,2026-11-11T13:05:36.476+05:30,10.7,10.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,q11,daily budget exhausted
+daily-0039,daily,stand-in,2026-11-11T13:05:54.093+05:30,18.4,18.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.7,0.0,,0,0,q12,daily budget exhausted
+daily-0040,daily,stand-in,2026-11-11T13:06:06.166+05:30,14.9,14.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.8,0.0,,0,0,q19,daily budget exhausted
+daily-0041,daily,stand-in,2026-11-11T13:06:13.293+05:30,9.1,9.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q03,daily budget exhausted
