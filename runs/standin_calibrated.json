@@ -1,0 +1,9 @@
+{
+ "ttft_median_s": 0.632,
+ "ttft_per_1k_in_s": 0.284,
+ "ttft_sigma": 0.529,
+ "tokens_per_s": 8295.0,
+ "extra_out_tokens": 115,
+ "load_slowdown": 0.0,
+ "chars_per_token": 3.73
+}
