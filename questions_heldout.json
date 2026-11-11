@@ -1,0 +1,10 @@
+[
+ {"id": "h01", "paper": "ATT", "question": "What is the output dimension of the sub-layers and embedding layers in the base Transformer?", "gold": "d_model = 512"},
+ {"id": "h02", "paper": "ATT", "question": "How were sentence pairs batched for training in Attention Is All You Need?", "gold": "batched by approximate sequence length; each batch about 25000 source tokens and 25000 target tokens"},
+ {"id": "h03", "paper": "MOSHI", "question": "What audio sample rate does Mimi's encoder take as input?", "gold": "24kHz waveform"},
+ {"id": "h04", "paper": "MOSHI", "question": "Which dataset is Moshi fine-tuned on to learn real conversation dynamics?", "gold": "the Fisher dataset"},
+ {"id": "h05", "paper": "HNET", "question": "Which dataset are H-Net's English language models trained on?", "gold": "100B token subset of FineWeb-Edu"},
+ {"id": "h06", "paper": "HNET", "question": "Which benchmark is used to evaluate H-Net's robustness to textual perturbations?", "gold": "HellaSwag (with perturbations, following BLT)"},
+ {"id": "hu1", "paper": "NONE", "question": "What does the Moshi paper say about DNA sequence modeling?", "gold": "REFUSE: Moshi says nothing about DNA"},
+ {"id": "hu2", "paper": "NONE", "question": "How many human annotators rated H-Net's outputs?", "gold": "REFUSE: no human evaluation in H-Net"}
+]
