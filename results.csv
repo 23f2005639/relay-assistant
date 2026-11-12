@@ -1,0 +1,726 @@
+request_id,scenario,source,start_time,first_token_ms,total_ms,status,retries,tokens_in,tokens_out,retrieval_setting,answer_grade,level,wait_ms,work_ms,retry_ms,raw_first_token_ms,queue_len,coalesced,question_id,reason
+probe-latency-1794293387-000,probe-latency,real,2026-11-10T12:19:47.218+05:30,513.6,518.6,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293390-001,probe-latency,real,2026-11-10T12:19:49.740+05:30,858.3,859.3,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293393-002,probe-latency,real,2026-11-10T12:19:52.603+05:30,1225.7,1226.5,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293481-000,probe-latency,real,2026-11-10T12:21:21.004+05:30,891.0,892.0,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293489-001,probe-latency,real,2026-11-10T12:21:24.901+05:30,,5007.9,timeout,0,0,0,none,,probe,,,,,,,,CallTimeout
+probe-latency-1794293494-002,probe-latency,real,2026-11-10T12:21:32.913+05:30,1283.2,1283.8,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293498-003,probe-latency,real,2026-11-10T12:21:37.201+05:30,940.4,941.7,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293502-004,probe-latency,real,2026-11-10T12:21:41.148+05:30,1227.4,1228.6,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293505-005,probe-latency,real,2026-11-10T12:21:45.380+05:30,155.7,160.4,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293509-006,probe-latency,real,2026-11-10T12:21:48.544+05:30,877.3,878.3,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293513-007,probe-latency,real,2026-11-10T12:21:52.427+05:30,1214.0,1215.0,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293517-008,probe-latency,real,2026-11-10T12:21:56.646+05:30,1089.3,1090.3,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293520-009,probe-latency,real,2026-11-10T12:22:00.740+05:30,164.0,167.9,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293524-010,probe-latency,real,2026-11-10T12:22:03.912+05:30,990.8,992.0,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293528-011,probe-latency,real,2026-11-10T12:22:07.908+05:30,729.5,730.6,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293532-012,probe-latency,real,2026-11-10T12:22:11.643+05:30,425.9,426.9,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293536-013,probe-latency,real,2026-11-10T12:22:15.074+05:30,1093.3,1094.4,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293539-014,probe-latency,real,2026-11-10T12:22:19.172+05:30,707.6,708.6,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293543-015,probe-latency,real,2026-11-10T12:22:22.886+05:30,512.0,513.1,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293547-016,probe-latency,real,2026-11-10T12:22:26.403+05:30,1090.6,1091.5,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293551-017,probe-latency,real,2026-11-10T12:22:30.499+05:30,676.1,677.4,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293554-018,probe-latency,real,2026-11-10T12:22:34.180+05:30,480.8,481.7,ok,0,79,20,none,,probe,,,,,,,,
+probe-latency-1794293558-019,probe-latency,real,2026-11-10T12:22:37.665+05:30,516.5,517.3,ok,0,79,20,none,,probe,,,,,,,,
+probe-cache-1794293561-000,probe-cache,real,2026-11-10T12:22:41.323+05:30,,571.1,ok,0,1346,30,none,,probe,,,,,,,,
+probe-cache-1794293565-001,probe-cache,real,2026-11-10T12:22:44.898+05:30,,1032.0,ok,0,1346,30,none,,probe,,,,,,,,
+probe-cache-1794293570-002,probe-cache,real,2026-11-10T12:22:48.935+05:30,,1088.3,ok,0,1346,30,none,,probe,,,,,,,,
+probe-limit-1794293638-000,probe-limit,real,2026-11-10T12:23:58.180+05:30,,581.4,ok,0,1276,10,none,,probe,,,,,,,,
+probe-limit-1794293639-001,probe-limit,real,2026-11-10T12:23:58.762+05:30,,472.3,ok,0,1276,10,none,,probe,,,,,,,,
+probe-limit-1794293639-002,probe-limit,real,2026-11-10T12:23:59.235+05:30,,546.7,ok,0,1276,10,none,,probe,,,,,,,,
+probe-limit-1794293640-003,probe-limit,real,2026-11-10T12:23:59.782+05:30,,1025.0,ok,0,1276,10,none,,probe,,,,,,,,
+probe-limit-1794293641-004,probe-limit,real,2026-11-10T12:24:00.808+05:30,,1023.0,ok,0,1276,10,none,,probe,,,,,,,,
+probe-limit-1794293642-005,probe-limit,real,2026-11-10T12:24:01.831+05:30,,764.9,ok,0,1276,10,none,,probe,,,,,,,,
+probe-limit-1794293642-006,probe-limit,real,2026-11-10T12:24:02.597+05:30,,82.4,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=4.0
+probe-limit-recovery-1794293647-007,probe-limit-recovery,real,2026-11-10T12:24:07.185+05:30,,790.5,ok,0,75,10,none,,probe,,,,,,,,
+probe-reserve-1794293678-000,probe-reserve,real,2026-11-10T12:24:37.677+05:30,1017.6,1018.5,ok,0,78,18,none,,probe,,,,,,,,
+probe-reserve-1794293680-001,probe-reserve,real,2026-11-10T12:24:39.697+05:30,1045.9,1069.8,ok,0,78,18,none,,probe,,,,,,,,
+probe-reserve-1794293742-002,probe-reserve,real,2026-11-10T12:25:41.973+05:30,517.5,519.3,ok,0,78,18,none,,probe,,,,,,,,
+probe-reserve-1794293752-003,probe-reserve,real,2026-11-10T12:25:51.503+05:30,522.9,523.9,ok,0,78,18,none,,probe,,,,,,,,
+probe-concurrent-solo-1794377540-000,probe-concurrent-solo,real,2026-11-11T11:42:20.149+05:30,795.8,798.1,ok,0,78,18,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-008,probe-concurrent-10,real,2026-11-11T11:42:22.958+05:30,320.3,321.4,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-009,probe-concurrent-10,real,2026-11-11T11:42:22.958+05:30,450.7,454.0,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-003,probe-concurrent-10,real,2026-11-11T11:42:22.956+05:30,477.1,480.4,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-007,probe-concurrent-10,real,2026-11-11T11:42:22.957+05:30,491.0,493.8,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-000,probe-concurrent-10,real,2026-11-11T11:42:22.951+05:30,543.1,546.3,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-004,probe-concurrent-10,real,2026-11-11T11:42:22.956+05:30,546.9,550.3,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-006,probe-concurrent-10,real,2026-11-11T11:42:22.957+05:30,606.7,608.3,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-005,probe-concurrent-10,real,2026-11-11T11:42:22.957+05:30,935.6,937.8,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377543-002,probe-concurrent-10,real,2026-11-11T11:42:22.956+05:30,938.7,939.6,ok,0,79,20,none,,probe,,,,,,,,
+probe-concurrent-10-1794377544-001,probe-concurrent-10,real,2026-11-11T11:42:22.954+05:30,1139.9,1140.8,ok,0,79,20,none,,probe,,,,,,,,
+probe-rpm-1794377552-000,probe-rpm,real,2026-11-11T11:42:31.596+05:30,,469.0,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377552-001,probe-rpm,real,2026-11-11T11:42:31.896+05:30,,427.6,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377552-002,probe-rpm,real,2026-11-11T11:42:32.197+05:30,,698.3,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377553-003,probe-rpm,real,2026-11-11T11:42:32.497+05:30,,610.7,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377553-005,probe-rpm,real,2026-11-11T11:42:33.096+05:30,,516.6,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377553-006,probe-rpm,real,2026-11-11T11:42:33.397+05:30,,296.7,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377554-008,probe-rpm,real,2026-11-11T11:42:33.997+05:30,,308.4,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377554-009,probe-rpm,real,2026-11-11T11:42:34.298+05:30,,440.7,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377554-004,probe-rpm,real,2026-11-11T11:42:32.797+05:30,,2005.1,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377555-007,probe-rpm,real,2026-11-11T11:42:33.697+05:30,,1430.3,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377555-011,probe-rpm,real,2026-11-11T11:42:34.897+05:30,,290.0,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377555-010,probe-rpm,real,2026-11-11T11:42:34.597+05:30,,791.1,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377555-012,probe-rpm,real,2026-11-11T11:42:35.197+05:30,,450.4,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377555-013,probe-rpm,real,2026-11-11T11:42:35.496+05:30,,502.9,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377556-014,probe-rpm,real,2026-11-11T11:42:35.797+05:30,,500.9,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377556-015,probe-rpm,real,2026-11-11T11:42:36.097+05:30,,704.3,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377556-016,probe-rpm,real,2026-11-11T11:42:36.397+05:30,,519.5,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377557-017,probe-rpm,real,2026-11-11T11:42:36.697+05:30,,394.5,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377557-018,probe-rpm,real,2026-11-11T11:42:36.996+05:30,,448.8,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377557-019,probe-rpm,real,2026-11-11T11:42:37.297+05:30,,389.7,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377558-020,probe-rpm,real,2026-11-11T11:42:37.597+05:30,,428.4,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377558-021,probe-rpm,real,2026-11-11T11:42:37.898+05:30,,308.7,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377558-022,probe-rpm,real,2026-11-11T11:42:38.197+05:30,,451.9,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377558-024,probe-rpm,real,2026-11-11T11:42:38.797+05:30,,116.3,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377559-023,probe-rpm,real,2026-11-11T11:42:38.496+05:30,,606.8,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377559-025,probe-rpm,real,2026-11-11T11:42:39.097+05:30,,49.0,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377559-026,probe-rpm,real,2026-11-11T11:42:39.397+05:30,,54.2,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377559-027,probe-rpm,real,2026-11-11T11:42:39.697+05:30,,52.0,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377560-028,probe-rpm,real,2026-11-11T11:42:39.997+05:30,,52.3,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377560-029,probe-rpm,real,2026-11-11T11:42:40.297+05:30,,59.9,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377561-031,probe-rpm,real,2026-11-11T11:42:40.897+05:30,,125.2,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377561-030,probe-rpm,real,2026-11-11T11:42:40.598+05:30,,440.1,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377561-032,probe-rpm,real,2026-11-11T11:42:41.197+05:30,,61.9,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377561-033,probe-rpm,real,2026-11-11T11:42:41.498+05:30,,54.7,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377561-034,probe-rpm,real,2026-11-11T11:42:41.797+05:30,,53.9,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377562-035,probe-rpm,real,2026-11-11T11:42:42.097+05:30,,52.8,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377562-036,probe-rpm,real,2026-11-11T11:42:42.397+05:30,,59.6,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377563-038,probe-rpm,real,2026-11-11T11:42:42.997+05:30,,125.0,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377563-037,probe-rpm,real,2026-11-11T11:42:42.698+05:30,,568.8,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-1794377563-039,probe-rpm,real,2026-11-11T11:42:43.297+05:30,,56.4,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377563-040,probe-rpm,real,2026-11-11T11:42:43.597+05:30,,58.7,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377563-041,probe-rpm,real,2026-11-11T11:42:43.897+05:30,,53.4,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377564-042,probe-rpm,real,2026-11-11T11:42:44.197+05:30,,55.8,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377564-043,probe-rpm,real,2026-11-11T11:42:44.496+05:30,,54.2,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_minute retry_after=2.0
+probe-rpm-1794377565-044,probe-rpm,real,2026-11-11T11:42:44.797+05:30,,529.9,ok,0,75,8,none,,probe,,,,,,,,
+probe-rpm-recovery-1794377568-045,probe-rpm-recovery,real,2026-11-11T11:42:47.831+05:30,,536.1,ok,0,75,8,none,,probe,,,,,,,,
+probe-abandon-baseline-1794381561-000,probe-abandon-baseline,real,2026-11-11T12:49:20.658+05:30,,446.0,ok,0,75,8,none,,probe,,,,,,,,
+probe-abandon-after-1794381565-001,probe-abandon-after,real,2026-11-11T12:49:25.305+05:30,,441.3,ok,0,75,8,none,,probe,,,,,,,,
+retrieval-medium-q01,retrieval-medium,real,2026-11-12T10:55:34.106+05:30,659.3,677.4,ok,0,2242,81,medium-300w-k4-rerank,correct,full,0.0,677.0,0.0,,,,q01,
+overload-short-stand-in-0000,overload-short,stand-in,2026-11-12T10:55:36.932+05:30,903.7,921.1,ok,0,2558,191,medium-300w-k4-rerank,,full,0.1,916.1,0.0,894.0,1,0,q05,
+overload-noshare-stand-in-0000,overload-noshare,stand-in,2026-11-12T10:55:37.011+05:30,901.8,918.7,ok,0,2558,191,medium-300w-k4-rerank,,full,0.1,915.1,0.0,892.2,1,0,q05,
+overload-stand-in-0000,overload,stand-in,2026-11-12T10:55:37.009+05:30,904.0,921.0,ok,0,2558,191,medium-300w-k4-rerank,,full,0.1,915.7,0.0,894.0,1,0,q05,
+halved-stand-in-0000,halved,stand-in,2026-11-12T10:55:39.173+05:30,838.8,858.3,ok,0,2141,200,medium-300w-k4-rerank,,full,0.1,850.4,0.0,829.4,1,0,q03,
+overload-short-stand-in-0001,overload-short,stand-in,2026-11-12T10:55:42.884+05:30,1982.5,1997.5,ok,0,1808,168,medium-300w-k4-rerank,,full,0.1,1991.5,0.0,1975.7,1,0,q08,
+overload-noshare-stand-in-0001,overload-noshare,stand-in,2026-11-12T10:55:42.963+05:30,1984.1,2001.9,ok,0,1808,168,medium-300w-k4-rerank,,full,0.0,1994.9,0.0,1978.4,1,0,q08,
+overload-stand-in-0001,overload,stand-in,2026-11-12T10:55:42.961+05:30,1986.2,2005.8,ok,0,1808,168,medium-300w-k4-rerank,,full,0.1,1999.3,0.0,1980.2,1,0,q08,
+retry-naive-stand-in-0000,retry-naive,stand-in,2026-11-12T10:55:44.229+05:30,741.5,757.9,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,746.6,0.0,727.8,1,0,q07,
+retry-none-stand-in-0000,retry-none,stand-in,2026-11-12T10:55:44.245+05:30,742.9,766.8,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,755.9,0.0,724.5,1,0,q07,
+retry-budgeted-stand-in-0000,retry-budgeted,stand-in,2026-11-12T10:55:44.245+05:30,744.2,770.4,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,759.0,0.0,724.9,1,0,q07,
+retry-naive-stand-in-0001,retry-naive,stand-in,2026-11-12T10:55:46.743+05:30,2155.6,2176.6,ok,0,2159,201,medium-300w-k4-rerank,,full,0.1,2173.0,0.0,2145.7,1,0,q06,
+retry-none-stand-in-0001,retry-none,stand-in,2026-11-12T10:55:46.758+05:30,2162.4,2177.5,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,2174.4,0.0,2143.0,1,0,q06,
+retry-budgeted-stand-in-0001,retry-budgeted,stand-in,2026-11-12T10:55:46.758+05:30,2159.2,2178.3,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,2175.8,0.0,2142.1,1,0,q06,
+harness-freeze-check-stand-in-0000,harness-freeze-check,stand-in,2026-11-12T10:55:49.699+05:30,815.5,825.2,ok,0,1940,194,medium-300w-k4-rerank,,full,0.1,812.7,0.0,804.6,1,0,q20,
+overload-short-stand-in-0002,overload-short,stand-in,2026-11-12T10:55:50.096+05:30,1633.0,1646.4,ok,0,2141,200,medium-300w-k4-rerank,,full,0.1,1639.6,0.0,1626.5,1,0,q03,
+overload-noshare-stand-in-0002,overload-noshare,stand-in,2026-11-12T10:55:50.175+05:30,1633.8,1646.3,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,1640.0,0.0,1625.8,1,0,q03,
+overload-stand-in-0002,overload,stand-in,2026-11-12T10:55:50.173+05:30,1635.6,1648.3,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,1640.9,0.0,1627.4,1,0,q03,
+retry-naive-stand-in-0002,retry-naive,stand-in,2026-11-12T10:55:50.355+05:30,1784.4,1795.4,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1791.9,0.0,1776.2,1,0,q05,
+retry-budgeted-stand-in-0002,retry-budgeted,stand-in,2026-11-12T10:55:50.371+05:30,1780.2,1801.1,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1798.3,0.0,1774.5,1,0,q05,
+retry-none-stand-in-0002,retry-none,stand-in,2026-11-12T10:55:50.371+05:30,1790.8,1804.5,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1801.2,0.0,1774.3,1,0,q05,
+overload-short-stand-in-0003,overload-short,stand-in,2026-11-12T10:55:52.059+05:30,1992.7,2007.2,ok,0,1427,192,medium-300w-k4-rerank,,lean,0.0,2005.4,0.0,1986.5,1,0,q11,
+overload-stand-in-0003,overload,stand-in,2026-11-12T10:55:52.136+05:30,1991.2,2008.4,ok,0,1427,192,medium-300w-k4-rerank,,lean,0.0,2006.7,0.0,1983.7,1,0,q11,
+overload-noshare-stand-in-0003,overload-noshare,stand-in,2026-11-12T10:55:52.138+05:30,1993.8,2011.5,ok,0,1427,192,medium-300w-k4-rerank,,lean,0.0,2010.7,0.0,1984.1,1,0,q11,
+steady-short-stand-in-0000,steady-short,stand-in,2026-11-12T10:55:53.832+05:30,749.8,770.2,ok,0,1620,184,medium-300w-k4-rerank,,full,0.1,749.2,0.0,739.0,1,0,q07,
+steady-stand-in-0000,steady,stand-in,2026-11-12T10:55:53.851+05:30,732.7,751.1,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,741.4,0.0,722.8,1,0,q07,
+daily-stand-in-0000,daily,stand-in,2026-11-12T10:55:54.227+05:30,786.5,804.3,ok,0,1838,186,medium-300w-k4-rerank,,full,0.1,782.6,0.0,777.0,1,0,q09,
+overload-short-stand-in-0004,overload-short,stand-in,2026-11-12T10:55:54.513+05:30,611.2,624.8,ok,0,1057,188,medium-300w-k4-rerank,,lean,0.0,623.4,0.0,603.5,1,0,q17,
+overload-stand-in-0004,overload,stand-in,2026-11-12T10:55:54.590+05:30,611.2,625.3,ok,0,1057,188,medium-300w-k4-rerank,,lean,0.0,623.8,0.0,602.9,1,0,q17,
+overload-noshare-stand-in-0004,overload-noshare,stand-in,2026-11-12T10:55:54.592+05:30,612.5,628.1,ok,0,1057,188,medium-300w-k4-rerank,,lean,0.0,626.6,0.0,602.3,1,0,q17,
+retrieval-medium-q02,retrieval-medium,real,2026-11-12T10:55:54.785+05:30,809.4,921.3,ok,0,1962,222,medium-300w-k4-rerank,correct,full,0.1,917.9,0.0,,,,q02,
+harness-freeze-check-stand-in-0001,harness-freeze-check,stand-in,2026-11-12T10:55:54.501+05:30,1637.3,1654.8,ok,0,1097,185,medium-300w-k4-rerank,,lean,0.0,1650.0,0.0,1629.5,1,0,q02,
+retry-budgeted-stand-in-0003,retry-budgeted,stand-in,2026-11-12T10:55:54.427+05:30,1794.8,1807.6,ok,0,1057,188,medium-300w-k4-rerank,,lean,0.0,1804.8,0.0,1787.1,1,0,q17,
+retry-none-stand-in-0003,retry-none,stand-in,2026-11-12T10:55:54.427+05:30,1794.8,1807.7,ok,0,1057,188,medium-300w-k4-rerank,,lean,0.0,1804.6,0.0,1787.2,1,0,q17,
+retry-naive-stand-in-0003,retry-naive,stand-in,2026-11-12T10:55:54.411+05:30,2126.7,2139.6,ok,0,1664,188,medium-300w-k4-rerank,,full,0.0,2136.2,0.0,2118.3,1,0,q17,
+overload-short-stand-in-0006,overload-short,stand-in,2026-11-12T10:55:59.024+05:30,5.2,5.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.7,0.0,,0,0,q17,predicted wait 16.7s exceeds patience
+steady-short-stand-in-0001,steady-short,stand-in,2026-11-12T10:55:58.859+05:30,2154.8,2167.4,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,2162.0,0.0,2147.8,1,0,q06,
+steady-stand-in-0001,steady,stand-in,2026-11-12T10:55:58.879+05:30,2159.8,2174.2,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,2168.8,0.0,2146.3,1,0,q06,
+retry-naive-stand-in-0004,retry-naive,stand-in,2026-11-12T10:56:05.059+05:30,238.4,238.4,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.1,222.1,,1,0,q12,rate limit
+retry-none-stand-in-0004,retry-none,stand-in,2026-11-12T10:56:05.075+05:30,693.2,711.5,ok,0,1434,186,medium-300w-k4-rerank,,lean,0.0,701.6,0.0,679.7,1,0,q12,
+retry-budgeted-stand-in-0004,retry-budgeted,stand-in,2026-11-12T10:56:05.075+05:30,693.9,711.9,ok,0,1434,186,medium-300w-k4-rerank,,lean,0.0,701.9,0.0,679.9,1,0,q12,
+overload-short-stand-in-0005,overload-short,stand-in,2026-11-12T10:55:55.865+05:30,10495.8,10510.9,ok,0,1357,172,medium-300w-k4-rerank,,lean,9839.9,668.9,0.0,10488.9,1,0,q14,
+overload-stand-in-0005,overload,stand-in,2026-11-12T10:55:55.942+05:30,10505.3,10521.0,ok,0,1357,172,medium-300w-k4-rerank,,lean,9847.3,671.3,0.0,10491.7,1,0,q14,
+overload-noshare-stand-in-0005,overload-noshare,stand-in,2026-11-12T10:55:55.944+05:30,10504.1,10520.9,ok,0,1357,172,medium-300w-k4-rerank,,lean,9844.4,674.8,0.0,10487.2,1,0,q14,
+steady-short-stand-in-0002,steady-short,stand-in,2026-11-12T10:56:06.084+05:30,1785.8,1801.4,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1795.1,0.0,1779.3,1,0,q05,
+steady-stand-in-0002,steady,stand-in,2026-11-12T10:56:06.103+05:30,1791.5,1807.6,ok,0,2558,191,medium-300w-k4-rerank,,full,0.0,1800.9,0.0,1778.9,1,0,q05,
+overload-noshare-stand-in-0006,overload-noshare,stand-in,2026-11-12T10:55:59.103+05:30,16921.4,16935.4,ok,0,1057,188,medium-300w-k4-rerank,,lean,15831.0,1103.4,0.0,16916.3,2,0,q17,
+overload-stand-in-0006,overload,stand-in,2026-11-12T10:55:59.101+05:30,16927.1,16944.6,ok,0,1057,188,medium-300w-k4-rerank,,lean,15833.4,1109.5,0.0,16919.7,2,0,q17,
+steady-short-stand-in-0003,steady-short,stand-in,2026-11-12T10:56:14.196+05:30,2128.3,2142.1,ok,0,1664,188,medium-300w-k4-rerank,,full,0.0,2134.4,0.0,2122.4,1,0,q17,
+steady-stand-in-0003,steady,stand-in,2026-11-12T10:56:14.216+05:30,2131.6,2146.6,ok,0,1664,188,medium-300w-k4-rerank,,full,0.0,2138.6,0.0,2121.1,1,0,q17,
+overload-short-stand-in-0007,overload-short,stand-in,2026-11-12T10:56:12.960+05:30,6350.3,6366.4,ok,0,1474,192,medium-300w-k4-rerank,,lean,5112.7,1244.6,0.0,6345.4,1,0,q15,
+halved-stand-in-0001,halved,stand-in,2026-11-12T10:56:17.414+05:30,2220.9,2232.0,ok,0,2256,185,medium-300w-k4-rerank,,full,0.1,2209.5,0.0,2211.3,1,0,q02,
+harness-freeze-check-stand-in-0004,harness-freeze-check,stand-in,2026-11-12T10:56:10.794+05:30,9390.0,9403.8,ok,0,799,186,medium-300w-k4-rerank,,lean,0.0,9402.7,0.0,9383.5,1,0,u04,
+harness-freeze-check-stand-in-0005,harness-freeze-check,stand-in,2026-11-12T10:56:15.593+05:30,4757.6,4770.1,ok,0,1808,168,medium-300w-k4-rerank,,full,0.0,4765.9,0.0,4749.3,1,0,q08,
+harness-freeze-check-stand-in-0002,harness-freeze-check,stand-in,2026-11-12T10:56:08.142+05:30,12779.6,12794.9,ok,0,1255,205,medium-300w-k4-rerank,,lean,0.0,12790.3,0.0,12768.8,1,0,q01,
+harness-freeze-check-stand-in-0006,harness-freeze-check,stand-in,2026-11-12T10:56:17.647+05:30,3420.1,3432.6,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,3428.8,0.0,3412.4,1,0,q03,
+harness-freeze-check-stand-in-0003,harness-freeze-check,stand-in,2026-11-12T10:56:10.712+05:30,10700.8,10714.4,ok,0,1057,188,medium-300w-k4-rerank,,lean,0.0,10710.9,0.0,10689.7,1,0,q17,
+retrieval-medium-q03,retrieval-medium,real,2026-11-12T10:56:15.727+05:30,6244.7,6338.0,ok,1,2666,192,medium-300w-k4-rerank,wrong,full,0.1,5010.5,1326.8,,,,q03,"retried once after CallTimeout, waited 0.6s"
+overload-stand-in-0007,overload,stand-in,2026-11-12T10:56:13.037+05:30,15114.1,15128.3,ok,0,1474,192,medium-300w-k4-rerank,,lean,14466.8,659.6,0.0,15105.7,2,0,q15,
+overload-noshare-stand-in-0007,overload-noshare,stand-in,2026-11-12T10:56:13.039+05:30,15112.2,15127.3,ok,0,1474,192,medium-300w-k4-rerank,,lean,14465.2,661.2,0.0,15103.2,2,0,q15,
+harness-freeze-check-stand-in-0007,harness-freeze-check,stand-in,2026-11-12T10:56:28.434+05:30,808.3,820.9,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,811.3,0.0,800.6,1,0,q14,
+retry-budgeted-stand-in-0005,retry-budgeted,stand-in,2026-11-12T10:56:29.348+05:30,847.7,861.3,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,847.3,0.0,842.3,1,0,q14,
+retry-none-stand-in-0005,retry-none,stand-in,2026-11-12T10:56:29.348+05:30,866.3,882.0,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,857.1,0.0,851.6,1,0,q14,
+retry-naive-stand-in-0005,retry-naive,stand-in,2026-11-12T10:56:29.333+05:30,887.1,905.6,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,880.3,0.0,872.5,1,0,q14,
+overload-short-stand-in-0008,overload-short,stand-in,2026-11-12T10:56:33.161+05:30,593.5,606.2,ok,0,1182,195,medium-300w-k4-rerank,,lean,0.0,605.2,0.0,587.1,1,0,q16,
+harness-freeze-check-stand-in-0008,harness-freeze-check,stand-in,2026-11-12T10:56:33.459+05:30,750.2,766.8,ok,0,1664,188,medium-300w-k4-rerank,,full,0.0,761.2,0.0,742.5,1,0,q17,
+halved-stand-in-0002,halved,stand-in,2026-11-12T10:56:33.256+05:30,1735.7,1750.6,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,1735.3,0.0,1726.5,1,0,q14,
+burst-short-stand-in-0000,burst-short,stand-in,2026-11-12T10:56:35.374+05:30,902.3,917.6,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,855.8,0.0,893.4,1,0,q19,
+steady-short-stand-in-0004,steady-short,stand-in,2026-11-12T10:56:35.492+05:30,899.0,913.0,ok,0,2513,186,medium-300w-k4-rerank,,full,0.0,892.0,0.0,890.4,1,0,q12,
+steady-stand-in-0004,steady,stand-in,2026-11-12T10:56:35.511+05:30,882.3,897.1,ok,0,2513,186,medium-300w-k4-rerank,,full,0.0,892.4,0.0,872.3,1,0,q12,
+burst-stand-in-0000,burst,stand-in,2026-11-12T10:56:35.653+05:30,883.6,902.3,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,860.4,0.0,874.6,1,0,q19,
+burst-short-stand-in-0001,burst-short,stand-in,2026-11-12T10:56:35.631+05:30,2197.5,2211.2,ok,0,2256,185,medium-300w-k4-rerank,,full,0.1,2209.0,0.0,2189.2,1,0,q02,
+burst-short-stand-in-0002,burst-short,stand-in,2026-11-12T10:56:36.669+05:30,1336.2,1349.2,ok,0,1349,165,medium-300w-k4-rerank,,full,0.0,1347.5,0.0,1326.5,1,0,q04,
+overload-short-stand-in-0009,overload-short,stand-in,2026-11-12T10:56:37.443+05:30,615.4,632.5,ok,0,963,165,medium-300w-k4-rerank,,lean,0.0,628.1,0.0,610.4,1,0,q04,
+overload-noshare-stand-in-0008,overload-noshare,stand-in,2026-11-12T10:56:33.240+05:30,5149.2,5162.7,ok,0,1182,195,medium-300w-k4-rerank,,lean,4487.1,668.9,0.0,5142.5,1,0,q16,
+overload-stand-in-0008,overload,stand-in,2026-11-12T10:56:33.238+05:30,5155.0,5171.5,ok,0,1182,195,medium-300w-k4-rerank,,lean,4493.8,675.4,0.0,5146.1,1,0,q16,
+burst-stand-in-0001,burst,stand-in,2026-11-12T10:56:36.242+05:30,2197.4,2212.1,ok,0,2256,185,medium-300w-k4-rerank,,full,0.1,2209.7,0.0,2189.1,1,0,q02,
+burst-stand-in-0002,burst,stand-in,2026-11-12T10:56:37.354+05:30,1336.7,1350.7,ok,0,1349,165,medium-300w-k4-rerank,,full,0.0,1348.0,0.0,1329.4,1,0,q04,
+daily-stand-in-0001,daily,stand-in,2026-11-12T10:56:37.379+05:30,1512.7,1525.8,ok,0,784,186,medium-300w-k4-rerank,,full,0.0,1492.4,0.0,1506.2,1,0,u04,
+retry-naive-stand-in-0006,retry-naive,stand-in,2026-11-12T10:56:38.289+05:30,709.0,721.6,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,712.5,0.0,700.5,1,0,q07,
+burst-short-stand-in-0006,burst-short,stand-in,2026-11-12T10:56:39.802+05:30,2.2,2.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.9,0.0,,0,0,q04,predicted wait 24.1s exceeds patience
+burst-short-stand-in-0003,burst-short,stand-in,2026-11-12T10:56:37.332+05:30,2603.3,2616.1,ok,0,1169,194,medium-300w-k4-rerank,,lean,752.1,1862.3,0.0,2596.5,1,0,q20,
+burst-short-stand-in-0007,burst-short,stand-in,2026-11-12T10:56:40.185+05:30,2.7,2.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.0,0.0,,0,0,u04,predicted wait 23.7s exceeds patience
+burst-stand-in-0006,burst,stand-in,2026-11-12T10:56:40.207+05:30,3.1,3.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.2,0.0,,0,0,q04,predicted wait 23.9s exceeds patience
+burst-stand-in-0003,burst,stand-in,2026-11-12T10:56:38.492+05:30,1853.8,1867.7,ok,0,1169,194,medium-300w-k4-rerank,,lean,0.0,1865.9,0.0,1846.8,1,0,q20,
+burst-short-stand-in-0008,burst-short,stand-in,2026-11-12T10:56:40.592+05:30,3.1,3.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q11,predicted wait 28.2s exceeds patience
+burst-stand-in-0007,burst,stand-in,2026-11-12T10:56:40.614+05:30,2.0,2.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.7,0.0,,0,0,u04,predicted wait 23.5s exceeds patience
+burst-short-stand-in-0009,burst-short,stand-in,2026-11-12T10:56:41.320+05:30,4.3,4.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.3,0.0,,0,0,u02,predicted wait 26.8s exceeds patience
+burst-stand-in-0008,burst,stand-in,2026-11-12T10:56:41.342+05:30,2.9,2.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q11,predicted wait 27.7s exceeds patience
+burst-short-stand-in-0010,burst-short,stand-in,2026-11-12T10:56:42.278+05:30,3.0,3.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q01,predicted wait 25.1s exceeds patience
+burst-stand-in-0009,burst,stand-in,2026-11-12T10:56:42.300+05:30,3.7,3.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,u02,predicted wait 26.0s exceeds patience
+burst-stand-in-0010,burst,stand-in,2026-11-12T10:56:42.419+05:30,3.0,3.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q01,predicted wait 25.3s exceeds patience
+burst-short-stand-in-0011,burst-short,stand-in,2026-11-12T10:56:42.657+05:30,2.1,2.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q08,predicted wait 23.4s exceeds patience
+burst-stand-in-0011,burst,stand-in,2026-11-12T10:56:42.678+05:30,1.9,1.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q08,predicted wait 23.6s exceeds patience
+burst-short-stand-in-0012,burst-short,stand-in,2026-11-12T10:56:42.781+05:30,2.4,2.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q05,predicted wait 25.0s exceeds patience
+retrieval-medium-q04,retrieval-medium,real,2026-11-12T10:56:42.073+05:30,638.4,720.1,ok,0,1290,265,medium-300w-k4-rerank,correct,full,0.1,719.6,0.0,,,,q04,
+burst-stand-in-0012,burst,stand-in,2026-11-12T10:56:42.803+05:30,1.8,1.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.6,0.0,,0,0,q05,predicted wait 25.2s exceeds patience
+burst-short-stand-in-0013,burst-short,stand-in,2026-11-12T10:56:43.042+05:30,0.9,0.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,0.9,0,1,q02,shared an identical question's answer
+burst-stand-in-0013,burst,stand-in,2026-11-12T10:56:43.064+05:30,1.1,1.1,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.1,0,1,q02,shared an identical question's answer
+harness-freeze-check-stand-in-0009,harness-freeze-check,stand-in,2026-11-12T10:56:42.149+05:30,1310.1,1321.4,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,1314.8,0.0,1302.2,1,0,q19,
+harness-freeze-check-stand-in-0010,harness-freeze-check,stand-in,2026-11-12T10:56:42.793+05:30,1221.7,1234.4,ok,0,2444,187,medium-300w-k4-rerank,,full,0.0,1233.3,0.0,1214.4,1,0,q18,
+burst-short-stand-in-0014,burst-short,stand-in,2026-11-12T10:56:44.140+05:30,4.1,4.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q16,predicted wait 22.7s exceeds patience
+burst-stand-in-0014,burst,stand-in,2026-11-12T10:56:44.162+05:30,1.3,1.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.7,0.0,,0,0,q16,predicted wait 23.0s exceeds patience
+burst-stand-in-0015,burst,stand-in,2026-11-12T10:56:44.276+05:30,1.5,1.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.6,0.0,,0,0,q09,predicted wait 21.1s exceeds patience
+harness-freeze-check-stand-in-0011,harness-freeze-check,stand-in,2026-11-12T10:56:43.240+05:30,1122.2,1134.9,ok,0,2538,186,medium-300w-k4-rerank,,full,0.1,1133.5,0.0,1115.6,1,0,q13,
+burst-short-stand-in-0016,burst-short,stand-in,2026-11-12T10:56:44.437+05:30,2.0,2.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.5,0.0,,0,0,q02,predicted wait 30.9s exceeds patience
+burst-short-stand-in-0017,burst-short,stand-in,2026-11-12T10:56:44.442+05:30,1.9,1.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q16,predicted wait 31.6s exceeds patience
+burst-stand-in-0017,burst,stand-in,2026-11-12T10:56:44.463+05:30,3.7,3.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q16,predicted wait 32.9s exceeds patience
+burst-stand-in-0018,burst,stand-in,2026-11-12T10:56:44.633+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,u02,predicted wait 34.0s exceeds patience
+burst-short-stand-in-0018,burst-short,stand-in,2026-11-12T10:56:45.020+05:30,4.6,4.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.7,0.0,,0,0,u02,predicted wait 32.2s exceeds patience
+burst-stand-in-0019,burst,stand-in,2026-11-12T10:56:45.042+05:30,3.3,3.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q18,predicted wait 33.1s exceeds patience
+burst-short-stand-in-0004,burst-short,stand-in,2026-11-12T10:56:38.470+05:30,6763.6,6777.6,ok,0,952,186,medium-300w-k4-rerank,,lean,6170.5,605.7,0.0,6755.5,1,0,q09,
+daily-stand-in-0002,daily,stand-in,2026-11-12T10:56:43.507+05:30,1748.0,1756.3,ok,0,2444,187,medium-300w-k4-rerank,,full,0.1,1751.0,0.0,1734.7,1,0,q18,
+burst-short-stand-in-0019,burst-short,stand-in,2026-11-12T10:56:45.307+05:30,4.9,4.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q18,predicted wait 30.8s exceeds patience
+burst-stand-in-0020,burst,stand-in,2026-11-12T10:56:45.308+05:30,4.3,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.3,0.0,,0,0,q19,predicted wait 33.8s exceeds patience
+burst-stand-in-0021,burst,stand-in,2026-11-12T10:56:45.329+05:30,3.8,3.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,q17,predicted wait 31.1s exceeds patience
+burst-stand-in-0004,burst,stand-in,2026-11-12T10:56:39.396+05:30,6102.6,6115.5,ok,0,952,186,medium-300w-k4-rerank,,lean,5505.6,608.2,0.0,6094.5,1,0,q09,
+burst-short-stand-in-0020,burst-short,stand-in,2026-11-12T10:56:45.759+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q19,predicted wait 31.3s exceeds patience
+burst-stand-in-0022,burst,stand-in,2026-11-12T10:56:45.781+05:30,3.4,3.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.4,0.0,,0,0,q19,predicted wait 32.7s exceeds patience
+burst-short-stand-in-0021,burst-short,stand-in,2026-11-12T10:56:45.787+05:30,3.7,3.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.7,0.0,,0,0,q17,predicted wait 28.6s exceeds patience
+burst-stand-in-0023,burst,stand-in,2026-11-12T10:56:45.809+05:30,3.7,3.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q05,predicted wait 31.9s exceeds patience
+burst-short-stand-in-0022,burst-short,stand-in,2026-11-12T10:56:46.061+05:30,3.5,3.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q19,predicted wait 31.0s exceeds patience
+burst-stand-in-0024,burst,stand-in,2026-11-12T10:56:46.082+05:30,1.4,1.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.4,0,1,q02,shared an identical question's answer
+burst-short-stand-in-0023,burst-short,stand-in,2026-11-12T10:56:46.099+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q05,predicted wait 30.2s exceeds patience
+burst-stand-in-0025,burst,stand-in,2026-11-12T10:56:46.121+05:30,3.6,3.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q04,predicted wait 29.0s exceeds patience
+burst-short-stand-in-0024,burst-short,stand-in,2026-11-12T10:56:46.215+05:30,0.9,0.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,0.9,0,1,q02,shared an identical question's answer
+burst-stand-in-0026,burst,stand-in,2026-11-12T10:56:46.237+05:30,3.4,3.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q18,predicted wait 31.3s exceeds patience
+burst-short-stand-in-0025,burst-short,stand-in,2026-11-12T10:56:46.248+05:30,2.4,2.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q04,predicted wait 27.4s exceeds patience
+burst-short-stand-in-0026,burst-short,stand-in,2026-11-12T10:56:46.810+05:30,3.0,3.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.8,0.0,,0,0,q18,predicted wait 29.3s exceeds patience
+burst-short-stand-in-0027,burst-short,stand-in,2026-11-12T10:56:47.007+05:30,4.8,4.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q13,predicted wait 29.8s exceeds patience
+burst-stand-in-0027,burst,stand-in,2026-11-12T10:56:47.029+05:30,3.1,3.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q13,predicted wait 31.2s exceeds patience
+overload-noshare-stand-in-0009,overload-noshare,stand-in,2026-11-12T10:56:37.522+05:30,9764.6,9775.9,ok,0,963,165,medium-300w-k4-rerank,,lean,8827.0,947.2,0.0,9756.3,2,0,q04,
+overload-stand-in-0009,overload,stand-in,2026-11-12T10:56:37.520+05:30,9766.4,9781.4,ok,0,963,165,medium-300w-k4-rerank,,lean,8830.6,949.3,0.0,9758.4,2,0,q04,
+burst-short-stand-in-0028,burst-short,stand-in,2026-11-12T10:56:48.276+05:30,2.7,2.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q19,predicted wait 28.8s exceeds patience
+burst-stand-in-0028,burst,stand-in,2026-11-12T10:56:48.298+05:30,3.4,3.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q19,predicted wait 30.2s exceeds patience
+retry-none-stand-in-0006,retry-none,stand-in,2026-11-12T10:56:38.305+05:30,10025.6,10025.6,error,0,0,0,medium-300w-k4-rerank,,extractive,0.0,10016.4,0.0,,1,0,q07,provider too slow (ReadTimeout)
+burst-short-stand-in-0029,burst-short,stand-in,2026-11-12T10:56:48.346+05:30,3.2,3.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q05,predicted wait 28.0s exceeds patience
+burst-stand-in-0029,burst,stand-in,2026-11-12T10:56:48.368+05:30,2.8,2.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q05,predicted wait 29.3s exceeds patience
+burst-short-stand-in-0030,burst-short,stand-in,2026-11-12T10:56:48.490+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q05,predicted wait 27.8s exceeds patience
+burst-stand-in-0030,burst,stand-in,2026-11-12T10:56:48.511+05:30,2.7,2.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q05,predicted wait 29.2s exceeds patience
+burst-short-stand-in-0031,burst-short,stand-in,2026-11-12T10:56:49.494+05:30,3.7,3.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q01,predicted wait 26.5s exceeds patience
+burst-stand-in-0031,burst,stand-in,2026-11-12T10:56:49.516+05:30,3.6,3.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q01,predicted wait 27.8s exceeds patience
+retry-budgeted-stand-in-0006,retry-budgeted,stand-in,2026-11-12T10:56:38.304+05:30,11288.1,11301.0,ok,1,971,184,medium-300w-k4-rerank,,lean,0.0,10015.3,1275.2,11275.9,1,0,q07,"retried once after CallTimeout, waited 0.7s"
+burst-short-stand-in-0032,burst-short,stand-in,2026-11-12T10:56:49.618+05:30,5.0,5.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,4.0,0.0,,0,0,u03,predicted wait 25.1s exceeds patience
+burst-stand-in-0032,burst,stand-in,2026-11-12T10:56:49.640+05:30,6.8,6.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,4.4,0.0,,0,0,u03,predicted wait 26.5s exceeds patience
+overload-short-stand-in-0010,overload-short,stand-in,2026-11-12T10:56:48.086+05:30,1784.6,1795.4,ok,0,1403,188,medium-300w-k4-rerank,,lean,712.7,1072.3,0.0,1776.4,1,0,q19,
+burst-short-stand-in-0033,burst-short,stand-in,2026-11-12T10:56:50.704+05:30,5.2,5.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q16,predicted wait 24.7s exceeds patience
+burst-stand-in-0033,burst,stand-in,2026-11-12T10:56:50.726+05:30,3.9,3.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q16,predicted wait 26.1s exceeds patience
+burst-stand-in-0034,burst,stand-in,2026-11-12T10:56:51.458+05:30,4.3,4.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q13,predicted wait 26.8s exceeds patience
+harness-freeze-check-stand-in-0012,harness-freeze-check,stand-in,2026-11-12T10:56:51.491+05:30,726.9,739.7,ok,0,784,186,medium-300w-k4-rerank,,full,0.0,736.2,0.0,719.2,1,0,u04,
+burst-stand-in-0035,burst,stand-in,2026-11-12T10:56:53.093+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q20,predicted wait 23.6s exceeds patience
+burst-short-stand-in-0035,burst-short,stand-in,2026-11-12T10:56:53.268+05:30,4.3,4.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,q20,predicted wait 34.4s exceeds patience
+burst-short-stand-in-0036,burst-short,stand-in,2026-11-12T10:56:53.939+05:30,3.5,3.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q09,predicted wait 32.0s exceeds patience
+burst-stand-in-0036,burst,stand-in,2026-11-12T10:56:53.961+05:30,2.8,2.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q09,predicted wait 21.0s exceeds patience
+harness-freeze-check-stand-in-0013,harness-freeze-check,stand-in,2026-11-12T10:56:52.896+05:30,1125.3,1138.5,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,1137.2,0.0,1118.0,1,0,q06,
+burst-short-stand-in-0037,burst-short,stand-in,2026-11-12T10:56:54.134+05:30,4.0,4.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.7,0.0,,0,0,q15,predicted wait 35.9s exceeds patience
+burst-stand-in-0037,burst,stand-in,2026-11-12T10:56:54.156+05:30,4.0,4.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.4,0.0,,0,0,q15,predicted wait 24.9s exceeds patience
+burst-short-stand-in-0038,burst-short,stand-in,2026-11-12T10:56:54.303+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q01,predicted wait 34.0s exceeds patience
+burst-short-stand-in-0005,burst-short,stand-in,2026-11-12T10:56:39.374+05:30,16556.4,16568.6,ok,0,1225,200,medium-300w-k4-rerank,,lean,15924.9,642.5,0.0,16547.4,2,0,q03,
+burst-short-stand-in-0039,burst-short,stand-in,2026-11-12T10:56:54.568+05:30,1374.6,1374.6,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,1374.6,0,1,q03,shared an identical question's answer
+burst-stand-in-0005,burst,stand-in,2026-11-12T10:56:39.824+05:30,16365.8,16379.9,ok,0,1225,200,medium-300w-k4-rerank,,lean,15736.3,642.4,0.0,16358.5,2,0,q03,
+burst-stand-in-0039,burst,stand-in,2026-11-12T10:56:54.590+05:30,1613.8,1613.8,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,1613.8,0,1,q03,shared an identical question's answer
+retry-budgeted-stand-in-0007,retry-budgeted,stand-in,2026-11-12T10:56:57.017+05:30,668.4,682.4,ok,0,1225,200,medium-300w-k4-rerank,,lean,0.0,677.7,0.0,660.3,1,0,q03,
+retry-none-stand-in-0007,retry-none,stand-in,2026-11-12T10:56:57.017+05:30,760.5,774.7,ok,0,2141,200,medium-300w-k4-rerank,,full,0.1,770.3,0.0,753.8,1,0,q03,
+overload-stand-in-0010,overload,stand-in,2026-11-12T10:56:48.163+05:30,11022.3,11033.6,ok,0,1403,188,medium-300w-k4-rerank,,lean,10066.1,964.8,0.0,11016.3,1,0,q19,
+overload-noshare-stand-in-0010,overload-noshare,stand-in,2026-11-12T10:56:48.165+05:30,11021.4,11035.5,ok,0,1403,188,medium-300w-k4-rerank,,lean,10063.9,969.2,0.0,11013.9,1,0,q19,
+retry-none-stand-in-0008,retry-none,stand-in,2026-11-12T10:57:01.551+05:30,705.7,717.1,ok,0,1427,192,medium-300w-k4-rerank,,lean,0.0,712.8,0.0,696.8,1,0,q11,
+retry-naive-stand-in-0008,retry-naive,stand-in,2026-11-12T10:57:01.535+05:30,830.1,842.5,ok,0,2534,192,medium-300w-k4-rerank,,full,0.0,837.1,0.0,822.4,1,0,q11,
+retrieval-medium-q05,retrieval-medium,real,2026-11-12T10:57:02.800+05:30,786.3,804.9,ok,0,2849,160,medium-300w-k4-rerank,correct,extractive,0.0,804.4,0.0,,,,q05,no answer sentence passed checking; verified quotes shown
+overload-short-stand-in-0011,overload-short,stand-in,2026-11-12T10:57:02.843+05:30,923.5,935.9,ok,0,1225,200,medium-300w-k4-rerank,,lean,0.0,921.5,0.0,915.6,1,0,q03,
+harness-freeze-check-stand-in-0015,harness-freeze-check,stand-in,2026-11-12T10:57:02.638+05:30,1279.6,1293.4,ok,0,1664,188,medium-300w-k4-rerank,,full,0.0,1291.8,0.0,1269.7,1,0,q17,
+harness-freeze-check-stand-in-0014,harness-freeze-check,stand-in,2026-11-12T10:57:02.502+05:30,1603.2,1614.5,ok,0,2074,182,medium-300w-k4-rerank,,full,0.0,1605.9,0.0,1596.0,1,0,u02,
+burst-short-stand-in-0015,burst-short,stand-in,2026-11-12T10:56:44.254+05:30,20668.8,20681.5,ok,0,952,186,medium-300w-k4-rerank,,lean,19609.1,1071.2,0.0,20661.2,3,0,q09,
+burst-stand-in-0016,burst,stand-in,2026-11-12T10:56:44.459+05:30,21903.6,21921.0,ok,0,1097,185,medium-300w-k4-rerank,,lean,20800.0,1120.4,0.0,21897.8,3,0,q02,
+retry-naive-stand-in-0007,retry-naive,stand-in,2026-11-12T10:56:57.001+05:30,10231.5,10231.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.1,10010.2,217.6,,1,0,q03,rate limit
+daily-stand-in-0003,daily,stand-in,2026-11-12T10:57:05.520+05:30,2460.1,2472.8,ok,0,2252,188,medium-300w-k4-rerank,,full,0.1,2455.0,0.0,2450.3,1,0,q19,
+retry-naive-stand-in-0009,retry-naive,stand-in,2026-11-12T10:57:08.112+05:30,231.1,231.1,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.5,222.7,,1,0,q06,rate limit
+harness-freeze-check-stand-in-0018,harness-freeze-check,stand-in,2026-11-12T10:57:07.474+05:30,873.7,890.9,ok,0,1838,186,medium-300w-k4-rerank,,full,0.0,889.7,0.0,865.0,1,0,q09,
+harness-freeze-check-stand-in-0017,harness-freeze-check,stand-in,2026-11-12T10:57:07.175+05:30,1596.7,1609.3,ok,0,2916,192,medium-300w-k4-rerank,,full,0.1,1608.1,0.0,1590.9,1,0,q15,
+overload-noshare-stand-in-0011,overload-noshare,stand-in,2026-11-12T10:57:02.922+05:30,6685.0,6707.6,ok,0,1225,200,medium-300w-k4-rerank,,lean,5858.8,844.0,0.0,6669.3,1,0,q03,
+overload-stand-in-0011,overload,stand-in,2026-11-12T10:57:02.920+05:30,6693.4,6717.1,ok,0,1225,200,medium-300w-k4-rerank,,lean,5863.2,849.2,0.0,6671.9,1,0,q03,
+harness-freeze-check-stand-in-0016,harness-freeze-check,stand-in,2026-11-12T10:57:06.897+05:30,4182.3,4196.8,ok,0,2444,187,medium-300w-k4-rerank,,full,0.0,4194.2,0.0,4173.8,1,0,q18,
+retry-budgeted-stand-in-0008,retry-budgeted,stand-in,2026-11-12T10:57:01.550+05:30,12743.4,12756.1,ok,1,1427,192,medium-300w-k4-rerank,,lean,0.0,10009.7,2741.4,12736.8,2,0,q11,"retried once after CallTimeout, waited 0.7s"
+burst-short-stand-in-0034,burst-short,stand-in,2026-11-12T10:56:53.071+05:30,23187.0,23199.8,ok,0,1368,186,medium-300w-k4-rerank,,lean,22559.3,638.8,0.0,23179.5,3,0,q13,
+overload-short-stand-in-0012,overload-short,stand-in,2026-11-12T10:57:15.460+05:30,832.5,859.3,ok,0,1182,195,medium-300w-k4-rerank,,lean,0.0,846.6,0.0,810.9,1,0,q16,
+burst-stand-in-0038,burst,stand-in,2026-11-12T10:56:54.325+05:30,22379.1,22393.4,ok,0,1255,205,medium-300w-k4-rerank,,lean,21770.1,621.9,0.0,22371.4,3,0,q01,
+halved-stand-in-0003,halved,stand-in,2026-11-12T10:57:15.782+05:30,2467.3,2482.2,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,2456.0,0.0,2460.6,1,0,q02,
+overload-noshare-stand-in-0012,overload-noshare,stand-in,2026-11-12T10:57:15.539+05:30,4419.9,4436.9,ok,0,1182,195,medium-300w-k4-rerank,,lean,3594.0,835.3,0.0,4413.2,1,0,q16,
+overload-stand-in-0012,overload,stand-in,2026-11-12T10:57:15.537+05:30,4425.1,4442.0,ok,0,1182,195,medium-300w-k4-rerank,,lean,3598.0,837.0,0.0,4416.3,1,0,q16,
+daily-stand-in-0004,daily,stand-in,2026-11-12T10:57:19.463+05:30,867.5,880.1,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,867.3,0.0,858.8,1,0,q14,
+harness-freeze-check-stand-in-0019,harness-freeze-check,stand-in,2026-11-12T10:57:19.726+05:30,628.9,645.1,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,642.3,0.0,613.5,1,0,q01,
+retry-none-stand-in-0009,retry-none,stand-in,2026-11-12T10:57:08.127+05:30,12528.6,12528.6,error,0,0,0,medium-300w-k4-rerank,,extractive,2506.3,10015.1,0.0,,1,0,q06,provider too slow (ReadTimeout)
+overload-short-stand-in-0013,overload-short,stand-in,2026-11-12T10:57:19.888+05:30,1560.5,1575.2,ok,0,1255,205,medium-300w-k4-rerank,,lean,718.9,853.0,0.0,1553.7,1,0,q01,
+retrieval-medium-q06,retrieval-medium,real,2026-11-12T10:57:23.619+05:30,476.4,818.1,ok,0,1996,376,medium-300w-k4-rerank,correct,full,0.0,817.6,0.0,,,,q06,
+steady-short-stand-in-0005,steady-short,stand-in,2026-11-12T10:57:24.039+05:30,885.4,899.1,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,850.7,0.0,875.9,1,0,q14,
+steady-stand-in-0005,steady,stand-in,2026-11-12T10:57:24.058+05:30,884.3,901.4,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,853.0,0.0,873.0,1,0,q14,
+retry-naive-stand-in-0010,retry-naive,stand-in,2026-11-12T10:57:24.365+05:30,910.2,921.6,ok,0,2513,186,medium-300w-k4-rerank,,full,0.0,914.5,0.0,901.4,1,0,q12,
+retry-none-stand-in-0010,retry-none,stand-in,2026-11-12T10:57:24.381+05:30,968.1,980.7,ok,0,1434,186,medium-300w-k4-rerank,,lean,0.0,976.8,0.0,959.9,1,0,q12,
+overload-stand-in-0015,overload,stand-in,2026-11-12T10:57:25.890+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q06,predicted wait 24.8s exceeds patience
+overload-noshare-stand-in-0015,overload-noshare,stand-in,2026-11-12T10:57:25.892+05:30,3.4,3.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q06,predicted wait 24.8s exceeds patience
+retry-budgeted-stand-in-0009,retry-budgeted,stand-in,2026-11-12T10:57:08.127+05:30,18010.0,18021.7,ok,0,1402,201,medium-300w-k4-rerank,,lean,17144.8,868.0,0.0,18003.2,1,0,q06,
+harness-freeze-check-stand-in-0020,harness-freeze-check,stand-in,2026-11-12T10:57:26.616+05:30,1814.3,1831.0,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,1823.6,0.0,1807.5,1,0,q01,
+overload-short-stand-in-0014,overload-short,stand-in,2026-11-12T10:57:25.426+05:30,3398.7,3411.1,ok,0,799,186,medium-300w-k4-rerank,,lean,2612.6,792.6,0.0,3391.9,1,0,u04,
+overload-short-stand-in-0016,overload-short,stand-in,2026-11-12T10:57:29.385+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q07,predicted wait 20.0s exceeds patience
+overload-stand-in-0013,overload,stand-in,2026-11-12T10:57:19.965+05:30,10964.0,10979.1,ok,0,1255,205,medium-300w-k4-rerank,,lean,10069.0,909.4,0.0,10957.9,1,0,q01,
+overload-noshare-stand-in-0013,overload-noshare,stand-in,2026-11-12T10:57:19.967+05:30,10962.0,10978.7,ok,0,1255,205,medium-300w-k4-rerank,,lean,10064.9,913.0,0.0,10954.5,1,0,q01,
+harness-freeze-check-stand-in-0021,harness-freeze-check,stand-in,2026-11-12T10:57:33.392+05:30,1831.0,1844.6,ok,0,2444,187,medium-300w-k4-rerank,,full,0.0,1838.4,0.0,1822.7,1,0,q18,
+daily-stand-in-0005,daily,stand-in,2026-11-12T10:57:35.498+05:30,807.7,822.1,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,803.9,0.0,800.8,1,0,q03,
+overload-noshare-stand-in-0014,overload-noshare,stand-in,2026-11-12T10:57:25.504+05:30,13089.0,13099.7,ok,0,799,186,medium-300w-k4-rerank,,lean,11959.7,1138.9,0.0,13080.6,2,0,u04,
+overload-stand-in-0014,overload,stand-in,2026-11-12T10:57:25.503+05:30,13091.6,13107.0,ok,0,799,186,medium-300w-k4-rerank,,lean,11963.1,1142.8,0.0,13083.7,2,0,u04,
+daily-stand-in-0006,daily,stand-in,2026-11-12T10:57:38.121+05:30,1337.8,1351.6,ok,0,1808,168,medium-300w-k4-rerank,,full,0.1,1350.5,0.0,1331.2,1,0,q08,
+burst-stand-in-0040,burst,stand-in,2026-11-12T10:57:40.374+05:30,747.9,762.6,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,751.1,0.0,740.7,1,0,q07,
+overload-short-stand-in-0015,overload-short,stand-in,2026-11-12T10:57:25.813+05:30,15633.5,15648.3,ok,0,1402,201,medium-300w-k4-rerank,,lean,14280.2,1367.0,0.0,15627.2,2,0,q06,
+retry-budgeted-stand-in-0010,retry-budgeted,stand-in,2026-11-12T10:57:24.381+05:30,,17438.0,timeout,0,0,0,medium-300w-k4-rerank,,none,,,,,,0,q12,gave up after 17.4s with nothing shown
+steady-short-stand-in-0006,steady-short,stand-in,2026-11-12T10:57:41.952+05:30,1301.8,1316.5,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,1297.4,0.0,1291.5,1,0,q07,
+steady-stand-in-0006,steady,stand-in,2026-11-12T10:57:41.971+05:30,1290.1,1308.7,ok,0,1620,184,medium-300w-k4-rerank,,full,0.0,1299.0,0.0,1278.8,1,0,q07,
+retrieval-medium-q08,retrieval-medium,real,2026-11-12T10:57:44.458+05:30,635.4,806.5,ok,0,1730,213,medium-300w-k4-rerank,correct,full,0.0,806.0,0.0,,,,q08,
+overload-noshare-stand-in-0016,overload-noshare,stand-in,2026-11-12T10:57:29.464+05:30,17753.7,17766.0,ok,0,971,184,medium-300w-k4-rerank,,lean,16698.7,1065.6,0.0,17745.6,3,0,q07,
+overload-stand-in-0016,overload,stand-in,2026-11-12T10:57:29.462+05:30,17755.5,17767.8,ok,0,971,184,medium-300w-k4-rerank,,lean,16701.3,1064.8,0.0,17747.5,3,0,q07,
+retry-none-stand-in-0011,retry-none,stand-in,2026-11-12T10:57:47.043+05:30,1070.6,1085.0,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,1068.6,0.0,1062.5,1,0,q19,
+retry-naive-stand-in-0012,retry-naive,stand-in,2026-11-12T10:57:49.137+05:30,232.5,232.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,6.7,220.6,,1,0,u02,rate limit
+retry-budgeted-stand-in-0011,retry-budgeted,stand-in,2026-11-12T10:57:47.043+05:30,4094.0,4106.5,ok,0,1403,188,medium-300w-k4-rerank,,lean,3151.2,948.3,0.0,4087.3,1,0,q19,
+retry-budgeted-stand-in-0013,retry-budgeted,stand-in,2026-11-12T10:57:53.438+05:30,1.0,1.0,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,1.0,0,1,q03,shared an identical question's answer
+retry-none-stand-in-0013,retry-none,stand-in,2026-11-12T10:57:53.439+05:30,1.3,1.3,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.3,0,1,q03,shared an identical question's answer
+retry-naive-stand-in-0013,retry-naive,stand-in,2026-11-12T10:57:53.423+05:30,232.7,232.7,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.9,219.7,,1,0,q03,rate limit
+daily-stand-in-0007,daily,stand-in,2026-11-12T10:57:54.102+05:30,758.1,769.5,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,753.3,0.0,751.8,1,0,q01,
+retry-naive-stand-in-0014,retry-naive,stand-in,2026-11-12T10:57:55.240+05:30,959.4,975.3,ok,0,1418,178,medium-300w-k4-rerank,,full,0.0,972.7,0.0,952.8,1,0,u05,
+halved-stand-in-0004,halved,stand-in,2026-11-12T10:57:55.408+05:30,909.7,925.5,ok,0,2538,186,medium-300w-k4-rerank,,full,0.0,898.3,0.0,901.1,1,0,q13,
+retry-naive-stand-in-0011,retry-naive,stand-in,2026-11-12T10:57:47.028+05:30,10257.2,10257.2,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,10010.4,222.9,,1,0,q19,rate limit
+retry-none-stand-in-0015,retry-none,stand-in,2026-11-12T10:57:58.145+05:30,3.3,3.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q10,predicted wait 15.3s exceeds patience
+retry-budgeted-stand-in-0015,retry-budgeted,stand-in,2026-11-12T10:57:58.145+05:30,3.8,3.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q10,predicted wait 23.7s exceeds patience
+retry-naive-stand-in-0015,retry-naive,stand-in,2026-11-12T10:57:58.130+05:30,229.4,229.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.9,220.6,,1,0,q10,rate limit
+overload-stand-in-0017,overload,stand-in,2026-11-12T10:57:45.848+05:30,15284.6,15298.6,ok,0,1368,186,medium-300w-k4-rerank,,lean,12062.8,3235.1,0.0,15278.4,2,0,q13,
+overload-noshare-stand-in-0017,overload-noshare,stand-in,2026-11-12T10:57:45.849+05:30,15282.6,15298.2,ok,0,1368,186,medium-300w-k4-rerank,,lean,12059.5,3236.9,0.0,15276.3,2,0,q13,
+overload-stand-in-0020,overload,stand-in,2026-11-12T10:58:02.431+05:30,4.3,4.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q02,predicted wait 27.7s exceeds patience
+overload-noshare-stand-in-0020,overload-noshare,stand-in,2026-11-12T10:58:02.433+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q02,predicted wait 27.7s exceeds patience
+retry-budgeted-stand-in-0012,retry-budgeted,stand-in,2026-11-12T10:57:49.152+05:30,13822.6,13836.2,ok,0,1340,182,medium-300w-k4-rerank,,lean,12496.0,1339.1,0.0,13815.8,2,0,u02,
+retry-none-stand-in-0012,retry-none,stand-in,2026-11-12T10:57:49.152+05:30,14112.0,14112.0,error,0,0,0,medium-300w-k4-rerank,,extractive,4101.6,10008.7,0.0,,1,0,u02,provider too slow (ReadTimeout)
+retry-none-stand-in-0014,retry-none,stand-in,2026-11-12T10:57:55.256+05:30,8816.2,8829.9,ok,0,1057,178,medium-300w-k4-rerank,,lean,7964.6,862.1,0.0,8808.0,1,0,u05,
+daily-stand-in-0008,daily,stand-in,2026-11-12T10:58:05.033+05:30,695.3,710.0,ok,0,1349,165,medium-300w-k4-rerank,,full,0.0,699.0,0.0,689.7,1,0,q04,
+retrieval-medium-q11,retrieval-medium,real,2026-11-12T10:58:05.286+05:30,520.3,610.1,ok,0,2455,141,medium-300w-k4-rerank,correct,full,0.1,609.6,0.0,,,,q11,
+overload-stand-in-0021,overload,stand-in,2026-11-12T10:58:07.348+05:30,5.8,5.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,4.9,0.0,,0,0,u03,predicted wait 22.8s exceeds patience
+overload-noshare-stand-in-0021,overload-noshare,stand-in,2026-11-12T10:58:07.350+05:30,6.1,6.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,4.3,0.0,,0,0,u03,predicted wait 22.8s exceeds patience
+overload-stand-in-0022,overload,stand-in,2026-11-12T10:58:07.559+05:30,1.1,1.1,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.1,0,1,q03,shared an identical question's answer
+overload-noshare-stand-in-0022,overload-noshare,stand-in,2026-11-12T10:58:07.561+05:30,5.0,5.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q03,predicted wait 23.5s exceeds patience
+overload-stand-in-0023,overload,stand-in,2026-11-12T10:58:07.664+05:30,2.9,2.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q18,predicted wait 23.8s exceeds patience
+overload-noshare-stand-in-0023,overload-noshare,stand-in,2026-11-12T10:58:07.666+05:30,3.5,3.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q18,predicted wait 23.8s exceeds patience
+halved-stand-in-0005,halved,stand-in,2026-11-12T10:58:08.725+05:30,806.6,824.1,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,810.2,0.0,799.5,1,0,q06,
+overload-stand-in-0018,overload,stand-in,2026-11-12T10:58:01.187+05:30,9784.1,9803.3,ok,0,1402,201,medium-300w-k4-rerank,,lean,8647.5,1154.0,0.0,9770.2,1,0,q06,
+overload-noshare-stand-in-0018,overload-noshare,stand-in,2026-11-12T10:58:01.189+05:30,9784.4,9803.7,ok,0,1402,201,medium-300w-k4-rerank,,lean,8643.5,1159.0,0.0,9767.5,1,0,q06,
+daily-stand-in-0009,daily,stand-in,2026-11-12T10:58:11.325+05:30,6.6,6.6,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,6.6,0,1,q03,shared an identical question's answer
+retry-naive-stand-in-0016,retry-naive,stand-in,2026-11-12T10:58:10.440+05:30,1030.7,1044.1,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,1042.0,0.0,1025.4,1,0,q03,
+retry-budgeted-stand-in-0014,retry-budgeted,stand-in,2026-11-12T10:57:55.255+05:30,16689.2,16702.2,ok,0,1057,178,medium-300w-k4-rerank,,lean,15608.5,1091.6,0.0,16682.6,2,0,u05,
+retry-budgeted-stand-in-0017,retry-budgeted,stand-in,2026-11-12T10:58:12.576+05:30,3.0,3.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q04,predicted wait 18.1s exceeds patience
+retry-naive-stand-in-0017,retry-naive,stand-in,2026-11-12T10:58:12.561+05:30,230.5,230.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,8.3,218.7,,1,0,q04,rate limit
+retry-none-stand-in-0016,retry-none,stand-in,2026-11-12T10:58:10.455+05:30,4618.5,4631.6,ok,0,1225,200,medium-300w-k4-rerank,,lean,3329.0,1296.9,0.0,4611.7,1,0,q03,
+overload-noshare-stand-in-0019,overload-noshare,stand-in,2026-11-12T10:58:01.829+05:30,18055.1,18075.4,ok,0,1057,188,medium-300w-k4-rerank,,lean,17347.2,727.1,0.0,18047.0,2,0,q17,
+overload-stand-in-0019,overload,stand-in,2026-11-12T10:58:01.827+05:30,18060.8,18083.1,ok,0,1057,188,medium-300w-k4-rerank,,lean,17351.1,730.3,0.0,18050.9,2,0,q17,
+steady-stand-in-0007,steady,stand-in,2026-11-12T10:58:19.395+05:30,775.5,788.1,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,766.5,0.0,769.1,1,0,q03,
+steady-short-stand-in-0007,steady-short,stand-in,2026-11-12T10:58:19.376+05:30,795.1,808.5,ok,0,2141,200,medium-300w-k4-rerank,,full,0.1,769.5,0.0,788.2,1,0,q03,
+daily-stand-in-0010,daily,stand-in,2026-11-12T10:58:20.593+05:30,1316.8,1329.1,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,1318.1,0.0,1308.4,1,0,q02,
+retry-none-stand-in-0017,retry-none,stand-in,2026-11-12T10:58:12.576+05:30,10912.0,10924.3,ok,0,963,165,medium-300w-k4-rerank,,lean,9860.1,1062.9,0.0,10903.7,2,0,q04,
+retry-budgeted-stand-in-0016,retry-budgeted,stand-in,2026-11-12T10:58:10.455+05:30,14070.3,14081.6,ok,0,1225,200,medium-300w-k4-rerank,,lean,10977.2,3103.2,0.0,14062.6,2,0,q03,
+retrieval-medium-q13,retrieval-medium,real,2026-11-12T10:58:25.909+05:30,700.0,727.2,ok,0,2154,110,medium-300w-k4-rerank,correct,full,0.1,726.7,0.0,,,,q13,
+halved-stand-in-0006,halved,stand-in,2026-11-12T10:58:25.656+05:30,1586.3,1599.8,ok,0,2513,186,medium-300w-k4-rerank,,full,0.0,1583.3,0.0,1579.8,1,0,q12,
+retry-none-stand-in-0018,retry-none,stand-in,2026-11-12T10:58:27.298+05:30,4.6,4.6,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,4.6,0,1,q04,shared an identical question's answer
+steady-short-stand-in-0008,steady-short,stand-in,2026-11-12T10:58:28.444+05:30,912.9,926.7,ok,0,2534,192,medium-300w-k4-rerank,,full,0.0,920.6,0.0,906.8,1,0,q11,
+steady-stand-in-0008,steady,stand-in,2026-11-12T10:58:28.463+05:30,931.3,955.2,ok,0,2534,192,medium-300w-k4-rerank,,full,0.0,945.7,0.0,909.5,1,0,q11,
+daily-stand-in-0011,daily,stand-in,2026-11-12T10:58:28.390+05:30,1181.5,1195.1,ok,0,2252,188,medium-300w-k4-rerank,,full,0.1,1187.3,0.0,1175.1,1,0,q19,
+overload-stand-in-0026,overload,stand-in,2026-11-12T10:58:30.453+05:30,0.9,0.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,0.9,0,1,q03,shared an identical question's answer
+overload-noshare-stand-in-0026,overload-noshare,stand-in,2026-11-12T10:58:30.455+05:30,2.6,2.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.8,0.0,,0,0,q03,predicted wait 22.5s exceeds patience
+overload-noshare-stand-in-0024,overload-noshare,stand-in,2026-11-12T10:58:20.423+05:30,10128.9,10143.4,ok,0,1255,205,medium-300w-k4-rerank,,lean,9620.7,520.4,0.0,10121.2,1,0,q01,
+overload-stand-in-0024,overload,stand-in,2026-11-12T10:58:20.421+05:30,10133.1,10147.2,ok,0,1255,205,medium-300w-k4-rerank,,lean,9623.8,521.4,0.0,10124.4,1,0,q01,
+retry-budgeted-stand-in-0018,retry-budgeted,stand-in,2026-11-12T10:58:27.298+05:30,3777.9,3794.6,ok,0,963,165,medium-300w-k4-rerank,,lean,2777.8,1012.4,0.0,3772.2,1,0,q04,
+overload-stand-in-0027,overload,stand-in,2026-11-12T10:58:32.580+05:30,2.8,2.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.4,0.0,,0,0,q01,predicted wait 20.0s exceeds patience
+overload-noshare-stand-in-0027,overload-noshare,stand-in,2026-11-12T10:58:32.581+05:30,1.4,1.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.9,0.0,,0,0,q01,predicted wait 20.0s exceeds patience
+burst-stand-in-0041,burst,stand-in,2026-11-12T10:58:32.678+05:30,1428.6,1443.4,ok,0,2534,192,medium-300w-k4-rerank,,full,0.0,1401.3,0.0,1419.2,1,0,q11,
+daily-stand-in-0012,daily,stand-in,2026-11-12T10:58:31.693+05:30,3641.4,3654.8,ok,0,1271,194,medium-300w-k4-rerank,,lean,2807.2,843.2,0.0,3632.3,1,0,u01,
+halved-stand-in-0007,halved,stand-in,2026-11-12T10:58:34.636+05:30,743.5,755.5,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,754.7,0.0,735.2,1,0,q01,
+burst-stand-in-0042,burst,stand-in,2026-11-12T10:58:35.007+05:30,1174.5,1189.6,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,1187.3,0.0,1167.9,1,0,q19,
+overload-stand-in-0028,overload,stand-in,2026-11-12T10:58:37.348+05:30,0.8,0.8,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,0.8,0,1,q05,shared an identical question's answer
+retry-naive-stand-in-0018,retry-naive,stand-in,2026-11-12T10:58:27.282+05:30,11003.4,11018.2,ok,1,1349,165,medium-300w-k4-rerank,,full,0.0,10019.1,983.3,10995.3,1,0,q04,"retried once after CallTimeout, waited 0.1s"
+overload-stand-in-0025,overload,stand-in,2026-11-12T10:58:29.000+05:30,13605.6,13620.0,ok,0,1271,194,medium-300w-k4-rerank,,lean,12125.7,1493.4,0.0,13595.5,2,0,u01,
+overload-noshare-stand-in-0025,overload-noshare,stand-in,2026-11-12T10:58:29.001+05:30,13599.5,13618.6,ok,0,1271,194,medium-300w-k4-rerank,,lean,12119.9,1496.2,0.0,13592.0,2,0,u01,
+steady-stand-in-0009,steady,stand-in,2026-11-12T10:58:41.616+05:30,1291.6,1303.2,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,1289.5,0.0,1282.3,1,0,q06,
+retrieval-medium-q16,retrieval-medium,real,2026-11-12T10:58:46.657+05:30,787.4,837.9,ok,0,3271,149,medium-300w-k4-rerank,correct,full,0.1,837.4,0.0,,,,q16,
+retry-naive-stand-in-0019,retry-naive,stand-in,2026-11-12T10:58:48.408+05:30,236.0,236.0,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,6.1,221.9,,1,0,q19,rate limit
+retry-budgeted-stand-in-0019,retry-budgeted,stand-in,2026-11-12T10:58:48.424+05:30,795.6,809.8,ok,0,1403,188,medium-300w-k4-rerank,,lean,0.0,791.7,0.0,789.9,1,0,q19,
+retry-none-stand-in-0019,retry-none,stand-in,2026-11-12T10:58:48.424+05:30,4029.8,4043.3,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,4020.7,0.0,4021.8,1,0,q19,
+overload-noshare-stand-in-0028,overload-noshare,stand-in,2026-11-12T10:58:37.350+05:30,16367.8,16380.3,ok,0,1300,191,medium-300w-k4-rerank,,lean,14984.6,1394.2,0.0,16360.6,2,0,q05,
+overload-noshare-stand-in-0029,overload-noshare,stand-in,2026-11-12T10:59:03.807+05:30,1586.0,1599.9,ok,0,1403,188,medium-300w-k4-rerank,,lean,495.5,1093.0,0.0,1578.6,1,0,q19,
+overload-stand-in-0029,overload,stand-in,2026-11-12T10:59:03.805+05:30,1764.7,1777.6,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,1760.9,0.0,1757.0,1,0,q19,
+retrieval-medium-q19,retrieval-medium,real,2026-11-12T10:59:07.509+05:30,453.9,453.9,ok,0,2029,38,medium-300w-k4-rerank,refused_wrongly,refused,0.0,453.4,0.0,,,,q19,model judged the pieces insufficient
+overload-stand-in-0030,overload,stand-in,2026-11-12T10:59:03.836+05:30,9254.5,9267.3,ok,0,1474,192,medium-300w-k4-rerank,,lean,8151.8,1114.5,0.0,9246.7,1,0,q15,
+steady-stand-in-0010,steady,stand-in,2026-11-12T10:59:14.123+05:30,1275.2,1288.3,ok,0,2513,186,medium-300w-k4-rerank,,full,0.0,1255.8,0.0,1266.3,1,0,q12,
+overload-noshare-stand-in-0030,overload-noshare,stand-in,2026-11-12T10:59:03.838+05:30,13754.9,13768.6,ok,0,1474,192,medium-300w-k4-rerank,,lean,12961.8,804.7,0.0,13747.7,2,0,q15,
+daily-stand-in-0014,daily,stand-in,2026-11-12T10:59:20.755+05:30,9.4,9.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.1,7.1,0.0,,1,0,q18,rate limit
+daily-stand-in-0013,daily,stand-in,2026-11-12T10:59:19.881+05:30,1186.1,1199.3,ok,0,2558,191,medium-300w-k4-rerank,,full,0.1,1152.8,0.0,1178.4,1,0,q05,
+overload-stand-in-0031,overload,stand-in,2026-11-12T10:59:14.120+05:30,7071.7,7083.7,ok,0,963,165,medium-300w-k4-rerank,,lean,6385.2,695.4,0.0,7064.3,1,0,q04,
+overload-stand-in-0032,overload,stand-in,2026-11-12T10:59:22.843+05:30,3.0,3.0,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,3.0,0,1,q03,shared an identical question's answer
+overload-stand-in-0033,overload,stand-in,2026-11-12T10:59:23.821+05:30,2.1,2.1,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,2.1,0,1,q06,shared an identical question's answer
+overload-noshare-stand-in-0033,overload-noshare,stand-in,2026-11-12T10:59:23.823+05:30,4.0,4.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.4,0.0,,0,0,q06,predicted wait 25.4s exceeds patience
+overload-stand-in-0034,overload,stand-in,2026-11-12T10:59:25.964+05:30,3.9,3.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,3.9,0,1,q05,shared an identical question's answer
+overload-noshare-stand-in-0034,overload-noshare,stand-in,2026-11-12T10:59:25.966+05:30,4.9,4.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q05,predicted wait 22.5s exceeds patience
+overload-noshare-stand-in-0031,overload-noshare,stand-in,2026-11-12T10:59:14.122+05:30,11875.2,11891.3,ok,0,963,165,medium-300w-k4-rerank,,lean,11197.3,693.1,0.0,11867.9,2,0,q04,
+daily-stand-in-0015,daily,stand-in,2026-11-12T10:59:26.684+05:30,9.3,9.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q09,daily budget exhausted
+retry-budgeted-stand-in-0020,retry-budgeted,stand-in,2026-11-12T10:59:26.557+05:30,701.5,711.9,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,673.9,0.0,692.8,1,0,q14,
+retry-none-stand-in-0020,retry-none,stand-in,2026-11-12T10:59:26.557+05:30,1472.3,1486.1,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,1451.0,0.0,1462.6,1,0,q14,
+retry-naive-stand-in-0020,retry-naive,stand-in,2026-11-12T10:59:26.541+05:30,1753.4,1769.0,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,1730.7,0.0,1744.2,1,0,q14,
+retrieval-medium-u01,retrieval-medium,real,2026-11-12T10:59:27.984+05:30,592.1,592.1,ok,0,2501,45,medium-300w-k4-rerank,refused_correctly,refused,0.0,591.5,0.0,,,,u01,model judged the pieces insufficient
+overload-stand-in-0035,overload,stand-in,2026-11-12T10:59:33.547+05:30,702.1,716.1,ok,0,1057,178,medium-300w-k4-rerank,,lean,0.0,707.3,0.0,695.5,1,0,u05,
+daily-stand-in-0016,daily,stand-in,2026-11-12T10:59:36.482+05:30,14.5,14.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q04,daily budget exhausted
+overload-noshare-stand-in-0032,overload-noshare,stand-in,2026-11-12T10:59:22.845+05:30,14647.2,14661.1,ok,0,1225,200,medium-300w-k4-rerank,,lean,12973.9,1686.1,0.0,14640.6,2,0,q03,
+retry-naive-stand-in-0021,retry-naive,stand-in,2026-11-12T10:59:39.492+05:30,5.7,5.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,5.7,0,1,q04,shared an identical question's answer
+retry-budgeted-stand-in-0021,retry-budgeted,stand-in,2026-11-12T10:59:39.507+05:30,6.3,6.3,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,6.3,0,1,q04,shared an identical question's answer
+retry-none-stand-in-0021,retry-none,stand-in,2026-11-12T10:59:39.508+05:30,11.9,11.9,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,11.9,0,1,q04,shared an identical question's answer
+overload-noshare-stand-in-0037,overload-noshare,stand-in,2026-11-12T10:59:43.781+05:30,4.9,4.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q05,predicted wait 25.7s exceeds patience
+overload-stand-in-0036,overload,stand-in,2026-11-12T10:59:42.704+05:30,1749.1,1762.8,ok,0,1368,186,medium-300w-k4-rerank,,lean,0.0,1753.7,0.0,1740.6,1,0,q13,
+overload-noshare-stand-in-0035,overload-noshare,stand-in,2026-11-12T10:59:33.549+05:30,12853.6,12864.7,ok,0,1057,178,medium-300w-k4-rerank,,lean,11654.9,1208.6,0.0,12846.2,2,0,u05,
+daily-stand-in-0017,daily,stand-in,2026-11-12T10:59:47.715+05:30,6.7,6.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.2,0.0,,0,0,q05,daily budget exhausted
+daily-stand-in-0018,daily,stand-in,2026-11-12T10:59:47.980+05:30,0.9,0.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,0.9,0,1,q04,shared an identical question's answer
+retrieval-medium-u02,retrieval-medium,real,2026-11-12T10:59:48.583+05:30,649.6,649.6,ok,0,2076,35,medium-300w-k4-rerank,refused_correctly,refused,0.0,649.1,0.0,,,,u02,model judged the pieces insufficient
+retry-naive-stand-in-0022,retry-naive,stand-in,2026-11-12T10:59:49.470+05:30,10.8,10.8,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,10.8,0,1,q05,shared an identical question's answer
+retry-none-stand-in-0022,retry-none,stand-in,2026-11-12T10:59:49.486+05:30,7.1,7.1,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,7.1,0,1,q05,shared an identical question's answer
+retry-budgeted-stand-in-0022,retry-budgeted,stand-in,2026-11-12T10:59:49.486+05:30,9.5,9.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,9.5,0,1,q05,shared an identical question's answer
+daily-stand-in-0019,daily,stand-in,2026-11-12T10:59:52.656+05:30,8.7,8.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,q17,daily budget exhausted
+overload-stand-in-0037,overload,stand-in,2026-11-12T10:59:43.779+05:30,10020.4,10031.7,ok,0,1300,191,medium-300w-k4-rerank,,lean,8727.9,1300.5,0.0,10012.9,1,0,q05,
+halved-stand-in-0008,halved,stand-in,2026-11-12T10:59:53.099+05:30,905.9,920.9,ok,0,2074,182,medium-300w-k4-rerank,,full,0.0,840.7,0.0,896.7,1,0,u02,
+retry-none-stand-in-0023,retry-none,stand-in,2026-11-12T10:59:53.898+05:30,941.6,958.2,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,952.6,0.0,932.2,1,0,q03,
+retry-naive-stand-in-0023,retry-naive,stand-in,2026-11-12T10:59:53.882+05:30,1433.6,1447.8,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,1442.6,0.0,1428.0,1,0,q03,
+retry-budgeted-stand-in-0023,retry-budgeted,stand-in,2026-11-12T10:59:53.898+05:30,1845.9,1861.1,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,1855.1,0.0,1839.5,1,0,q03,
+overload-noshare-stand-in-0036,overload-noshare,stand-in,2026-11-12T10:59:42.706+05:30,15975.3,15992.2,ok,0,1368,186,medium-300w-k4-rerank,,lean,14172.5,1818.0,0.0,15969.9,2,0,q13,
+steady-stand-in-0011,steady,stand-in,2026-11-12T10:59:59.448+05:30,1090.4,1104.4,ok,0,2252,188,medium-300w-k4-rerank,,full,0.1,1070.8,0.0,1081.9,1,0,q19,
+daily-stand-in-0020,daily,stand-in,2026-11-12T11:00:02.455+05:30,12.6,12.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q03,daily budget exhausted
+overload-stand-in-0040,overload,stand-in,2026-11-12T11:00:02.712+05:30,5.4,5.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q01,predicted wait 25.1s exceeds patience
+overload-noshare-stand-in-0040,overload-noshare,stand-in,2026-11-12T11:00:02.714+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q01,predicted wait 29.4s exceeds patience
+steady-stand-in-0012,steady,stand-in,2026-11-12T11:00:03.666+05:30,1030.3,1044.7,ok,0,2074,182,medium-300w-k4-rerank,,full,0.0,1040.6,0.0,1022.6,1,0,u02,
+overload-stand-in-0038,overload,stand-in,2026-11-12T10:59:54.834+05:30,11680.6,11693.0,ok,0,1427,192,medium-300w-k4-rerank,,lean,9847.8,1842.3,0.0,11674.2,1,0,q11,
+retry-none-stand-in-0024,retry-none,stand-in,2026-11-12T11:00:07.644+05:30,752.6,768.5,ok,0,2916,192,medium-300w-k4-rerank,,full,0.1,754.0,0.0,745.6,1,0,q15,
+overload-noshare-stand-in-0041,overload-noshare,stand-in,2026-11-12T11:00:09.190+05:30,4.1,4.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q01,predicted wait 22.9s exceeds patience
+retrieval-medium-u04,retrieval-medium,real,2026-11-12T11:00:09.254+05:30,323.0,323.0,ok,0,777,30,medium-300w-k4-rerank,refused_correctly,refused,0.0,322.5,0.0,,,,u04,model judged the pieces insufficient
+overload-noshare-stand-in-0038,overload-noshare,stand-in,2026-11-12T10:59:54.836+05:30,15329.1,15346.0,ok,0,1427,192,medium-300w-k4-rerank,,lean,14164.0,1179.9,0.0,15323.5,2,0,q11,
+steady-stand-in-0013,steady,stand-in,2026-11-12T11:00:12.239+05:30,7.7,7.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,7.7,0,1,q03,shared an identical question's answer
+retry-naive-stand-in-0024,retry-naive,stand-in,2026-11-12T11:00:07.628+05:30,4612.5,4623.4,ok,0,2916,192,medium-300w-k4-rerank,,full,0.0,4611.2,0.0,4604.7,1,0,q15,
+halved-stand-in-0010,halved,stand-in,2026-11-12T11:00:13.331+05:30,4.6,4.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q14,predicted wait 24.5s exceeds patience
+daily-stand-in-0021,daily,stand-in,2026-11-12T11:00:14.437+05:30,13.3,13.3,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,13.3,0,1,q04,shared an identical question's answer
+retry-budgeted-stand-in-0025,retry-budgeted,stand-in,2026-11-12T11:00:13.191+05:30,1282.5,1299.8,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,1292.7,0.0,1272.3,1,0,q01,
+retry-naive-stand-in-0025,retry-naive,stand-in,2026-11-12T11:00:13.176+05:30,1337.7,1352.8,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,1350.8,0.0,1330.0,1,0,q01,
+halved-stand-in-0009,halved,stand-in,2026-11-12T11:00:08.395+05:30,6277.8,6292.4,ok,0,2558,191,medium-300w-k4-rerank,,full,4871.4,1405.6,0.0,6271.4,1,0,q05,
+retry-none-stand-in-0025,retry-none,stand-in,2026-11-12T11:00:13.191+05:30,1814.3,1829.4,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,1823.0,0.0,1808.6,1,0,q01,
+overload-stand-in-0039,overload,stand-in,2026-11-12T11:00:00.821+05:30,15905.5,15920.5,ok,0,1271,194,medium-300w-k4-rerank,,lean,14788.8,1130.2,0.0,15899.1,2,0,u01,
+steady-stand-in-0014,steady,stand-in,2026-11-12T11:00:15.873+05:30,939.9,953.5,ok,0,1418,178,medium-300w-k4-rerank,,full,0.0,950.8,0.0,932.4,1,0,u05,
+overload-stand-in-0042,overload,stand-in,2026-11-12T11:00:16.874+05:30,1.6,1.6,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,1.6,0,1,q04,shared an identical question's answer
+retry-budgeted-stand-in-0024,retry-budgeted,stand-in,2026-11-12T11:00:07.644+05:30,10597.6,10597.7,rate_limited,1,0,0,medium-300w-k4-rerank,,extractive,0.1,10008.3,575.5,,1,0,q15,queue wait exceeded patience
+retry-naive-stand-in-0026,retry-naive,stand-in,2026-11-12T11:00:17.276+05:30,1015.6,1026.5,ok,0,2513,186,medium-300w-k4-rerank,,full,0.0,1022.2,0.0,1008.8,1,0,q12,
+overload-noshare-stand-in-0039,overload-noshare,stand-in,2026-11-12T11:00:00.823+05:30,19409.8,19424.7,ok,0,1271,194,medium-300w-k4-rerank,,lean,19105.6,318.3,0.0,19402.2,2,0,u01,
+steady-stand-in-0015,steady,stand-in,2026-11-12T11:00:21.652+05:30,1518.7,1533.7,ok,0,1842,200,medium-300w-k4-rerank,,full,0.0,1526.3,0.0,1512.3,1,0,q10,
+retry-naive-stand-in-0027,retry-naive,stand-in,2026-11-12T11:00:24.921+05:30,232.6,232.6,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.5,219.4,,1,0,q02,rate limit
+retry-budgeted-stand-in-0027,retry-budgeted,stand-in,2026-11-12T11:00:24.937+05:30,710.1,728.9,ok,0,1097,185,medium-300w-k4-rerank,,lean,0.0,721.3,0.0,702.6,1,0,q02,
+retry-none-stand-in-0027,retry-none,stand-in,2026-11-12T11:00:24.937+05:30,993.4,1007.1,ok,0,1097,185,medium-300w-k4-rerank,,lean,0.0,1004.6,0.0,983.5,1,0,q02,
+retry-naive-stand-in-0028,retry-naive,stand-in,2026-11-12T11:00:26.102+05:30,227.4,227.5,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,5.9,218.1,,1,0,q05,rate limit
+retry-none-stand-in-0029,retry-none,stand-in,2026-11-12T11:00:26.748+05:30,0.4,0.4,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,0.4,0,1,q02,shared an identical question's answer
+retry-budgeted-stand-in-0029,retry-budgeted,stand-in,2026-11-12T11:00:26.747+05:30,0.7,0.7,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,0.7,0,1,q02,shared an identical question's answer
+overload-stand-in-0041,overload,stand-in,2026-11-12T11:00:09.188+05:30,17585.1,17598.7,ok,0,1255,205,medium-300w-k4-rerank,,lean,17280.9,316.4,0.0,17578.4,2,0,q01,
+retry-naive-stand-in-0029,retry-naive,stand-in,2026-11-12T11:00:26.732+05:30,223.2,223.3,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,218.3,,1,0,q02,rate limit
+retry-none-stand-in-0026,retry-none,stand-in,2026-11-12T11:00:17.292+05:30,10010.4,10010.5,error,0,0,0,medium-300w-k4-rerank,,extractive,0.0,10007.3,0.0,,1,0,q12,provider too slow (ReadTimeout)
+retry-budgeted-stand-in-0026,retry-budgeted,stand-in,2026-11-12T11:00:17.292+05:30,10524.6,10524.7,rate_limited,1,0,0,medium-300w-k4-rerank,,extractive,0.0,10006.7,513.9,,2,0,q12,queue wait exceeded patience
+retry-naive-stand-in-0030,retry-naive,stand-in,2026-11-12T11:00:27.895+05:30,228.2,228.2,rate_limited,4,0,0,medium-300w-k4-rerank,,extractive,0.0,6.2,219.3,,1,0,u01,rate limit
+overload-stand-in-0044,overload,stand-in,2026-11-12T11:00:28.578+05:30,1.3,1.3,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,1.3,0,1,q06,shared an identical question's answer
+overload-noshare-stand-in-0044,overload-noshare,stand-in,2026-11-12T11:00:28.580+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.5,0.0,,0,0,q06,predicted wait 22.7s exceeds patience
+overload-noshare-stand-in-0042,overload-noshare,stand-in,2026-11-12T11:00:16.876+05:30,12473.2,12486.2,ok,0,963,165,medium-300w-k4-rerank,,lean,11638.4,846.7,0.0,12467.9,2,0,q04,
+retrieval-medium-u05,retrieval-medium,real,2026-11-12T11:00:29.590+05:30,380.0,380.0,ok,0,1272,20,medium-300w-k4-rerank,refused_correctly,refused,0.0,379.3,0.0,,,,u05,model judged the pieces insufficient
+retrieval-small-q01,retrieval-small,real,2026-11-12T11:00:30.141+05:30,784.5,813.8,ok,0,3560,86,small-150w-k8-norerank,correct,full,0.0,813.4,0.0,,,,q01,
+daily-stand-in-0022,daily,stand-in,2026-11-12T11:00:34.296+05:30,20.8,20.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q09,daily budget exhausted
+daily-stand-in-0023,daily,stand-in,2026-11-12T11:00:36.518+05:30,4.8,4.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q13,daily budget exhausted
+overload-stand-in-0043,overload,stand-in,2026-11-12T11:00:23.258+05:30,13656.4,13669.0,ok,0,1079,168,medium-300w-k4-rerank,,lean,12788.2,879.4,0.0,13648.4,2,0,q08,
+overload-noshare-stand-in-0043,overload-noshare,stand-in,2026-11-12T11:00:23.260+05:30,15652.8,15664.5,ok,0,1079,168,medium-300w-k4-rerank,,lean,14615.9,1047.6,0.0,15640.6,2,0,q08,
+daily-stand-in-0024,daily,stand-in,2026-11-12T11:00:39.847+05:30,4.8,4.8,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,4.8,0,1,q03,shared an identical question's answer
+retry-none-stand-in-0028,retry-none,stand-in,2026-11-12T11:00:26.118+05:30,15337.2,15337.2,error,0,0,0,medium-300w-k4-rerank,,extractive,5324.6,10009.7,0.0,,1,0,q05,provider too slow (ReadTimeout)
+retry-none-stand-in-0030,retry-none,stand-in,2026-11-12T11:00:27.910+05:30,15906.0,15920.3,ok,0,1271,194,medium-300w-k4-rerank,,lean,15165.2,753.8,0.0,15899.7,2,0,u01,
+daily-stand-in-0025,daily,stand-in,2026-11-12T11:00:46.277+05:30,4.5,4.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,4.5,0,1,q01,shared an identical question's answer
+retry-budgeted-stand-in-0031,retry-budgeted,stand-in,2026-11-12T11:00:46.683+05:30,3.0,3.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.8,0.0,,0,0,q04,predicted wait 21.4s exceeds patience
+overload-stand-in-0045,overload,stand-in,2026-11-12T11:00:41.611+05:30,5554.6,5567.2,ok,0,1169,194,medium-300w-k4-rerank,,lean,4488.9,1072.1,0.0,5545.9,1,0,q20,
+retry-naive-stand-in-0031,retry-naive,stand-in,2026-11-12T11:00:46.668+05:30,529.9,546.6,ok,0,1349,165,medium-300w-k4-rerank,,full,0.0,532.9,0.0,523.0,1,0,q04,
+retry-budgeted-stand-in-0030,retry-budgeted,stand-in,2026-11-12T11:00:27.910+05:30,19321.6,19321.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,19318.3,2.3,0.0,,2,0,u01,queue wait exceeded patience
+halved-stand-in-0011,halved,stand-in,2026-11-12T11:00:46.382+05:30,968.1,981.4,ok,0,1349,165,medium-300w-k4-rerank,,full,0.0,957.9,0.0,958.6,1,0,q04,
+steady-stand-in-0016,steady,stand-in,2026-11-12T11:00:46.272+05:30,1453.4,1468.4,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,1443.9,0.0,1445.5,1,0,q03,
+retry-budgeted-stand-in-0028,retry-budgeted,stand-in,2026-11-12T11:00:26.118+05:30,22346.9,22362.5,ok,1,1300,191,medium-300w-k4-rerank,,lean,9204.0,10009.3,3147.3,22339.1,2,0,q05,"retried once after CallTimeout, waited 0.7s"
+halved-stand-in-0012,halved,stand-in,2026-11-12T11:00:48.616+05:30,2.7,2.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,2.7,0,1,q01,shared an identical question's answer
+overload-noshare-stand-in-0045,overload-noshare,stand-in,2026-11-12T11:00:41.612+05:30,7318.1,7333.1,ok,0,1169,194,medium-300w-k4-rerank,,lean,6318.4,1010.7,0.0,7309.9,1,0,q20,
+retrieval-small-q02,retrieval-small,real,2026-11-12T11:00:50.968+05:30,752.9,855.3,ok,0,2334,153,small-150w-k8-norerank,correct,full,0.1,854.6,0.0,,,,q02,
+overload-stand-in-0048,overload,stand-in,2026-11-12T11:00:51.943+05:30,0.9,0.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,0.9,0,1,q05,shared an identical question's answer
+overload-noshare-stand-in-0048,overload-noshare,stand-in,2026-11-12T11:00:51.944+05:30,3.8,3.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q05,predicted wait 30.7s exceeds patience
+steady-stand-in-0017,steady,stand-in,2026-11-12T11:00:50.514+05:30,3206.2,3223.4,ok,0,1349,165,medium-300w-k4-rerank,,full,0.0,3220.3,0.0,3199.7,1,0,q04,
+overload-stand-in-0046,overload,stand-in,2026-11-12T11:00:43.522+05:30,13238.8,13250.1,ok,0,1099,190,medium-300w-k4-rerank,,lean,12263.2,985.5,0.0,13231.7,2,0,u03,
+overload-stand-in-0049,overload,stand-in,2026-11-12T11:00:58.395+05:30,3.3,3.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q08,predicted wait 20.1s exceeds patience
+overload-noshare-stand-in-0049,overload-noshare,stand-in,2026-11-12T11:00:58.397+05:30,4.4,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q08,predicted wait 22.6s exceeds patience
+overload-noshare-stand-in-0046,overload-noshare,stand-in,2026-11-12T11:00:43.524+05:30,14984.3,15000.3,ok,0,1099,190,medium-300w-k4-rerank,,lean,14089.8,909.5,0.0,14977.6,2,0,u03,
+retry-none-stand-in-0031,retry-none,stand-in,2026-11-12T11:00:46.684+05:30,14998.5,14998.5,error,0,0,0,medium-300w-k4-rerank,,extractive,4978.4,10015.9,0.0,,1,0,q04,provider too slow (ReadTimeout)
+overload-stand-in-0050,overload,stand-in,2026-11-12T11:01:08.796+05:30,2.0,2.0,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,2.0,0,1,q06,shared an identical question's answer
+overload-stand-in-0047,overload,stand-in,2026-11-12T11:00:49.089+05:30,20269.5,20282.8,ok,0,1474,192,medium-300w-k4-rerank,,lean,19275.4,1005.8,0.0,20261.6,2,0,q15,
+overload-noshare-stand-in-0047,overload-noshare,stand-in,2026-11-12T11:00:49.091+05:30,22170.7,22182.2,ok,0,1474,192,medium-300w-k4-rerank,,lean,21100.6,1079.9,0.0,22161.9,2,0,q15,
+retrieval-small-q03,retrieval-small,real,2026-11-12T11:01:11.844+05:30,1050.3,1073.2,ok,0,2899,181,small-150w-k8-norerank,wrong,full,0.0,1072.9,0.0,,,,q03,
+burst-stand-in-0043,burst,stand-in,2026-11-12T11:01:16.979+05:30,32.8,32.8,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,32.8,0,1,q03,shared an identical question's answer
+overload-stand-in-0052,overload,stand-in,2026-11-12T11:01:17.679+05:30,0.5,0.5,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,0.5,0,1,q06,shared an identical question's answer
+overload-noshare-stand-in-0052,overload-noshare,stand-in,2026-11-12T11:01:17.681+05:30,3.0,3.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.2,0.0,,0,0,q06,predicted wait 27.4s exceeds patience
+retry-none-stand-in-0032,retry-none,stand-in,2026-11-12T11:01:17.244+05:30,1103.2,1115.9,ok,0,784,186,medium-300w-k4-rerank,,full,0.0,1111.7,0.0,1094.8,1,0,u04,
+retry-naive-stand-in-0032,retry-naive,stand-in,2026-11-12T11:01:17.229+05:30,1301.8,1315.8,ok,0,784,186,medium-300w-k4-rerank,,full,0.0,1284.5,0.0,1294.5,1,0,u04,
+retry-budgeted-stand-in-0032,retry-budgeted,stand-in,2026-11-12T11:01:17.244+05:30,1520.4,1534.0,ok,0,784,186,medium-300w-k4-rerank,,full,0.0,1522.5,0.0,1513.7,1,0,u04,
+overload-noshare-stand-in-0053,overload-noshare,stand-in,2026-11-12T11:01:18.783+05:30,2.6,2.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.5,0.0,,0,0,q17,predicted wait 23.6s exceeds patience
+overload-stand-in-0051,overload,stand-in,2026-11-12T11:01:16.918+05:30,1977.1,1991.9,ok,0,1097,185,medium-300w-k4-rerank,,lean,1015.9,974.7,0.0,1970.4,1,0,q02,
+steady-stand-in-0018,steady,stand-in,2026-11-12T11:01:19.957+05:30,1.5,1.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.5,0,1,q04,shared an identical question's answer
+overload-noshare-stand-in-0054,overload-noshare,stand-in,2026-11-12T11:01:21.561+05:30,4.6,4.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q14,predicted wait 23.2s exceeds patience
+overload-noshare-stand-in-0050,overload-noshare,stand-in,2026-11-12T11:01:08.798+05:30,14041.2,14059.7,ok,0,1402,201,medium-300w-k4-rerank,,lean,13333.2,725.2,0.0,14033.5,2,0,q06,
+burst-stand-in-0044,burst,stand-in,2026-11-12T11:01:23.489+05:30,970.0,983.2,ok,0,1838,186,medium-300w-k4-rerank,,full,0.0,975.4,0.0,960.7,1,0,q09,
+retry-budgeted-stand-in-0033,retry-budgeted,stand-in,2026-11-12T11:01:25.025+05:30,1171.9,1186.4,ok,0,1418,178,medium-300w-k4-rerank,,full,0.0,1178.4,0.0,1163.9,1,0,u05,
+overload-stand-in-0056,overload,stand-in,2026-11-12T11:01:26.238+05:30,1.6,1.6,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.6,0,1,q03,shared an identical question's answer
+overload-noshare-stand-in-0056,overload-noshare,stand-in,2026-11-12T11:01:26.240+05:30,2.9,2.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.6,0.0,,0,0,q03,predicted wait 24.8s exceeds patience
+retry-none-stand-in-0033,retry-none,stand-in,2026-11-12T11:01:25.025+05:30,1836.4,1845.4,ok,0,1418,178,medium-300w-k4-rerank,,full,0.0,1837.2,0.0,1826.1,1,0,u05,
+overload-stand-in-0053,overload,stand-in,2026-11-12T11:01:18.781+05:30,9098.3,9114.8,ok,0,1057,188,medium-300w-k4-rerank,,lean,8461.4,651.8,0.0,9093.6,1,0,q17,
+daily-stand-in-0026,daily,stand-in,2026-11-12T11:01:28.736+05:30,8.2,8.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,q09,daily budget exhausted
+overload-noshare-stand-in-0051,overload-noshare,stand-in,2026-11-12T11:01:16.920+05:30,15307.5,15319.4,ok,0,1097,185,medium-300w-k4-rerank,,lean,14865.0,453.3,0.0,15301.0,2,0,q02,
+overload-stand-in-0057,overload,stand-in,2026-11-12T11:01:32.408+05:30,5.5,5.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q05,predicted wait 26.3s exceeds patience
+overload-stand-in-0058,overload,stand-in,2026-11-12T11:01:33.785+05:30,2.1,2.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.4,0.0,,0,0,q03,predicted wait 24.4s exceeds patience
+overload-noshare-stand-in-0058,overload-noshare,stand-in,2026-11-12T11:01:33.787+05:30,2.2,2.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q03,predicted wait 28.4s exceeds patience
+retrieval-small-q04,retrieval-small,real,2026-11-12T11:01:32.938+05:30,781.8,868.0,ok,0,2481,233,small-150w-k8-norerank,correct,full,0.1,867.4,0.0,,,,q04,
+daily-stand-in-0027,daily,stand-in,2026-11-12T11:01:34.540+05:30,9.7,9.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q05,daily budget exhausted
+retry-naive-stand-in-0033,retry-naive,stand-in,2026-11-12T11:01:25.010+05:30,11155.0,11167.2,ok,1,1418,178,medium-300w-k4-rerank,,full,0.0,10016.2,1144.3,11147.9,1,0,u05,"retried once after CallTimeout, waited 0.1s"
+overload-stand-in-0054,overload,stand-in,2026-11-12T11:01:21.559+05:30,17823.0,17836.8,ok,0,1357,172,medium-300w-k4-rerank,,lean,17344.3,491.0,0.0,17815.8,2,0,q14,
+overload-noshare-stand-in-0055,overload-noshare,stand-in,2026-11-12T11:01:24.644+05:30,17082.6,17097.8,ok,0,799,186,medium-300w-k4-rerank,,lean,14462.2,2633.3,0.0,17077.1,2,0,u04,
+overload-stand-in-0060,overload,stand-in,2026-11-12T11:01:45.848+05:30,4.0,4.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q03,predicted wait 23.2s exceeds patience
+overload-noshare-stand-in-0060,overload-noshare,stand-in,2026-11-12T11:01:45.850+05:30,3.4,3.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q03,predicted wait 27.5s exceeds patience
+overload-stand-in-0055,overload,stand-in,2026-11-12T11:01:24.643+05:30,24039.6,24053.5,ok,0,799,186,medium-300w-k4-rerank,,lean,21417.3,2634.3,0.0,24031.2,3,0,u04,
+overload-noshare-stand-in-0057,overload-noshare,stand-in,2026-11-12T11:01:32.410+05:30,19222.0,19238.1,ok,0,1300,191,medium-300w-k4-rerank,,lean,17951.9,1284.6,0.0,19215.6,2,0,q05,
+retrieval-small-q05,retrieval-small,real,2026-11-12T11:01:53.827+05:30,843.3,908.2,ok,0,3174,162,small-150w-k8-norerank,correct,extractive,0.1,907.6,0.0,,,,q05,no answer sentence passed checking; verified quotes shown
+daily-stand-in-0028,daily,stand-in,2026-11-12T11:01:57.073+05:30,3.9,3.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,3.9,0,1,q03,shared an identical question's answer
+overload-stand-in-0059,overload,stand-in,2026-11-12T11:01:42.027+05:30,16362.8,16375.2,ok,0,1276,187,medium-300w-k4-rerank,,lean,15103.1,1271.1,0.0,16357.4,2,0,q18,
+daily-stand-in-0029,daily,stand-in,2026-11-12T11:01:59.216+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.9,0.0,,0,0,q18,daily budget exhausted
+overload-noshare-stand-in-0062,overload-noshare,stand-in,2026-11-12T11:01:59.654+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q08,predicted wait 25.0s exceeds patience
+daily-stand-in-0030,daily,stand-in,2026-11-12T11:02:01.368+05:30,6.1,6.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q05,daily budget exhausted
+overload-stand-in-0063,overload,stand-in,2026-11-12T11:02:02.787+05:30,5.5,5.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.6,0.0,,0,0,u02,predicted wait 29.1s exceeds patience
+overload-noshare-stand-in-0063,overload-noshare,stand-in,2026-11-12T11:02:02.789+05:30,4.9,4.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,u02,predicted wait 23.9s exceeds patience
+overload-noshare-stand-in-0059,overload-noshare,stand-in,2026-11-12T11:01:42.029+05:30,21137.1,21152.9,ok,0,1276,187,medium-300w-k4-rerank,,lean,19330.0,1821.5,0.0,21130.6,2,0,q18,
+steady-stand-in-0019,steady,stand-in,2026-11-12T11:02:02.210+05:30,1439.4,1452.9,ok,0,2252,188,medium-300w-k4-rerank,,full,0.0,1409.2,0.0,1431.3,1,0,q19,
+daily-stand-in-0031,daily,stand-in,2026-11-12T11:02:06.330+05:30,9.7,9.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q13,daily budget exhausted
+halved-stand-in-0013,halved,stand-in,2026-11-12T11:02:09.020+05:30,997.4,1014.6,ok,0,1664,188,medium-300w-k4-rerank,,full,0.0,936.3,0.0,988.7,1,0,q17,
+overload-stand-in-0061,overload,stand-in,2026-11-12T11:01:56.618+05:30,14932.4,14942.5,ok,0,1474,192,medium-300w-k4-rerank,,lean,13020.6,1920.5,0.0,14923.6,2,0,q15,
+overload-noshare-stand-in-0061,overload-noshare,stand-in,2026-11-12T11:01:56.620+05:30,17517.8,17531.3,ok,0,1474,192,medium-300w-k4-rerank,,lean,17247.9,281.6,0.0,17511.4,2,0,q15,
+overload-stand-in-0065,overload,stand-in,2026-11-12T11:02:14.231+05:30,2.8,2.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.7,0.0,,0,0,q11,predicted wait 27.7s exceeds patience
+overload-noshare-stand-in-0065,overload-noshare,stand-in,2026-11-12T11:02:14.233+05:30,2.7,2.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.5,0.0,,0,0,q11,predicted wait 21.7s exceeds patience
+overload-stand-in-0066,overload,stand-in,2026-11-12T11:02:14.722+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,u01,predicted wait 25.9s exceeds patience
+overload-noshare-stand-in-0066,overload-noshare,stand-in,2026-11-12T11:02:14.723+05:30,4.1,4.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,u01,predicted wait 20.0s exceeds patience
+retrieval-small-q06,retrieval-small,real,2026-11-12T11:02:14.756+05:30,799.4,1015.2,ok,0,2850,337,small-150w-k8-norerank,correct,full,0.1,1014.6,0.0,,,,q06,
+daily-stand-in-0032,daily,stand-in,2026-11-12T11:02:19.195+05:30,7.0,7.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q08,daily budget exhausted
+overload-stand-in-0062,overload,stand-in,2026-11-12T11:01:59.652+05:30,19651.9,19670.2,ok,0,1079,168,medium-300w-k4-rerank,,lean,19405.8,262.3,0.0,19643.9,2,0,q08,
+daily-stand-in-0033,daily,stand-in,2026-11-12T11:02:19.942+05:30,3.9,3.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.2,0.0,,0,0,q05,daily budget exhausted
+overload-stand-in-0067,overload,stand-in,2026-11-12T11:02:21.853+05:30,1.8,1.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.1,0.0,,0,0,q04,predicted wait 15.6s exceeds patience
+overload-noshare-stand-in-0068,overload-noshare,stand-in,2026-11-12T11:02:22.652+05:30,4.9,4.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q20,predicted wait 20.5s exceeds patience
+overload-noshare-stand-in-0064,overload-noshare,stand-in,2026-11-12T11:02:12.994+05:30,10599.7,10612.2,ok,0,1057,188,medium-300w-k4-rerank,,lean,10134.2,476.2,0.0,10593.1,2,0,q17,
+overload-stand-in-0064,overload,stand-in,2026-11-12T11:02:12.993+05:30,15723.5,15736.0,ok,0,1057,188,medium-300w-k4-rerank,,lean,15259.5,474.4,0.0,15717.2,2,0,q17,
+halved-stand-in-0014,halved,stand-in,2026-11-12T11:02:31.840+05:30,23.4,23.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,23.4,0,1,q04,shared an identical question's answer
+overload-noshare-stand-in-0067,overload-noshare,stand-in,2026-11-12T11:02:21.855+05:30,11313.6,11328.9,ok,0,963,165,medium-300w-k4-rerank,,lean,9869.7,1456.8,0.0,11305.7,2,0,q04,
+retrieval-small-q08,retrieval-small,real,2026-11-12T11:02:35.792+05:30,700.1,851.6,ok,0,2967,224,small-150w-k8-norerank,correct,full,0.0,851.2,0.0,,,,q08,
+overload-stand-in-0070,overload,stand-in,2026-11-12T11:02:38.133+05:30,4.9,4.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q01,predicted wait 21.1s exceeds patience
+overload-stand-in-0068,overload,stand-in,2026-11-12T11:02:22.650+05:30,17337.2,17351.6,ok,0,1169,194,medium-300w-k4-rerank,,lean,15802.8,1547.2,0.0,17328.7,2,0,q20,
+overload-noshare-stand-in-0069,overload-noshare,stand-in,2026-11-12T11:02:33.256+05:30,7999.8,8014.6,ok,0,971,184,medium-300w-k4-rerank,,lean,6994.3,1018.6,0.0,7993.1,1,0,q07,
+overload-stand-in-0069,overload,stand-in,2026-11-12T11:02:33.255+05:30,14889.9,14903.0,ok,0,971,184,medium-300w-k4-rerank,,lean,13882.3,1018.5,0.0,14883.4,2,0,q07,
+daily-stand-in-0034,daily,stand-in,2026-11-12T11:02:49.743+05:30,33.0,33.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q02,daily budget exhausted
+overload-noshare-stand-in-0072,overload-noshare,stand-in,2026-11-12T11:02:50.064+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.1,0.0,,0,0,q01,predicted wait 24.7s exceeds patience
+daily-stand-in-0035,daily,stand-in,2026-11-12T11:02:51.186+05:30,4.6,4.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q19,daily budget exhausted
+overload-noshare-stand-in-0070,overload-noshare,stand-in,2026-11-12T11:02:38.135+05:30,15161.3,15174.4,ok,0,1255,205,medium-300w-k4-rerank,,lean,12983.9,2188.7,0.0,15153.6,2,0,q01,
+retrieval-small-q11,retrieval-small,real,2026-11-12T11:02:56.665+05:30,823.9,1005.9,ok,0,2884,229,small-150w-k8-norerank,correct,full,0.0,1005.5,0.0,,,,q11,
+overload-stand-in-0073,overload,stand-in,2026-11-12T11:02:58.152+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q04,predicted wait 21.3s exceeds patience
+overload-noshare-stand-in-0074,overload-noshare,stand-in,2026-11-12T11:02:58.460+05:30,3.4,3.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q06,predicted wait 26.2s exceeds patience
+overload-stand-in-0074,overload,stand-in,2026-11-12T11:02:58.459+05:30,5.4,5.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.4,0.0,,0,0,q06,predicted wait 24.4s exceeds patience
+halved-stand-in-0015,halved,stand-in,2026-11-12T11:02:58.574+05:30,1072.1,1084.4,ok,0,2159,201,medium-300w-k4-rerank,,full,0.0,1058.1,0.0,1065.2,1,0,q06,
+overload-stand-in-0071,overload,stand-in,2026-11-12T11:02:48.531+05:30,12367.2,12379.1,ok,0,1340,182,medium-300w-k4-rerank,,lean,10137.0,2241.0,0.0,12360.6,1,0,u02,
+overload-noshare-stand-in-0071,overload-noshare,stand-in,2026-11-12T11:02:48.533+05:30,15416.2,15428.9,ok,0,1340,182,medium-300w-k4-rerank,,lean,14197.0,1230.3,0.0,15407.6,2,0,u02,
+overload-stand-in-0072,overload,stand-in,2026-11-12T11:02:50.062+05:30,20552.4,20564.4,ok,0,1255,205,medium-300w-k4-rerank,,lean,19359.8,1203.5,0.0,20544.5,2,0,q01,
+overload-noshare-stand-in-0073,overload-noshare,stand-in,2026-11-12T11:02:58.153+05:30,13911.9,13928.5,ok,0,963,165,medium-300w-k4-rerank,,lean,13058.6,868.4,0.0,13906.2,2,0,q04,
+daily-stand-in-0036,daily,stand-in,2026-11-12T11:03:13.489+05:30,15.4,15.4,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,15.4,0,1,q01,shared an identical question's answer
+retrieval-small-q13,retrieval-small,real,2026-11-12T11:03:17.692+05:30,868.6,884.4,ok,0,2431,112,small-150w-k8-norerank,correct,full,0.0,884.1,0.0,,,,q13,
+steady-stand-in-0020,steady,stand-in,2026-11-12T11:03:18.475+05:30,1062.0,1075.9,ok,0,2390,172,medium-300w-k4-rerank,,full,0.0,999.5,0.0,1054.3,1,0,q14,
+overload-stand-in-0075,overload,stand-in,2026-11-12T11:03:10.396+05:30,11588.8,11600.9,ok,0,1340,182,medium-300w-k4-rerank,,lean,10633.3,965.1,0.0,11581.3,1,0,u02,
+daily-stand-in-0037,daily,stand-in,2026-11-12T11:03:24.332+05:30,13.0,13.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.3,0.0,,0,0,q10,daily budget exhausted
+overload-noshare-stand-in-0075,overload-noshare,stand-in,2026-11-12T11:03:10.398+05:30,13940.9,13955.5,ok,0,1340,182,medium-300w-k4-rerank,,lean,12205.4,1748.7,0.0,13933.3,2,0,u02,
+halved-stand-in-0016,halved,stand-in,2026-11-12T11:03:26.983+05:30,1166.2,1177.7,ok,0,2256,185,medium-300w-k4-rerank,,full,0.1,1161.4,0.0,1159.7,1,0,q02,
+overload-stand-in-0076,overload,stand-in,2026-11-12T11:03:19.329+05:30,11740.9,11751.4,ok,0,963,165,medium-300w-k4-rerank,,lean,10185.1,1565.2,0.0,11731.5,2,0,q04,
+overload-noshare-stand-in-0076,overload-noshare,stand-in,2026-11-12T11:03:19.330+05:30,12819.5,12835.0,ok,0,963,165,medium-300w-k4-rerank,,lean,11756.6,1077.1,0.0,12811.2,2,0,q04,
+retrieval-small-q16,retrieval-small,real,2026-11-12T11:03:38.597+05:30,2061.6,2197.4,ok,0,3954,241,small-150w-k8-norerank,correct,full,1214.4,982.4,0.0,,,,q16,
+daily-stand-in-0038,daily,stand-in,2026-11-12T11:03:41.862+05:30,17.1,17.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,5.1,0.0,,0,0,u03,daily budget exhausted
+steady-stand-in-0021,steady,stand-in,2026-11-12T11:03:44.377+05:30,24.7,24.7,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,24.7,0,1,q04,shared an identical question's answer
+steady-stand-in-0022,steady,stand-in,2026-11-12T11:04:04.334+05:30,8.9,8.9,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,8.9,0,1,q05,shared an identical question's answer
+retrieval-small-q19,retrieval-small,real,2026-11-12T11:04:00.802+05:30,7812.1,7812.1,ok,0,3181,38,small-150w-k8-norerank,refused_wrongly,refused,6885.8,925.8,0.0,,,,q19,model judged the pieces insufficient
+steady-stand-in-0023,steady,stand-in,2026-11-12T11:04:13.157+05:30,639.7,653.7,ok,0,2141,200,medium-300w-k4-rerank,,full,0.0,644.8,0.0,631.4,1,0,q03,
+retrieval-small-u01,retrieval-small,real,2026-11-12T11:04:28.634+05:30,1584.9,1584.9,ok,0,3915,38,small-150w-k8-norerank,refused_correctly,refused,978.6,605.8,0.0,,,,u01,model judged the pieces insufficient
+daily-stand-in-0039,daily,stand-in,2026-11-12T11:04:36.778+05:30,33.4,33.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q16,daily budget exhausted
+steady-stand-in-0024,steady,stand-in,2026-11-12T11:04:40.649+05:30,2196.3,2210.4,ok,0,2916,192,medium-300w-k4-rerank,,full,0.0,2182.3,0.0,2188.4,1,0,q15,
+daily-stand-in-0040,daily,stand-in,2026-11-12T11:04:46.365+05:30,9.4,9.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q04,daily budget exhausted
+daily-stand-in-0041,daily,stand-in,2026-11-12T11:04:50.649+05:30,7.6,7.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.9,0.0,,0,0,q12,daily budget exhausted
+daily-stand-in-0042,daily,stand-in,2026-11-12T11:04:51.324+05:30,3.6,3.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q05,daily budget exhausted
+daily-stand-in-0043,daily,stand-in,2026-11-12T11:04:53.320+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q08,daily budget exhausted
+steady-stand-in-0025,steady,stand-in,2026-11-12T11:04:51.744+05:30,1690.8,1700.8,ok,0,2065,205,medium-300w-k4-rerank,,full,0.0,1691.5,0.0,1681.6,1,0,q01,
+retrieval-small-u02,retrieval-small,real,2026-11-12T11:04:50.240+05:30,8548.6,8548.6,ok,0,3327,35,small-150w-k8-norerank,refused_correctly,refused,8034.9,513.1,0.0,,,,u02,model judged the pieces insufficient
+steady-stand-in-0026,steady,stand-in,2026-11-12T11:04:59.946+05:30,1410.8,1423.6,ok,0,2513,186,medium-300w-k4-rerank,,full,0.1,1414.8,0.0,1403.1,1,0,q12,
+steady-stand-in-0027,steady,stand-in,2026-11-12T11:05:15.235+05:30,964.5,978.1,ok,0,2256,185,medium-300w-k4-rerank,,full,0.0,963.4,0.0,956.7,1,0,q02,
+steady-stand-in-0028,steady,stand-in,2026-11-12T11:05:17.597+05:30,747.9,765.3,ok,0,1300,191,medium-300w-k4-rerank,,lean,0.0,762.1,0.0,740.3,1,0,q05,
+steady-stand-in-0029,steady,stand-in,2026-11-12T11:05:18.857+05:30,1.5,1.5,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.5,0,1,q02,shared an identical question's answer
+daily-stand-in-0044,daily,stand-in,2026-11-12T11:05:18.960+05:30,11.9,11.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q09,daily budget exhausted
+retrieval-small-u04,retrieval-small,real,2026-11-12T11:05:18.794+05:30,577.5,577.5,ok,0,835,31,small-150w-k8-norerank,refused_correctly,refused,0.1,576.9,0.0,,,,u04,model judged the pieces insufficient
+daily-stand-in-0045,daily,stand-in,2026-11-12T11:05:24.886+05:30,8.0,8.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.0,0.0,,0,0,u04,daily budget exhausted
+steady-stand-in-0030,steady,stand-in,2026-11-12T11:05:21.182+05:30,5068.9,5083.2,ok,0,1271,194,medium-300w-k4-rerank,,lean,3372.5,1707.0,0.0,5063.4,1,0,u01,
+retrieval-small-u05,retrieval-small,real,2026-11-12T11:05:39.392+05:30,436.8,436.8,ok,0,1810,34,small-150w-k8-norerank,refused_correctly,refused,0.0,436.2,0.0,,,,u05,model judged the pieces insufficient
+retrieval-large-q01,retrieval-large,real,2026-11-12T11:05:40.003+05:30,714.4,749.9,ok,0,1401,129,large-600w-k2-norerank,correct,full,0.0,749.5,0.0,,,,q01,
+retrieval-large-q02,retrieval-large,real,2026-11-12T11:06:00.776+05:30,728.3,751.3,ok,0,1431,137,large-600w-k2-norerank,correct,full,0.1,750.6,0.0,,,,q02,
+retrieval-large-q03,retrieval-large,real,2026-11-12T11:06:21.538+05:30,1046.5,1236.2,ok,0,2620,274,large-600w-k2-norerank,wrong,full,0.1,1235.6,0.0,,,,q03,
+retrieval-large-q04,retrieval-large,real,2026-11-12T11:06:42.795+05:30,668.6,721.8,ok,0,615,216,large-600w-k2-norerank,correct,full,0.0,721.4,0.0,,,,q04,
+retrieval-large-q05,retrieval-large,real,2026-11-12T11:07:03.537+05:30,1252.9,1289.3,ok,0,1892,133,large-600w-k2-norerank,correct,full,0.0,1289.0,0.0,,,,q05,
+retrieval-large-q06,retrieval-large,real,2026-11-12T11:07:24.847+05:30,568.4,778.8,ok,0,1663,253,large-600w-k2-norerank,correct,full,0.0,778.4,0.0,,,,q06,
+retrieval-large-q08,retrieval-large,real,2026-11-12T11:07:45.647+05:30,642.2,789.1,ok,0,1281,216,large-600w-k2-norerank,correct,full,0.0,788.6,0.0,,,,q08,
+retrieval-large-q11,retrieval-large,real,2026-11-12T11:08:06.458+05:30,751.5,769.9,ok,0,1787,97,large-600w-k2-norerank,correct,full,0.1,769.5,0.0,,,,q11,
+retrieval-large-q13,retrieval-large,real,2026-11-12T11:08:27.249+05:30,1048.2,1102.3,ok,0,1347,237,large-600w-k2-norerank,wrong,full,0.1,1101.7,0.0,,,,q13,
+retrieval-large-q16,retrieval-large,real,2026-11-12T11:08:48.372+05:30,681.7,681.7,ok,0,2603,163,large-600w-k2-norerank,refused_wrongly,refused,0.0,681.3,0.0,,,,q16,nothing in the draft survived checking
+retrieval-large-q19,retrieval-large,real,2026-11-12T11:09:09.075+05:30,628.1,628.1,ok,0,2169,37,large-600w-k2-norerank,refused_wrongly,refused,0.1,627.5,0.0,,,,q19,model judged the pieces insufficient
+retrieval-large-u01,retrieval-large,real,2026-11-12T11:09:29.715+05:30,381.5,381.5,ok,0,1403,31,large-600w-k2-norerank,refused_correctly,refused,0.0,380.9,0.0,,,,u01,model judged the pieces insufficient
+retrieval-large-u02,retrieval-large,real,2026-11-12T11:09:50.118+05:30,425.1,425.1,ok,0,1736,36,large-600w-k2-norerank,refused_correctly,refused,0.1,424.5,0.0,,,,u02,model judged the pieces insufficient
+retrieval-large-u04,retrieval-large,real,2026-11-12T11:10:10.548+05:30,613.0,613.0,ok,0,1164,27,large-600w-k2-norerank,refused_correctly,refused,0.0,612.6,0.0,,,,u04,model judged the pieces insufficient
+retrieval-large-u05,retrieval-large,real,2026-11-12T11:10:31.182+05:30,719.8,719.8,ok,0,1527,27,large-600w-k2-norerank,refused_correctly,refused,0.0,719.3,0.0,,,,u05,model judged the pieces insufficient
+steady-short-real-0000,steady-short,real,2026-11-12T11:11:19.447+05:30,470.5,494.1,ok,0,1729,146,medium-300w-k4-rerank,,full,0.1,473.0,0.0,380.6,1,0,q07,
+steady-short-real-0001,steady-short,real,2026-11-12T11:11:24.475+05:30,632.9,949.9,ok,0,1996,376,medium-300w-k4-rerank,,full,0.1,943.5,0.0,585.3,1,0,q06,
+steady-short-real-0002,steady-short,real,2026-11-12T11:11:31.699+05:30,558.1,595.8,ok,0,2849,129,medium-300w-k4-rerank,,full,0.0,587.8,0.0,509.2,1,0,q05,
+steady-short-real-0003,steady-short,real,2026-11-12T11:11:39.812+05:30,598.7,639.8,ok,0,1393,108,medium-300w-k4-rerank,,full,0.1,630.8,0.0,566.6,1,0,q17,
+steady-short-real-0004,steady-short,real,2026-11-12T11:12:01.107+05:30,438.5,465.1,ok,0,2383,94,medium-300w-k4-rerank,,extractive,0.1,453.7,0.0,388.7,1,0,q12,no answer sentence passed checking; verified quotes shown
+steady-short-real-0005,steady-short,real,2026-11-12T11:12:49.654+05:30,1009.6,1059.4,ok,0,2389,151,medium-300w-k4-rerank,,full,0.1,1009.6,0.0,985.4,1,0,q14,
+steady-short-real-0006,steady-short,real,2026-11-12T11:13:07.567+05:30,339.7,361.7,ok,0,1729,146,medium-300w-k4-rerank,,full,0.0,343.5,0.0,261.9,1,0,q07,
+steady-short-real-0007,steady-short,real,2026-11-12T11:13:44.991+05:30,6386.2,6472.4,ok,1,2666,189,medium-300w-k4-rerank,,full,0.0,5009.3,1424.1,6383.2,1,0,q03,"retried once after CallTimeout, waited 0.6s"
+steady-short-real-0008,steady-short,real,2026-11-12T11:13:54.059+05:30,728.7,827.1,ok,0,2455,141,medium-300w-k4-rerank,,full,0.0,822.6,0.0,687.6,1,0,q11,
+burst-short-real-0000,burst-short,real,2026-11-12T11:16:11.350+05:30,681.8,681.8,ok,0,2029,38,medium-300w-k4-rerank,,refused,0.1,625.4,0.0,675.0,1,0,q19,model judged the pieces insufficient
+burst-short-real-0001,burst-short,real,2026-11-12T11:16:11.607+05:30,495.9,595.5,ok,0,1962,213,medium-300w-k4-rerank,,full,0.1,593.0,0.0,435.8,1,0,q02,
+burst-short-real-0002,burst-short,real,2026-11-12T11:16:12.645+05:30,688.2,773.3,ok,0,1290,265,medium-300w-k4-rerank,,full,0.0,771.3,0.0,540.1,1,0,q04,
+burst-short-real-0003,burst-short,real,2026-11-12T11:16:13.307+05:30,260.7,292.8,ok,0,1112,83,medium-300w-k4-rerank,,lean,0.0,292.4,0.0,219.4,1,0,q20,
+burst-short-real-0006,burst-short,real,2026-11-12T11:16:15.778+05:30,4.4,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q04,predicted wait 20.5s exceeds patience
+burst-short-real-0004,burst-short,real,2026-11-12T11:16:14.446+05:30,1797.5,1844.7,ok,0,837,111,medium-300w-k4-rerank,,lean,1331.9,510.2,0.0,1743.2,1,0,q09,
+burst-short-real-0008,burst-short,real,2026-11-12T11:16:16.567+05:30,2.9,2.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.8,0.0,,0,0,q11,predicted wait 29.3s exceeds patience
+burst-short-real-0009,burst-short,real,2026-11-12T11:16:17.295+05:30,5.4,5.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.6,0.0,,0,0,u02,predicted wait 27.9s exceeds patience
+burst-short-real-0010,burst-short,real,2026-11-12T11:16:18.253+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q01,predicted wait 26.2s exceeds patience
+burst-short-real-0011,burst-short,real,2026-11-12T11:16:18.632+05:30,4.8,4.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q08,predicted wait 24.5s exceeds patience
+burst-short-real-0012,burst-short,real,2026-11-12T11:16:18.757+05:30,5.0,5.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.3,0.0,,0,0,q05,predicted wait 26.1s exceeds patience
+burst-short-real-0013,burst-short,real,2026-11-12T11:16:19.017+05:30,1.3,1.3,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.3,0,1,q02,shared an identical question's answer
+burst-short-real-0014,burst-short,real,2026-11-12T11:16:20.115+05:30,1.2,1.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,0.9,0.0,,0,0,q16,predicted wait 23.8s exceeds patience
+burst-short-real-0015,burst-short,real,2026-11-12T11:16:20.229+05:30,5.1,5.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q09,predicted wait 21.9s exceeds patience
+burst-short-real-0017,burst-short,real,2026-11-12T11:16:20.417+05:30,3.1,3.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.9,0.0,,0,0,q16,predicted wait 33.8s exceeds patience
+burst-short-real-0018,burst-short,real,2026-11-12T11:16:20.996+05:30,4.9,4.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.5,0.0,,0,0,u02,predicted wait 34.4s exceeds patience
+burst-short-real-0019,burst-short,real,2026-11-12T11:16:21.282+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q18,predicted wait 33.7s exceeds patience
+burst-short-real-0020,burst-short,real,2026-11-12T11:16:21.735+05:30,2.7,2.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.0,0.0,,0,0,q19,predicted wait 34.2s exceeds patience
+burst-short-real-0021,burst-short,real,2026-11-12T11:16:21.763+05:30,5.7,5.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q17,predicted wait 31.5s exceeds patience
+burst-short-real-0022,burst-short,real,2026-11-12T11:16:22.036+05:30,5.4,5.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q19,predicted wait 33.9s exceeds patience
+burst-short-real-0023,burst-short,real,2026-11-12T11:16:22.075+05:30,4.3,4.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.6,0.0,,0,0,q05,predicted wait 33.1s exceeds patience
+burst-short-real-0024,burst-short,real,2026-11-12T11:16:22.190+05:30,1.6,1.6,ok,0,0,0,medium-300w-k4-rerank,,full,0.0,0.0,0.0,1.6,0,1,q02,shared an identical question's answer
+burst-short-real-0025,burst-short,real,2026-11-12T11:16:22.223+05:30,4.4,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q04,predicted wait 30.3s exceeds patience
+burst-short-real-0026,burst-short,real,2026-11-12T11:16:22.785+05:30,4.1,4.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q18,predicted wait 32.2s exceeds patience
+burst-short-real-0027,burst-short,real,2026-11-12T11:16:22.982+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.1,0.0,,0,0,q13,predicted wait 32.7s exceeds patience
+burst-short-real-0028,burst-short,real,2026-11-12T11:16:24.252+05:30,4.6,4.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.4,0.0,,0,0,q19,predicted wait 31.7s exceeds patience
+burst-short-real-0029,burst-short,real,2026-11-12T11:16:24.321+05:30,3.2,3.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.3,0.0,,0,0,q05,predicted wait 30.8s exceeds patience
+burst-short-real-0030,burst-short,real,2026-11-12T11:16:24.465+05:30,4.1,4.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.5,0.0,,0,0,q05,predicted wait 30.7s exceeds patience
+burst-short-real-0031,burst-short,real,2026-11-12T11:16:25.470+05:30,4.2,4.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q01,predicted wait 29.3s exceeds patience
+burst-short-real-0032,burst-short,real,2026-11-12T11:16:25.594+05:30,6.2,6.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,5.4,0.0,,0,0,u03,predicted wait 28.0s exceeds patience
+burst-short-real-0005,burst-short,real,2026-11-12T11:16:15.350+05:30,10551.9,10623.9,ok,0,1826,129,medium-300w-k4-rerank,,lean,9658.4,963.4,0.0,10548.3,2,0,q03,
+burst-short-real-0033,burst-short,real,2026-11-12T11:16:26.679+05:30,5.0,5.0,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.7,0.0,,0,0,q16,predicted wait 30.9s exceeds patience
+burst-short-real-0034,burst-short,real,2026-11-12T11:16:29.046+05:30,4.7,4.7,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q13,predicted wait 30.0s exceeds patience
+burst-short-real-0035,burst-short,real,2026-11-12T11:16:29.243+05:30,4.5,4.5,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q20,predicted wait 28.3s exceeds patience
+burst-short-real-0036,burst-short,real,2026-11-12T11:16:29.915+05:30,4.4,4.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.7,0.0,,0,0,q09,predicted wait 25.9s exceeds patience
+burst-short-real-0037,burst-short,real,2026-11-12T11:16:30.110+05:30,4.7,4.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q15,predicted wait 29.8s exceeds patience
+burst-short-real-0038,burst-short,real,2026-11-12T11:16:30.279+05:30,6.8,6.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.6,0.0,,0,0,q01,predicted wait 27.9s exceeds patience
+burst-short-real-0039,burst-short,real,2026-11-12T11:16:30.544+05:30,1.5,1.5,ok,0,0,0,medium-300w-k4-rerank,,lean,0.0,0.0,0.0,1.5,0,1,q03,shared an identical question's answer
+burst-short-real-0016,burst-short,real,2026-11-12T11:16:20.413+05:30,16026.9,16026.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,16023.0,2.9,0.0,,3,0,q02,queue wait exceeded patience
+burst-short-real-0007,burst-short,real,2026-11-12T11:16:16.160+05:30,20686.3,20686.3,ok,0,791,32,medium-300w-k4-rerank,,refused,20228.0,456.4,0.0,20680.3,2,0,u04,model judged the pieces insufficient
+overload-short-real-0000,overload-short,real,2026-11-12T11:17:59.919+05:30,761.7,799.4,ok,0,2849,129,medium-300w-k4-rerank,,full,0.0,794.3,0.0,713.9,1,0,q05,
+overload-short-real-0001,overload-short,real,2026-11-12T11:18:05.871+05:30,747.9,932.7,ok,0,1730,212,medium-300w-k4-rerank,,full,0.1,925.3,0.0,684.9,1,0,q08,
+overload-short-real-0002,overload-short,real,2026-11-12T11:18:13.083+05:30,752.6,894.2,ok,0,2666,194,medium-300w-k4-rerank,,full,0.0,886.3,0.0,585.2,1,0,q03,
+overload-short-real-0003,overload-short,real,2026-11-12T11:18:15.046+05:30,661.0,694.2,ok,0,1213,100,medium-300w-k4-rerank,,lean,0.0,691.4,0.0,606.5,1,0,q11,
+overload-short-real-0004,overload-short,real,2026-11-12T11:18:17.501+05:30,2697.3,2731.1,ok,0,925,81,medium-300w-k4-rerank,,lean,2315.0,413.0,0.0,2677.3,1,0,q17,
+overload-short-real-0006,overload-short,real,2026-11-12T11:18:22.011+05:30,6.3,6.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.4,0.0,,0,0,q17,predicted wait 17.6s exceeds patience
+overload-short-real-0005,overload-short,real,2026-11-12T11:18:18.853+05:30,11433.5,11433.5,ok,0,1322,33,medium-300w-k4-rerank,,refused,10834.4,597.0,0.0,11426.0,2,0,q14,model judged the pieces insufficient
+overload-short-real-0007,overload-short,real,2026-11-12T11:18:35.947+05:30,5395.8,5500.3,ok,0,1317,161,medium-300w-k4-rerank,,lean,4804.1,688.6,0.0,5314.2,1,0,q15,
+overload-short-real-0008,overload-short,real,2026-11-12T11:18:56.148+05:30,353.4,466.5,ok,0,1216,163,medium-300w-k4-rerank,,lean,0.0,449.6,0.0,297.6,1,0,q16,
+overload-short-real-0009,overload-short,real,2026-11-12T11:19:00.431+05:30,508.9,573.5,ok,0,971,216,medium-300w-k4-rerank,,lean,0.0,568.2,0.0,369.4,1,0,q04,
+overload-short-real-0010,overload-short,real,2026-11-12T11:19:11.074+05:30,830.3,830.3,ok,0,1353,125,medium-300w-k4-rerank,,refused,0.0,819.5,0.0,715.2,1,0,q19,nothing in the draft survived checking
+overload-short-real-0011,overload-short,real,2026-11-12T11:19:25.830+05:30,600.3,682.3,ok,0,1826,129,medium-300w-k4-rerank,,lean,0.0,677.7,0.0,561.9,1,0,q03,
+overload-short-real-0012,overload-short,real,2026-11-12T11:19:38.447+05:30,598.5,698.1,ok,0,1216,163,medium-300w-k4-rerank,,lean,0.0,684.4,0.0,545.3,1,0,q16,
+overload-short-real-0013,overload-short,real,2026-11-12T11:19:42.875+05:30,3243.7,3243.7,ok,0,1377,103,medium-300w-k4-rerank,,refused,2595.7,642.9,0.0,3145.1,1,0,q01,nothing in the draft survived checking
+overload-short-real-0016,overload-short,real,2026-11-12T11:19:52.372+05:30,4.8,4.8,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.4,0.0,,0,0,q07,predicted wait 22.6s exceeds patience
+overload-short-real-0014,overload-short,real,2026-11-12T11:19:48.413+05:30,5524.0,5524.0,ok,0,791,32,medium-300w-k4-rerank,,refused,4646.0,874.3,0.0,5522.5,1,0,u04,model judged the pieces insufficient
+overload-short-real-0015,overload-short,real,2026-11-12T11:19:48.801+05:30,16135.3,16232.0,ok,0,1382,154,medium-300w-k4-rerank,,lean,15094.7,1136.2,0.0,16132.3,2,0,q06,
+retrieval-medium-heldout-h01,retrieval-medium-heldout,real,2026-11-12T11:21:15.228+05:30,937.0,963.5,ok,0,1982,116,medium-300w-k4-rerank,correct,full,0.0,963.2,0.0,,,,h01,
+retrieval-medium-heldout-h02,retrieval-medium-heldout,real,2026-11-12T11:21:36.213+05:30,601.7,637.9,ok,0,1171,97,medium-300w-k4-rerank,correct,full,0.1,637.3,0.0,,,,h02,
+retrieval-medium-heldout-h03,retrieval-medium-heldout,real,2026-11-12T11:21:56.871+05:30,702.4,722.3,ok,0,3058,101,medium-300w-k4-rerank,correct,full,0.0,721.8,0.0,,,,h03,
+retrieval-medium-heldout-h04,retrieval-medium-heldout,real,2026-11-12T11:22:17.615+05:30,536.4,587.8,ok,0,2620,172,medium-300w-k4-rerank,wrong,full,0.1,587.3,0.0,,,,h04,
+retrieval-medium-heldout-h05,retrieval-medium-heldout,real,2026-11-12T11:22:38.217+05:30,461.8,461.8,ok,0,2003,45,medium-300w-k4-rerank,refused_wrongly,refused,0.0,461.3,0.0,,,,h05,model judged the pieces insufficient
+retrieval-medium-heldout-h06,retrieval-medium-heldout,real,2026-11-12T11:22:58.701+05:30,775.7,806.2,ok,0,3496,115,medium-300w-k4-rerank,correct,full,0.1,805.5,0.0,,,,h06,
+retrieval-medium-heldout-hu1,retrieval-medium-heldout,real,2026-11-12T11:23:19.514+05:30,577.8,577.9,ok,0,1507,43,medium-300w-k4-rerank,refused_correctly,refused,0.1,577.3,0.0,,,,hu1,model judged the pieces insufficient
+retrieval-medium-heldout-hu2,retrieval-medium-heldout,real,2026-11-12T11:23:40.113+05:30,420.0,420.0,ok,0,2278,40,medium-300w-k4-rerank,refused_correctly,refused,0.1,419.3,0.0,,,,hu2,model judged the pieces insufficient
+probe-daily-1794462840-000,probe-daily,real,2026-11-12T11:24:00.307+05:30,,476.5,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794462865-001,probe-daily,real,2026-11-12T11:24:24.432+05:30,,701.5,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794462889-002,probe-daily,real,2026-11-12T11:24:48.768+05:30,,823.1,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794462913-003,probe-daily,real,2026-11-12T11:25:13.242+05:30,,710.2,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794462938-004,probe-daily,real,2026-11-12T11:25:37.584+05:30,,1381.8,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794462963-005,probe-daily,real,2026-11-12T11:26:02.616+05:30,,618.7,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794462987-006,probe-daily,real,2026-11-12T11:26:26.885+05:30,,723.7,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794463011-007,probe-daily,real,2026-11-12T11:26:51.251+05:30,,521.8,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794463035-008,probe-daily,real,2026-11-12T11:27:15.406+05:30,,431.6,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794463060-009,probe-daily,real,2026-11-12T11:27:39.465+05:30,,743.7,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794463084-010,probe-daily,real,2026-11-12T11:28:03.859+05:30,,617.4,ok,0,3076,10,none,,probe,,,,,,,,
+probe-daily-1794463108-011,probe-daily,real,2026-11-12T11:28:28.114+05:30,,177.2,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_day retry_after=791.0
+probe-daily-small-right-after-1794463108-011,probe-daily-small-right-after,real,2026-11-12T11:28:28.292+05:30,,458.7,ok,0,75,8,none,,probe,,,,,,,,
+daily-exhausted-real-0000,daily-exhausted,real,2026-11-12T11:30:55.522+05:30,136.6,136.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.1,128.4,0.0,,1,0,q07,daily budget exhausted
+daily-exhausted-real-0001,daily-exhausted,real,2026-11-12T11:30:57.093+05:30,5.9,5.9,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q06,daily budget exhausted
+daily-exhausted-real-0002,daily-exhausted,real,2026-11-12T11:30:59.351+05:30,7.4,7.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.9,0.0,,0,0,q05,daily budget exhausted
+daily-exhausted-real-0003,daily-exhausted,real,2026-11-12T11:31:01.886+05:30,7.2,7.2,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q17,daily budget exhausted
+daily-exhausted-real-0004,daily-exhausted,real,2026-11-12T11:31:08.541+05:30,8.3,8.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,2.8,0.0,,0,0,q12,daily budget exhausted
+daily-exhausted-real-0005,daily-exhausted,real,2026-11-12T11:31:23.712+05:30,15.6,15.6,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.2,0.0,,0,0,q14,daily budget exhausted
+daily-exhausted-real-0006,daily-exhausted,real,2026-11-12T11:31:29.309+05:30,5.1,5.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.4,0.0,,0,0,q07,daily budget exhausted
+daily-exhausted-real-0007,daily-exhausted,real,2026-11-12T11:31:41.004+05:30,4.3,4.3,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.8,0.0,,0,0,q03,daily budget exhausted
+daily-exhausted-real-0008,daily-exhausted,real,2026-11-12T11:31:43.838+05:30,5.1,5.1,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,1.5,0.0,,0,0,q11,daily budget exhausted
+daily-exhausted-real-0009,daily-exhausted,real,2026-11-12T11:31:47.948+05:30,9.4,9.4,rate_limited,0,0,0,medium-300w-k4-rerank,,extractive,0.0,3.0,0.0,,0,0,q06,daily budget exhausted
+probe-daily-recovery-same-size-1794463901-011,probe-daily-recovery-same-size,real,2026-11-12T11:41:40.853+05:30,,177.4,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_day retry_after=35.0
+probe-daily-recovery-after-named-wait-1794463921-012,probe-daily-recovery-after-named-wait,real,2026-11-12T11:42:01.434+05:30,,170.7,rate_limited,0,0,0,none,,probe,,,,,,,,429 tokens_per_day retry_after=14.0
+probe-daily-recovery-after-named-wait-1794463953-013,probe-daily-recovery-after-named-wait,real,2026-11-12T11:42:32.703+05:30,,954.9,ok,0,3076,10,none,,probe,,,,,,,,
