@@ -1,0 +1,15 @@
+overload: 17 arrivals over 2 min, source=stand-in, dup=0.3, coalesce=True
+### Table 2a
+| Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (per min) | First token p50 / p95 / p99 (ms) | Total time p50 / p95 / p99 (ms) |
+|---|---|---:|---:|---:|---|---|
+| overload-short | stand-in | 17 | 112 | 9.1 | 1560 / 15634 / 15634 | 1575 / 15648 / 15648 |
+
+### Table 2b
+| Scenario | Succeeded (%) | Rate-limited (%) | Timed out or given up (%) | Retries per request | Peak queue length | Tokens per answer | Cost per 1,000 answers |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| overload-short (stand-in) | 88.2 | 11.8 | 0.0 | 0.00 | 2 | 1605 | $0.16 |
+
+What people received, and how long the first token took for each kind (not a required table):
+| Scenario | Model answer: n, first token p50 / p95 (ms) | Shared answer: n | Quoted passages: n, p50 (ms) | Refused: n | Nothing shown: n |
+|---|---|---:|---|---:|---:|
+| overload-short (stand-in) | 15, 1633 / 15634 | 0 | 2, 5 | 0 | 0 |

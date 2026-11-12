@@ -1,0 +1,76 @@
+[q01] full/ok 677ms in=2242 out=81
+Evidence: "Transformer (big) | 28.4 | 41.8" [ATT Table 2, p.8]
+The big Transformer reaches a BLEU score of 28.4 on English‑to‑German. [ATT Table 2, p.8]
+
+
+[q02] full/ok 921ms in=1962 out=222
+Evidence: "we settle on a theoretical latency of 160ms by pretraining Moshi with an acoustic delay of 2 and finetuning it with an acoustic delay of 1." [MOSHI §5.3 Ablations on generative modeling, p.26]
+Evidence: "our resulting model is the first real-time full‑duplex spoken large language model, with a theoretical latency of 160ms, 200ms in practice" [MOSHI p.1]
+Evidence: "design a streaming, hierarchical architecture, with a theoretical latency of 160 ms—lower than the 230 ms average in natural conversations" [MOSHI §1 Introduction, p.2]
+Moshi’s theoretical latency is 160 ms . [MOSHI §5.3 Ablations on generative modeling, p.26; MOSHI p.1; MOSHI §1 Introduction, p.2]
+
+
+[q03] full/ok 6338ms in=2666 out=192
+Evidence: "H-Net (1-stage) predominantly places boundaries at whitespace characters, closely mirroring the delimiters used by SpaceByte." [HNET §3.1 Language Modeling, p.14]
+Evidence: "H-Net (1-stage) tends to draw boundaries at spacelike bytes, which is very similar to SpaceByte." [HNET §3.1 Language Modeling, p.15]
+H‑Net decides chunk boundaries by learning to place them at spacelike (whitespace) bytes and, in a two‑stage setup, also at the first characters of words, thereby grouping semantically related tokens into chunks . [HNET §3.1 Language Modeling, p.14; HNET §3.1 Language Modeling, p.15]
+
+
+[q04] full/ok 720ms in=1290 out=265
+Evidence: "We used the Adam optimizer [20] with β1 = 0.9, β2 = 0.98 and ϵ = 10−9 . We varied the learning rate over the course of training, according to the formula: −0.5 lrate = d−0.5 , step_num · warmup_steps−1.5 ) model · min(step_num (3) This corresponds to increasing the learning rate linearly for the first warmup_steps training steps, and decreasing it thereafter proportionally to the inverse square root of the step number. We used warmup_steps = 4000." [ATT §5.3 Optimizer, p.7]
+The original Transformer was trained with the Adam optimizer (β1 = 0.9, β2 = 0.98, ε = 10⁻⁹) and a linear warm‑up schedule for the first 4,000 steps, after which the learning rate decayed proportionally to the inverse square root of the step number . [ATT §5.3 Optimizer, p.7]
+
+
+[q05] extractive/ok 805ms in=2849 out=160
+Evidence: "Mimi, adv. loss only  |  24kHz  |  12.5Hz  |  1.1kbps" [MOSHI Table 4, p.23]
+Evidence: "At 12.5Hz, this represents a bitrate of 1.1kbps." [MOSHI §3.3.1 Architecture, p.11]
+
+
+[q06] full/ok 818ms in=1996 out=376
+Evidence: "Without explicit regularization, the model may converge to trivial solutions: either retaining nearly all vectors (negating computational benefits) or compressing excessively (losing critical information)." [HNET §2.2.3 Ratio Loss, p.8]
+Evidence: "we introduce a ratio loss to guide compression: 𝐿 Lratio = 𝑁 ((𝑁 − 1)𝐹𝐺 + (1 − 𝐹 ) (1 − 𝐺)) , 𝑁 −1 𝐹= 1 ∑︁ 𝑏𝑡 , 𝐿 𝑡 =1 𝐿 𝐺= 1 ∑︁ 𝑝𝑡 , 𝐿 𝑡 =1" [HNET §2.2.3 Ratio Loss, p.8]
+Evidence: "When 𝐹 = 𝐺, the loss attains a minimum of Lratio = 1 when 𝐹 = 𝐺 = 𝑁1 ." [HNET §2.2.3 Ratio Loss, p.8]
+The ratio loss is an auxiliary loss that penalizes deviations from a target compression ratio 𝑁, defined as 𝐿 Lratio = 𝑁 ((𝑁 − 1)𝐹𝐺 + (1 − 𝐹 ) (1 − 𝐺)) . [HNET §2.2.3 Ratio Loss, p.8]
+It is needed because, without it, the model could either keep almost all vectors or compress too much, harming performance . [HNET §2.2.3 Ratio Loss, p.8]
+The loss drives the model toward the desired ratio by aligning the fraction of selected vectors 𝐹 with the average boundary probability 𝐺, reaching a minimum when 𝐹 = 𝐺 = 𝑁1 . [HNET §2.2.3 Ratio Loss, p.8]
+
+
+[q08] full/ok 807ms in=1730 out=213
+Evidence: "We chose this function because we hypothesized it would allow the model to easily learn to attend by relative positions, since for any fixed offset k, P Epos+k can be represented as a linear function of P Epos ." [ATT §3.5 O(n2 · d), p.6]
+Evidence: "We also experimented with using learned positional embeddings [9] instead, and found that the two versions produced nearly identical results (see Table 3 row (E))." [ATT §3.5 O(n2 · d), p.6]
+Evidence: "We chose the sinusoidal version because it may allow the model to extrapolate to sequence lengths longer than the ones encountered during training." [ATT §3.5 O(n2 · d), p.6]
+The authors chose sinusoidal positional encodings because they hypothesize it lets the model learn relative positions via a linear relationship between offsets, and it may extrapolate to longer sequences . [ATT §3.5 O(n2 · d), p.6]
+They also tested learned embeddings and found similar performance, so the choice was mainly for the extrapolation property . [ATT §3.5 O(n2 · d), p.6]
+
+
+[q11] full/ok 610ms in=2455 out=141
+Evidence: "Inner Monologue, a new method that generates text tokens as a prefix to audio tokens, while remaining compatible with streaming inference" [MOSHI §7 Conclusion, p.41]
+Evidence: "Inner Monologue decomposes speech into a chain of text, semantic and acoustic tokens, and predicts this structured sequence in a hierarchical manner" [MOSHI §2 Related Work, p.5]
+The Inner Monologue method in Moshi generates text tokens as a prefix to audio tokens, decomposing speech into a hierarchical chain of text, semantic, and acoustic tokens, and predicts this structured sequence in a hierarchical manner . [MOSHI §7 Conclusion, p.41; MOSHI §2 Related Work, p.5]
+
+
+[q13] full/ok 727ms in=2154 out=110
+Evidence: "we distill semantic information from a self-supervised model (WavLM8 (Chen et al., 2022) in our case) into the first level of the RVQ." [MOSHI §3.3.2 Learning semantic-acoustic tokens with a split RVQ, p.11]
+Mimi distills semantic information from the self‑supervised model WavLM8 . [MOSHI §3.3.2 Learning semantic-acoustic tokens with a split RVQ, p.11]
+
+
+[q16] full/ok 838ms in=3271 out=149
+Evidence: "H-Net’s improvements are even more pronounced on languages without obvious segmentation cues, including Chinese and code (59.9 → 66.3 on XWinograd-zh compared to tokenized Transformer)" [HNET §1 Introduction, p.4]
+H‑Net (2‑stage) outperforms a tokenized Transformer on Chinese, achieving higher downstream accuracy and a larger gap in XWinograd‑zh scores . [HNET §1 Introduction, p.4]
+
+
+[q19] refused/ok 454ms in=2029 out=38
+The papers in this library do not say, so I will not guess.
+
+[u01] refused/ok 592ms in=2501 out=45
+The papers in this library do not say, so I will not guess.
+
+[u02] refused/ok 650ms in=2076 out=35
+The papers in this library do not say, so I will not guess.
+
+[u04] refused/ok 323ms in=777 out=30
+The papers in this library do not say, so I will not guess.
+
+[u05] refused/ok 380ms in=1272 out=20
+The papers in this library do not say, so I will not guess.
+

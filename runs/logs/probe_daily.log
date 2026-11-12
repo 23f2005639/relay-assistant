@@ -1,0 +1,17 @@
+daily[0] http=200 ttft=Nonems total=476.5ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=916 
+daily[1] http=200 ttft=Nonems total=701.5ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=915 
+daily[2] http=200 ttft=Nonems total=823.1ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=914 
+daily[3] http=200 ttft=Nonems total=710.2ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=913 
+daily[4] http=200 ttft=Nonems total=1381.8ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=912 
+daily[5] http=200 ttft=Nonems total=618.7ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=911 
+daily[6] http=200 ttft=Nonems total=723.7ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=910 
+daily[7] http=200 ttft=Nonems total=521.8ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=909 
+daily[8] http=200 ttft=Nonems total=431.6ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=908 
+daily[9] http=200 ttft=Nonems total=743.7ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=907 
+daily[10] http=200 ttft=Nonems total=617.4ms in=3076 out=10 cached=0 rem_tok=4914 rem_req=906 
+daily[11] http=429 ttft=Nonems total=177.2ms in=0 out=0 cached=0 rem_tok=8000 rem_req=906 429 tokens_per_day retry_after=791.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 198745, Requested 3086. Please try again in 13m10.992s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/s
+   DAILY limit refused call 12; retry-after=791s
+daily-small-right-after[11] http=200 ttft=Nonems total=458.7ms in=75 out=8 cached=0 rem_tok=7917 rem_req=905 
+daily-recovery-same-size[11] http=429 ttft=Nonems total=177.4ms in=0 out=0 cached=0 rem_tok=8000 rem_req=914 429 tokens_per_day retry_after=35.0
+   body: {"error":{"message":"Rate limit reached for model `openai/gpt-oss-20b` in organization `org_REDACTED` service tier `on_demand` on tokens per day (TPD): Limit 200000, Used 196994, Requested 3086. Please try again in 34.56s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/setti

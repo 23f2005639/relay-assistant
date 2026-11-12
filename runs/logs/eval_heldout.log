@@ -1,0 +1,35 @@
+[h01] full/ok 963ms in=1982 out=116
+Evidence: "all sub-layers in the model, as well as the embedding layers, produce outputs of dimension dmodel = 512." [ATT §3.1 Encoder and Decoder Stacks, p.3]
+The sub‑layers and embedding layers in the base Transformer output vectors of dimension 512 . [ATT §3.1 Encoder and Decoder Stacks, p.3]
+
+
+[h02] full/ok 638ms in=1171 out=97
+Evidence: "Sentence pairs were batched together by approximate sequence length. Each training batch contained a set of sentence pairs containing approximately 25000 source tokens and 25000 target tokens." [ATT §5.1 Training Data and Batching, p.7]
+Sentence pairs were grouped by approximate sequence length, with each batch holding about 25,000 source tokens and 25,000 target tokens . [ATT §5.1 Training Data and Batching, p.7]
+
+
+[h03] full/ok 722ms in=3058 out=101
+Evidence: "Mimi’s encoder projects a 24kHz waveform to a latent representation of 12.5 frames per second" [MOSHI §3.3.1 Architecture, p.9]
+Mimi’s encoder takes a 24 kHz waveform as input . [MOSHI §3.3.1 Architecture, p.9]
+
+
+[h04] full/ok 588ms in=2620 out=172
+Evidence: "Finally, we source 170 hours of natural and scripted conversations between multiple pairs of participants, recorded with separate channels per speaker, in order to provide a small dataset on which to finetune the model to improve the quality over the one obtained when using only Fisher. We call this dataset the supervised multi-stream dataset." [MOSHI Table 19, p.18]
+Moshi is fine‑tuned on the supervised multi‑stream dataset, which contains 170 hours of natural and scripted conversations recorded with separate channels per speaker. [MOSHI Table 19, p.18]
+
+
+[h05] refused/ok 462ms in=2003 out=45
+The papers in this library do not say, so I will not guess.
+
+[h06] full/ok 806ms in=3496 out=115
+Evidence: "Table 3 evaluates model robustness on HellaSwag with various textual perturbations" [HNET §3.1 Language Modeling, p.14]
+Evidence: "evaluated on the noisy HellaSwag suite of benchmarks" [HNET §1 Introduction, p.4]
+The robustness of H‑Net to textual perturbations is evaluated using the noisy HellaSwag benchmark suite. [HNET §3.1 Language Modeling, p.14; HNET §1 Introduction, p.4]
+
+
+[hu1] refused/ok 578ms in=1507 out=43
+The papers in this library do not say, so I will not guess.
+
+[hu2] refused/ok 420ms in=2278 out=40
+The papers in this library do not say, so I will not guess.
+

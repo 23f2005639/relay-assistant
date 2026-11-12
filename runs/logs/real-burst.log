@@ -1,0 +1,15 @@
+burst: 40 arrivals over 2 min, source=real, dup=0.3, coalesce=True
+### Table 2a
+| Scenario | Real or stand-in | Requests sent | Duration (s) | Offered rate (per min) | First token p50 / p95 / p99 (ms) | Total time p50 / p95 / p99 (ms) |
+|---|---|---:|---:|---:|---|---|
+| burst-short | real | 40 | 19 | 125.0 | 5 / 10552 / 20686 | 5 / 10624 / 20686 |
+
+### Table 2b
+| Scenario | Succeeded (%) | Rate-limited (%) | Timed out or given up (%) | Retries per request | Peak queue length | Tokens per answer | Cost per 1,000 answers |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| burst-short (real) | 25.0 | 75.0 | 0.0 | 0.00 | 3 | 1531 | $0.14 |
+
+What people received, and how long the first token took for each kind (not a required table):
+| Scenario | Model answer: n, first token p50 / p95 (ms) | Shared answer: n | Quoted passages: n, p50 (ms) | Refused: n | Nothing shown: n |
+|---|---|---:|---|---:|---:|
+| burst-short (real) | 8, 261 / 10552 | 0 | 30, 4 | 2 | 0 |
