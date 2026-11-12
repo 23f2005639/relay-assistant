@@ -109,17 +109,17 @@ async def stream_chat(provider: Provider, messages: list[dict], max_tokens: int,
             stats.status = resp.status_code
             stats.headers = {k.lower(): v for k, v in resp.headers.items()
                              if k.lower().startswith("x-ratelimit") or k.lower() == "retry-after"}
-            if resp.status_code == 429:
+            if resp.status_code >= 400:
                 text = (await resp.aread()).decode(errors="replace")
                 text = re.sub(r"org_[0-9a-z]{16,}", "org_REDACTED", text)   # keep account ids out of logs
-                ra = parse_duration(resp.headers.get("retry-after")) or 1.0
-                raise RateLimited(ra, limit_kind(text), text, stats.headers)
-            if resp.status_code == 413:
-                raise TooLarge((await resp.aread()).decode(errors="replace"))
-            if resp.status_code >= 500:
-                raise ServerError(f"{resp.status_code}")
-            if resp.status_code >= 400:
-                raise RuntimeError(f"{resp.status_code}: {(await resp.aread()).decode(errors='replace')[:300]}")
+                if resp.status_code == 429:
+                    ra = parse_duration(resp.headers.get("retry-after")) or 1.0
+                    raise RateLimited(ra, limit_kind(text), text, stats.headers)
+                if resp.status_code == 413:
+                    raise TooLarge(text)
+                if resp.status_code >= 500:
+                    raise ServerError(f"{resp.status_code}")
+                raise RuntimeError(f"{resp.status_code}: {text[:300]}")     # 401, 400, 404: retrying cannot help
             async for line in resp.aiter_lines():
                 if time.monotonic() > deadline:
                     raise CallTimeout("total")
@@ -146,7 +146,7 @@ async def stream_chat(provider: Provider, messages: list[dict], max_tokens: int,
                         finished = True
     except (httpx.ReadTimeout, httpx.ConnectTimeout, httpx.PoolTimeout) as e:
         raise CallTimeout(type(e).__name__) from e
-    except (httpx.RemoteProtocolError, httpx.ReadError, httpx.ConnectError) as e:
+    except (httpx.RemoteProtocolError, httpx.ReadError, httpx.ConnectError, ValueError) as e:   # ValueError: a line cut mid-JSON
         raise StreamCut(type(e).__name__) from e
     finally:
         stats.t_end = time.monotonic()

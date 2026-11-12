@@ -8,31 +8,30 @@ from __future__ import annotations
 
 import argparse
 import asyncio
-import csv
 import datetime as dt
 import json
 import sys
 
-from .config import DEFAULT_SETTING, RETRIEVAL_SETTINGS, ROOT, RUNS_DIR, Provider
-from .loadgen import COLUMNS, load_questions
+from .config import DEFAULT_SETTING, RETRIEVAL_SETTINGS, RUNS_DIR, Provider
+from .control import Controller
+from .loadgen import append_row, load_questions
 from .pipeline import Pipeline
-from .standin import StandinConfig, start
+from .standin import calibrated, start
 
 
 async def main(a):
     runner = None
     if a.standin:
-        _, runner = await start(StandinConfig(), 8089)
+        _, runner = await start(calibrated(), 8089)
         provider = Provider.standin()
     else:
         provider = Provider()
         if not provider.api_key:
             raise SystemExit("GROQ_API_KEY is not set (or use --standin)")
-    pipe = Pipeline(provider, setting=a.eval or a.setting)
+    pipe = Pipeline(provider, Controller(day_file=None if a.standin else RUNS_DIR / "day_ledger.txt"), a.eval or a.setting)
     pipe.policy.coalesce = False
     pipe.policy.force_full = bool(a.eval)
     if a.eval:
-        rows = []
         RUNS_DIR.mkdir(exist_ok=True)
         answers = (RUNS_DIR / f"answers-{a.eval}-{provider.source}{'-heldout' if a.questions else ''}.jsonl").open("a")
         if a.questions:        # a separate file, e.g. questions written after the system was frozen
@@ -53,20 +52,14 @@ async def main(a):
                                       "evidence": round(r.evidence, 2), "tokens_in": r.tokens_in, "tokens_out": r.tokens_out,
                                       "reasoning_tokens": r.reasoning_tokens, "total_ms": round(r.total_ms),
                                       "ledger": pipe.ctl.trace[-1] if pipe.ctl.trace else None}) + "\n")
-            rows.append({"request_id": f"{scenario}-{q['id']}", "scenario": scenario, "source": provider.source,
+            answers.flush()
+            append_row({"request_id": f"{scenario}-{q['id']}", "scenario": scenario, "source": provider.source,
                          "start_time": wall, "first_token_ms": "" if r.first_token_ms is None else round(r.first_token_ms, 1),
                          "total_ms": round(r.total_ms, 1), "status": r.status, "retries": r.retries, "tokens_in": r.tokens_in,
                          "tokens_out": r.tokens_out, "retrieval_setting": pipe.setting.name,
                          "answer_grade": "",   # YOU fill this in by hand: correct / wrong / refused_correctly / refused_wrongly
                          "level": r.level, "wait_ms": round(r.wait_ms, 1), "work_ms": round(r.work_ms, 1),
                          "retry_ms": round(r.retry_ms, 1), "question_id": q["id"], "reason": r.reason})
-        out = ROOT / "results.csv"
-        new = not out.exists()
-        with out.open("a", newline="") as fh:
-            w = csv.DictWriter(fh, fieldnames=COLUMNS, extrasaction="ignore")
-            if new:
-                w.writeheader()
-            w.writerows(rows)
     else:
         r = await pipe.answer(a.question, emit=lambda s: (sys.stdout.write(s), sys.stdout.flush()))
         print(f"\n--- level={r.level} status={r.status} evidence={r.evidence:.2f} first_verified={r.first_token_ms and round(r.first_token_ms)}ms "

@@ -124,7 +124,7 @@ class StreamChecker:
         low = s.lower()
         if low.startswith("answerable:"):
             self.answerable_seen = True
-            if "no" in low.split(":", 1)[1]:
+            if low.split(":", 1)[1].strip().startswith("no"):     # "yes, but not all" is a yes
                 self.refused = True
                 return [Event("refuse")]
             return []
@@ -169,27 +169,5 @@ class StreamChecker:
             note = f"number(s) {missing} not in the cited source"
         else:
             note = "no verified quote cited"
-        # last resort before dropping: can we attach a source ourselves?
-        cid = self._attach(sent, nums)
-        if cid:
-            self.sentences_ok += 1
-            return [Event("sentence", CITE.sub("", sent).strip(), [cid], "citation attached locally")]
         self.sentences_dropped += 1
         return [Event("dropped", sent, [], note)]
-
-    def _attach(self, sent: str, nums: set[str]) -> int | None:
-        words = {w for w in re.findall(r"[a-z]{4,}", sent.lower())}
-        if len(words) < 4:
-            return None
-        best, best_cov = None, 0.0
-        named = papers_named(sent)
-        for i, text in enumerate(self.context, start=1):
-            if nums and not nums <= numbers(text):
-                continue
-            if self.papers and not named <= {self.papers[i - 1]}:
-                continue
-            tw = set(re.findall(r"[a-z]{4,}", text.lower()))
-            cov = len(words & tw) / len(words)
-            if cov > best_cov:
-                best, best_cov = i, cov
-        return best if best_cov >= 0.75 else None

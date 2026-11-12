@@ -34,10 +34,9 @@ def main():
     qs = [q for q in load_questions() if q.get("must")]
     print(f"{len(qs)} answerable questions; share of needed facts present in the pieces sent to the model")
     for name, base in RETRIEVAL_SETTINGS.items():
-        for label, kw in [("keywords only", dict(route_boost=0.0, route_first_at=9, facets=False)),
-                          ("+ router", dict(facets=False)),
-                          ("+ router + two-part search", dict()),
-                          ("+ router + two-part + meaning", dict(dense=True))]:
+        for label, kw in [("keywords only", dict(route_boost=0.0, route_first_at=9)),
+                          ("+ router", dict()),
+                          ("+ router + meaning", dict(dense=True))]:
             for rr in (False, True):
                 s = dataclasses.replace(base, rerank=rr, **kw)
                 r, missed = recall(s, qs)

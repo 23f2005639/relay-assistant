@@ -21,7 +21,7 @@ from dataclasses import asdict, dataclass
 
 from aiohttp import web
 
-from .config import approx_tokens
+from .config import RUNS_DIR, approx_tokens
 
 
 @dataclass
@@ -47,6 +47,12 @@ class StandinConfig:
     slow_factor: float = 15.0
     p_cut: float = 0.0              # stream dies halfway
     seed: int = 1
+
+
+def calibrated(**overrides) -> StandinConfig:
+    """Settings fitted from real calls by `python -m relay.probe fit`, if that has been run."""
+    cal = RUNS_DIR / "standin_calibrated.json"
+    return StandinConfig(**{**(json.loads(cal.read_text()) if cal.exists() else {}), **overrides})
 
 
 class Standin:

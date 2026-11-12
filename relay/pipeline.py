@@ -106,7 +106,9 @@ class Pipeline:
         try:
             res = await self._run(question, emit or (lambda s: None), t0, patience)
             if self.policy.coalesce:
-                if res.status == "ok" and res.level in (FULL, LEAN, "refused"):
+                if res.status == "ok" and res.level in (FULL, LEAN, "refused") and not share_key:
+                    if len(self._cache) >= 500:
+                        self._cache.pop(next(iter(self._cache)))    # oldest out; the store must not grow forever
                     self._cache[key] = res
                 fut.set_result(res)
             return res
@@ -158,7 +160,8 @@ class Pipeline:
                     got = again
         except asyncio.TimeoutError:
             span("work", "retrieve", s)
-            shown("The search over the papers timed out, so I cannot answer reliably right now. Please ask again.")
+            res.text = "The search over the papers timed out, so I cannot answer reliably right now. Please ask again."
+            shown(res.text)
             return done("error", "deferred", "retrieval tool timed out twice")
         res.evidence = got.evidence
         span("work", "route+retrieve+decide", s)
@@ -199,7 +202,7 @@ class Pipeline:
             err: Exception | None = None
             try:
                 await self._draft(messages, max_out, stats, checker, hits, res, shown, ms)
-            except (RateLimited, TooLarge, ServerError, CallTimeout, StreamCut) as e:
+            except Exception as e:      # anything the provider does wrong ends in passages, never in nothing
                 err = e
             span(kind, f"model call #{attempt}", s)
             accepted = stats.status == 200
@@ -229,8 +232,8 @@ class Pipeline:
             day = isinstance(err, RateLimited) and err.kind.endswith("per_day")
             pause = self.ctl.backoff(attempt, retry_after)
             fits = self.policy.naive or ms() / 1000 + pause + 1.0 < patience
-            if (not started_showing and not day and not isinstance(err, TooLarge) and fits
-                    and self.ctl.may_retry(attempt)):
+            can_pass = isinstance(err, (RateLimited, ServerError, CallTimeout, StreamCut))   # not 413, 401, bugs
+            if not started_showing and not day and can_pass and fits and self.ctl.may_retry(attempt):
                 s = ms()
                 await asyncio.sleep(pause)
                 span("retry", f"backoff after {type(err).__name__}", s)
@@ -242,9 +245,12 @@ class Pipeline:
                 res.text += "\n[cut short]"
                 return done("error", res.level, f"stream failed after first token: {type(err).__name__}")
             why = {RateLimited: "rate limit", TooLarge: "request too large for the per-minute limit",
-                   ServerError: "provider error", CallTimeout: "provider too slow", StreamCut: "connection cut"}[type(err)]
-            if isinstance(err, (StreamCut, CallTimeout, ServerError)):
-                why += f" ({err})"          # e.g. ConnectError means we never reached the provider at all
+                   ServerError: "provider error", CallTimeout: "provider too slow", StreamCut: "connection cut"
+                   }.get(type(err), "provider error")
+            if not isinstance(err, (RateLimited, TooLarge)):
+                why += f" ({str(err)[:60]})"   # e.g. ConnectError means we never reached the provider at all
+            if day:
+                why = "daily budget exhausted"     # the person who meets the daily refusal first gets the same message as the rest
             return self._extractive(res, got.hits, shown, done, why,
                                     status="rate_limited" if isinstance(err, (RateLimited, TooLarge)) else "error")
 
@@ -287,8 +293,6 @@ class Pipeline:
             res.raw += piece
             for ev in checker.feed(piece):
                 self._show(ev, cite, res, shown)
-            if checker.refused:
-                return                      # stop reading: saves output tokens
         for ev in checker.finish():
             self._show(ev, cite, res, shown)
 

@@ -46,7 +46,6 @@ class Retrieved:
     hits: list[Hit]
     evidence: float            # 0..1, coverage of rare question words by the chosen pieces
     route: dict[str, float]    # paper -> share
-    query: str
 
 
 class Index:
@@ -129,7 +128,7 @@ class Index:
             out.append(s)
         return out
 
-    def _ranked(self, query: str, route: dict[str, float], only: str | None = None) -> tuple[list[int], list[float]]:
+    def _ranked(self, query: str, route: dict[str, float]) -> tuple[list[int], list[float]]:
         """All pieces with a non-zero score, best first."""
         scores = self._bm25(tokenize(query))
         # soft boost, not a filter: a wrong route must not hide the right paper completely
@@ -146,42 +145,22 @@ class Index:
             order = sorted(fused, key=lambda i: -fused[i])
             scores = [fused.get(i, 0.0) for i in range(len(self.pieces))]
         # A paper named outright goes first. Other papers stay in the list, behind it.
-        top = only or (max(route, key=route.get) if route and max(route.values()) >= self.setting.route_first_at else None)
+        top = max(route, key=route.get) if route and max(route.values()) >= self.setting.route_first_at else None
         if top:
-            order = [i for i in order if self.pieces[i].paper == top] + ([] if only else [i for i in order if self.pieces[i].paper != top])
+            order = [i for i in order if self.pieces[i].paper == top] + [i for i in order if self.pieces[i].paper != top]
         return order, scores
-
-    def _facets(self, query: str, route: dict[str, float]) -> list[tuple[str, str | None]]:
-        """Questions that need two passages: one per paper named, or one per half of an "X and Y" question."""
-        if not self.setting.facets:
-            return [(query, None)]
-        named = [p for p, share in route.items() if share >= 0.3]
-        if len(named) >= 2:
-            return [(query, p) for p in named]
-        halves = re.split(r"\band\b", query, maxsplit=1, flags=re.I)
-        if len(halves) == 2 and all(len(tokenize(h)) >= 2 for h in halves):
-            return [(query, None), (halves[0], None), (halves[1], None)]
-        return [(query, None)]
 
     def search(self, query: str, k: int | None = None, route: dict[str, float] | None = None) -> Retrieved:
         k = k or self.setting.k
         route = route if route is not None else self.route(query)
         q_terms = tokenize(query)
-        facets = self._facets(query, route)
-        order, scores = self._ranked(query, route, facets[0][1])
-        if len(facets) > 1:
-            lists = [order] + [self._ranked(q, route, only)[0] for q, only in facets[1:]]
-            chosen: list[int] = []
-            for rank in range(k):                       # take turns: best of each facet, then second best ...
-                for lst in lists:
-                    if rank < len(lst) and lst[rank] not in chosen and len(chosen) < k:
-                        chosen.append(lst[rank])
-        elif self.setting.rerank:
+        order, scores = self._ranked(query, route)
+        if self.setting.rerank:
             chosen = self._coverage_rerank(q_terms, order[: self.setting.pool], k)
         else:
             chosen = order[:k]
         hits = [Hit(self.pieces[i], scores[i]) for i in chosen]
-        return Retrieved(hits, self._evidence(q_terms, chosen), route, query)
+        return Retrieved(hits, self._evidence(q_terms, chosen), route)
 
     def _coverage_rerank(self, q_terms: list[str], cand: list[int], k: int) -> list[int]:
         """Greedy pick by marginal coverage of question words (idea from PACE, without embeddings).

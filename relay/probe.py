@@ -21,7 +21,7 @@ import time
 
 from .config import ROOT, RUNS_DIR, Provider
 from .llm import CallStats, CallTimeout, RateLimited, ServerError, StreamCut, TooLarge, stream_chat
-from .loadgen import COLUMNS
+from .loadgen import append_row
 
 LOG = RUNS_DIR / "probes.jsonl"
 FILLER = ("The Transformer uses stacked self-attention and point-wise, fully connected layers for both the "
@@ -47,14 +47,8 @@ async def one(provider: Provider, mode: str, i: int, messages: list[dict], max_t
     RUNS_DIR.mkdir(exist_ok=True)
     with LOG.open("a") as fh:
         fh.write(json.dumps(rec) + "\n")
-    out = ROOT / "results.csv"
-    new = not out.exists()
-    with out.open("a", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=COLUMNS, extrasaction="ignore")
-        if new:
-            w.writeheader()
-        status = "ok" if not err else "rate_limited" if err.startswith("429") or err == "TooLarge" else "timeout" if err == "CallTimeout" else "error"
-        w.writerow({"request_id": f"probe-{mode}-{int(time.time())}-{i:03d}", "scenario": f"probe-{mode}", "source": provider.source,
+    status = "ok" if not err else "rate_limited" if err.startswith("429") or err == "TooLarge" else "timeout" if err == "CallTimeout" else "error"
+    append_row({"request_id": f"probe-{mode}-{int(time.time())}-{i:03d}", "scenario": f"probe-{mode}", "source": provider.source,
                     "start_time": wall, "first_token_ms": rec["first_token_ms"] or "", "total_ms": rec["total_ms"] or "",
                     "status": status, "retries": 0, "tokens_in": stats.tokens_in, "tokens_out": stats.tokens_out,
                     "retrieval_setting": "none", "answer_grade": "", "level": "probe", "reason": err})
@@ -92,6 +86,27 @@ async def limit(p: Provider, size_words: int, max_calls: int):
             await one(p, "limit-recovery", i + 1, [{"role": "user", "content": "Reply with: ok"}], 10)
             return
     print("   never refused within max_calls")
+
+
+async def daily(p: Provider, size_words: int, max_calls: int):
+    """Spend what is left of today in equal calls until the provider refuses with a DAILY limit. Then ask:
+    is a much smaller call still accepted, and does a same-size call pass again after the wait it names?"""
+    pad = "alpha " * size_words
+    big = [{"role": "user", "content": pad + "\nReply with: ok"}]
+    tiny = [{"role": "user", "content": "Reply with: ok"}]
+    for i in range(max_calls):
+        rec = await one(p, "daily", i, big, 10)
+        ra = float(rec["headers"].get("retry-after") or 5)
+        if rec["http"] == 429 and "per_day" in rec["error"]:
+            print(f"   DAILY limit refused call {i + 1}; retry-after={ra:.0f}s")
+            await one(p, "daily-small-right-after", i, tiny, 8)
+            if ra <= 1200:
+                await asyncio.sleep(ra + 1)
+                await one(p, "daily-recovery-same-size", i, big, 10)
+            return
+        # a per-minute refusal is not what we are looking for: wait it out. Otherwise pace to the minute limit.
+        await asyncio.sleep(ra + 0.5 if rec["http"] == 429 else size_words * 1.05 / (8000 / 60))
+    print("   the daily limit was not reached within max_calls")
 
 
 async def concurrent(p: Provider, n: int):
@@ -159,7 +174,7 @@ def fit():
         cfg = {"ttft_median_s": round(base, 3), "ttft_per_1k_in_s": round(slope, 3), "ttft_sigma": round(statistics.pstdev(resid), 3),
                # the real reply arrives almost in one piece after the first token: speed = tokens / (total - first)
                "tokens_per_s": round(statistics.median(outs) / max(0.005, statistics.median(stream)), 0),
-               "extra_out_tokens": max(0, int(statistics.median(outs)) - 45)}   # the stand-in's own reply is about 45 tokens
+               "extra_out_tokens": max(0, int(statistics.median(outs)) - 45)}   # 45 = the stand-in's own reply length, measured 2026-11-11; re-measure if its reply changes
         ys = sorted(y for _, y in pts)
         print(f"all sizes ({n} calls, up to {max(ins)} prompt tokens): first token min {ys[0]:.2f}s "
               f"median {statistics.median(ys):.2f}s max {ys[-1]:.2f}s; fitted {base:.2f}s + {slope:.2f}s per 1,000 prompt tokens; "
@@ -172,7 +187,7 @@ def fit():
         ratio = statistics.median(r["total_ms"] for r in many) / statistics.median(solo)
         cfg["load_slowdown"] = round(max(0.0, (ratio - 1) / (k - 1)), 3)
         print(f"{k} calls at once took {ratio:.2f}x the solo time -> slowdown per extra call in flight {cfg['load_slowdown']}")
-    # Measured separately (see README): prompt characters per real prompt token, median over 43 quality-run calls.
+    # Typed in, not recomputed: median over 43 quality-run calls on 2026-11-11 (range 2.86-4.40). Re-measure if the prompt changes.
     cfg["chars_per_token"] = 3.73
     (RUNS_DIR / "standin_calibrated.json").write_text(json.dumps(cfg, indent=1))
     print("stand-in settings:", cfg, "-> runs/standin_calibrated.json (loadgen reads this file automatically)")
@@ -180,7 +195,7 @@ def fit():
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("mode", choices=["latency", "cache", "limit", "concurrent", "rpm", "fit"])
+    ap.add_argument("mode", choices=["latency", "cache", "limit", "concurrent", "rpm", "daily", "fit"])
     ap.add_argument("--n", type=int, default=20)
     ap.add_argument("--gap", type=float, default=3.0, help="seconds between latency probes")
     ap.add_argument("--size-words", type=int, default=1200, help="limit probe: words per call (about 1 token each)")
@@ -198,4 +213,5 @@ if __name__ == "__main__":
             raise SystemExit("GROQ_API_KEY is not set")
         asyncio.run({"latency": lambda: latency(p, a.n, a.gap), "cache": lambda: cache(p),
                      "limit": lambda: limit(p, a.size_words, a.max_calls),
-                     "concurrent": lambda: concurrent(p, min(a.n, 12)), "rpm": lambda: rpm(p, a.n)}[a.mode]())
+                     "concurrent": lambda: concurrent(p, min(a.n, 12)), "rpm": lambda: rpm(p, a.n),
+                     "daily": lambda: daily(p, a.size_words, a.max_calls)}[a.mode]())

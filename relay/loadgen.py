@@ -17,6 +17,7 @@ import datetime as dt
 import json
 import random
 import time
+import zlib
 from pathlib import Path
 
 import httpx
@@ -24,7 +25,7 @@ import httpx
 from .config import DEFAULT_SETTING, ROOT, RUNS_DIR, Limits, Policy, Provider
 from .control import Controller
 from .pipeline import Pipeline, Result
-from .standin import StandinConfig, start
+from .standin import calibrated, start
 
 COLUMNS = ["request_id", "scenario", "source", "start_time", "first_token_ms", "total_ms", "status", "retries",
            "tokens_in", "tokens_out", "retrieval_setting", "answer_grade",
@@ -56,6 +57,16 @@ SMOKE_QUESTIONS = [  # placeholders so the harness runs; replace with questions.
     {"id": "s6", "question": "What is the ratio loss in dynamic chunking?"},
     {"id": "s7", "question": "What is the best pizza topping?"},
 ]
+
+
+def append_row(row: dict, out: Path = ROOT / "results.csv"):
+    """One row, written at once, so a run that is stopped keeps everything that had finished."""
+    new = not out.exists()
+    with out.open("a", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=COLUMNS, extrasaction="ignore")
+        if new:
+            w.writeheader()
+        w.writerow(row)
 
 
 def load_questions() -> list[dict]:
@@ -106,7 +117,7 @@ async def one_request(i: int, at: float, t_start: float, wall_start: dt.datetime
     waiter.cancel()
     now_ms = (time.monotonic() - arrived) * 1000
     f = lambda v: "" if v is None else round(v, 1)
-    return {"request_id": f"{scenario}-{i:04d}", "scenario": scenario, "source": pipe.provider.source,
+    return {"request_id": f"{scenario}-{pipe.provider.source}-{i:04d}", "scenario": scenario, "source": pipe.provider.source,
             "start_time": (wall_start + dt.timedelta(seconds=at)).isoformat(timespec="milliseconds"),
             "first_token_ms": f(res.first_token_ms) if res else "", "total_ms": f(res.total_ms if res else now_ms),
             "status": status, "retries": res.retries if res else 0,
@@ -120,10 +131,12 @@ async def one_request(i: int, at: float, t_start: float, wall_start: dt.datetime
 
 
 async def run(scenario: str, real: bool, minutes: float | None, rate: float | None, dup: float, setting: str,
-              seed: int, port: int, coalesce: bool, standin_overrides: dict, out: Path,
+              seed: int | None, port: int, coalesce: bool, standin_overrides: dict, out: Path,
               label: str | None = None, policy_overrides: dict | None = None) -> list[dict]:
     spec = SCENARIOS[scenario]
     minutes = minutes or spec["minutes"]
+    if seed is None:        # each scenario gets its own arrivals; the same scenario always gets the same ones
+        seed = zlib.crc32(scenario.encode()) % 1000
     policy = Policy(coalesce=coalesce, **(policy_overrides or {}))
     runner = None
     if real:
@@ -131,14 +144,12 @@ async def run(scenario: str, real: bool, minutes: float | None, rate: float | No
         if not provider.api_key:
             raise SystemExit("GROQ_API_KEY is not set")
     else:
-        cal = RUNS_DIR / "standin_calibrated.json"          # written by `python -m relay.probe fit`
-        fitted = json.loads(cal.read_text()) if cal.exists() else {}
-        cfg = StandinConfig(**{**fitted, **spec.get("standin", {}), **standin_overrides})
+        cfg = calibrated(**{**spec.get("standin", {}), **standin_overrides})
         _, runner = await start(cfg, port)
         provider = Provider.standin(port)
         # The controller starts from the documented limits and must discover anything different by itself.
         limits = Limits(day_seconds=cfg.day_seconds, tpd=cfg.tpd)
-    pipe = Pipeline(provider, Controller(limits, policy, seed), setting, policy)
+    pipe = Pipeline(provider, Controller(limits, policy, seed, RUNS_DIR / "day_ledger.txt" if real else None), setting, policy)
     questions = load_questions()
     rng = random.Random(seed)
     hot = questions[: max(1, len(questions) // 4)]              # "the incident everyone asks about"
@@ -155,21 +166,20 @@ async def run(scenario: str, real: bool, minutes: float | None, rate: float | No
                 await c.post(f"http://127.0.0.1:{port}/admin/config", json=change)
                 print(f"  t={at}s stand-in changed: {change}")
 
+    async def logged(*args) -> dict:
+        row = await one_request(*args)
+        append_row(row, out)
+        return row
+
     ev = asyncio.create_task(events())
     rows = await asyncio.gather(*[
-        one_request(i, at, t_start, wall_start, pipe,
+        logged(i, at, t_start, wall_start, pipe,
                     {**rng.choice(hot), "_hot": True} if rng.random() < dup else rng.choice(questions),
                     label or scenario, policy, rng) for i, at in enumerate(arrivals)])
     ev.cancel()
     if runner:
         await runner.cleanup()
 
-    new = not out.exists()
-    with out.open("a", newline="") as fh:
-        w = csv.DictWriter(fh, fieldnames=COLUMNS, extrasaction="ignore")
-        if new:
-            w.writeheader()
-        w.writerows(rows)
     RUNS_DIR.mkdir(exist_ok=True)
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M%S")
     with (RUNS_DIR / f"{label or scenario}-{provider.source}-{stamp}.jsonl").open("w") as fh:
@@ -191,7 +201,7 @@ def main():
     ap.add_argument("--rate", type=float, help="constant arrivals per minute (overrides the scenario shape)")
     ap.add_argument("--dup", type=float, default=0.3, help="share of arrivals asking one of the 'hot' questions")
     ap.add_argument("--setting", default=DEFAULT_SETTING)
-    ap.add_argument("--seed", type=int, default=7)
+    ap.add_argument("--seed", type=int, help="default: derived from the scenario name")
     ap.add_argument("--port", type=int, default=8089)
     ap.add_argument("--no-coalesce", action="store_true")
     ap.add_argument("--standin", default="{}", help='JSON overrides for the stand-in, e.g. \'{"p_slow":0.1}\'')

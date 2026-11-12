@@ -58,7 +58,6 @@ class RetrievalSetting:
     pool: int = 20        # candidates considered when re-ranking
     dense: bool = False   # fuse keyword search with a small local embedding model (measured: it hurt, see relay/recall.py)
     route_first_at: float = 0.75   # a paper with this share of the routing score is listed first
-    facets: bool = False  # two-part and two-paper questions get one search per part
     route_boost: float = 1.0   # how strongly the routed paper is preferred (0 = router off)
 
 
@@ -90,7 +89,7 @@ class Policy:
     retry_bucket_cap: float = 10.0  # Brooker's retry bucket
     retry_deposit: float = 0.1      # each success adds this much
     throttle_k: float = 2.0         # Google SRE adaptive throttling multiplier
-    throttle_window_s: float = 120.0
+    throttle_window_s: float = 30.0   # 120 s kept refusing for two minutes after a 15 s outage at this traffic
     call_timeout_s: float = 30.0    # whole model call
     first_byte_timeout_s: float = 10.0
     out_tokens_full: int = 450      # measured: 350 cut answers off mid-sentence (thinking tokens count as output)
@@ -108,7 +107,7 @@ class Policy:
 class Provider:
     base_url: str = "https://api.groq.com/openai/v1"
     model: str = "openai/gpt-oss-20b"
-    api_key: str = field(default_factory=lambda: os.environ.get("GROQ_API_KEY", ""))
+    api_key: str = field(default_factory=lambda: os.environ.get("GROQ_API_KEY", ""), repr=False)   # never printed
     source: str = "real"            # "real" or "stand-in", copied into results.csv
     reasoning_effort: str | None = "low"
 

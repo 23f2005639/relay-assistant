@@ -13,9 +13,10 @@ import re
 import time
 from collections import deque
 from dataclasses import dataclass
+from pathlib import Path
 
 from .config import Limits, Policy
-from .llm import RateLimited, parse_duration
+from .llm import RateLimited
 
 FULL, LEAN, EXTRACTIVE = "full", "lean", "extractive"
 
@@ -23,13 +24,14 @@ FULL, LEAN, EXTRACTIVE = "full", "lean", "extractive"
 @dataclass
 class Decision:
     level: str
-    wait_s: float
     reason: str
 
 
 class Controller:
-    def __init__(self, limits: Limits | None = None, policy: Policy | None = None, seed: int = 0):
+    def __init__(self, limits: Limits | None = None, policy: Policy | None = None, seed: int = 0,
+                 day_file: Path | None = None):
         self.limits = limits or Limits()
+        self.day_file = day_file                 # real provider only: today's spend must survive a restart
         self.policy = policy or Policy()
         self.rng = random.Random(seed)
         # Measured on Groq (runs/probes.jsonl, probe-limit): the per-minute token limit is a bucket that
@@ -49,6 +51,11 @@ class Controller:
         self._acc: deque[float] = deque()        # adaptive throttle: accepted by the provider
         self.events: list[tuple[float, str]] = []  # limit changes etc., for the write-up
         self.trace: list[dict] = []              # one entry per model call: our ledger next to the provider's header
+        if day_file and day_file.exists():
+            # shortcut: probe calls and cancelled calls are not in this file, add them if the daily count must be exact
+            for line in day_file.read_text().splitlines():
+                wall, tokens = line.split()
+                self._day.append([time.monotonic() - (time.time() - float(wall)), int(tokens), True])
 
     # ---- ledger ----------------------------------------------------------
     def _prune(self, now: float):
@@ -64,12 +71,8 @@ class Controller:
         self._prune(now)
         return int(self.limits.tpm - self._avail)
 
-    def minute_requests(self, now: float) -> int:
-        self._prune(now)
-        return len(self._minute)
-
     def spend(self, tokens: float, now: float | None = None):
-        """Take tokens out of the bucket (tests and header reconciliation use this too)."""
+        """Take tokens out of the bucket."""
         self._prune(time.monotonic() if now is None else now)
         self._avail -= tokens
 
@@ -109,24 +112,24 @@ class Controller:
         now = time.monotonic()
         p = self.policy
         if p.naive:
-            return Decision(FULL, 0, "naive arm: always send")
+            return Decision(FULL, "naive arm: always send")
         if tokens_lean > self.limits.tpm:
-            return Decision(EXTRACTIVE, 0, "request larger than the per-minute limit")
+            return Decision(EXTRACTIVE, "request larger than the per-minute limit")
         if now < self.day_blocked_until or self.day_left_frac(now) <= p.day_reserve_frac:
-            return Decision(EXTRACTIVE, 0, "daily budget exhausted")
+            return Decision(EXTRACTIVE, "daily budget exhausted")
         if self.rng.random() < self.reject_prob(now):
-            return Decision(EXTRACTIVE, 0, "self-throttled: provider is rejecting")
+            return Decision(EXTRACTIVE, "self-throttled: provider is rejecting")
         ahead = self._queued_tokens
         w_full = self.wait_for(ahead + tokens_full, now)
         if p.force_full:
-            return Decision(FULL, w_full, "quality run: full answer forced")
+            return Decision(FULL, "quality run: full answer forced")
         minute_left = 1 - (self.minute_tokens(now) + ahead) / self.limits.tpm
         if minute_left >= p.lean_below_frac and w_full + service_s <= time_left_s and tokens_full <= self.limits.tpm:
-            return Decision(FULL, w_full, "headroom")
+            return Decision(FULL, "headroom")
         w_lean = self.wait_for(ahead + tokens_lean, now)
         if w_lean + service_s <= time_left_s:
-            return Decision(LEAN, w_lean, "per-minute limit close")
-        return Decision(EXTRACTIVE, 0, f"predicted wait {w_lean:.1f}s exceeds patience")
+            return Decision(LEAN, "per-minute limit close")
+        return Decision(EXTRACTIVE, f"predicted wait {w_lean:.1f}s exceeds patience")
 
     async def acquire(self, tokens: int, priority: int = 1, give_up_at: float | None = None) -> list | None:
         """Wait for our turn and for room in the minute window. Lower priority number goes first.
@@ -138,6 +141,8 @@ class Controller:
         try:
             while True:
                 now = time.monotonic()
+                if tokens > self.limits.tpm:
+                    return None             # can never fit, e.g. the limit was cut while this request queued
                 if self._waiters[0] == me or self.policy.naive:
                     w = 0.0 if self.policy.naive else self.wait_for(tokens, now)
                     if w <= 0:
@@ -163,6 +168,9 @@ class Controller:
             self._prune(time.monotonic())
             self._avail = min(float(self.limits.tpm), self._avail + reservation[0] - actual_tokens)
             reservation[1][1] = actual_tokens
+        if self.day_file and reservation[1][1]:
+            with self.day_file.open("a") as fh:
+                fh.write(f"{time.time():.0f} {reservation[1][1]}\n")
         if accepted:
             self._acc.append(time.monotonic())
             self.retry_tokens = min(self.policy.retry_bucket_cap, self.retry_tokens + self.policy.retry_deposit)
@@ -225,5 +233,3 @@ class Controller:
             return 0.0
         return max(0.0, (r - self.policy.throttle_k * a) / (r + 1))
 
-
-__all__ = ["Controller", "Decision", "FULL", "LEAN", "EXTRACTIVE", "parse_duration"]
