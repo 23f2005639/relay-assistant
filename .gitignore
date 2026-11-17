@@ -1,3 +1,4 @@
+# Local and transient environment files
 .env
 .venv/
 __pycache__/
